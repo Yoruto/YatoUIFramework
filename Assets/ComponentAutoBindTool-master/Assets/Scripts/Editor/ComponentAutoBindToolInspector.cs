@@ -5,6 +5,8 @@ using System;
 using BindData = ComponentAutoBindTool.BindData;
 using System.Reflection;
 using System.IO;
+using UnityEditor.PackageManager;
+using YatoUIFramework;
 
 [CustomEditor(typeof(ComponentAutoBindTool))]
 public class ComponentAutoBindToolInspector : Editor
@@ -110,6 +112,9 @@ public class ComponentAutoBindToolInspector : Editor
         if (GUILayout.Button("生成绑定代码"))
         {
             GenAutoBindCode();
+            GenAutoMediatorBindCode();
+            GenAutoProxyBindCode();
+            AssetDatabase.Refresh();
         }
 
         EditorGUILayout.EndHorizontal();
@@ -430,7 +435,7 @@ public class ComponentAutoBindToolInspector : Editor
             Debug.LogError($"{go.name}的代码保存路径{codePath}无效");
         }
 
-        using (StreamWriter sw = new StreamWriter($"{codePath}/{className}.BindComponents.cs"))
+        using (StreamWriter sw = new StreamWriter($"{codePath}/{className}View.BindComponents.cs"))
         {
             sw.WriteLine("using UnityEngine;");
             sw.WriteLine("using UnityEngine.UI;");
@@ -448,7 +453,7 @@ public class ComponentAutoBindToolInspector : Editor
             }
 
             //类名
-            sw.WriteLine($"\tpublic partial class {className}");
+            sw.WriteLine($"\tpublic partial class {className}View");
             sw.WriteLine("\t{");
             sw.WriteLine("");
 
@@ -485,8 +490,183 @@ public class ComponentAutoBindToolInspector : Editor
             }
         }
 
-        AssetDatabase.Refresh();
-        EditorUtility.DisplayDialog("提示", "代码生成完毕", "OK");
+        using (StreamWriter sw = new StreamWriter($"{codePath}/{className}View.cs"))
+        {
+            sw.WriteLine("using UnityEngine;");
+            sw.WriteLine("using YatoUIFramework;");
+            sw.WriteLine("");
+
+            sw.WriteLine("//自动生成于：" + DateTime.Now);
+
+            if (!string.IsNullOrEmpty(m_Target.Namespace))
+            {
+                //命名空间
+                sw.WriteLine("namespace " + m_Target.Namespace);
+                sw.WriteLine("{");
+                sw.WriteLine("");
+            }
+
+            //类名
+            sw.WriteLine($"\tpublic partial class {className}View:BaseUIView");
+            sw.WriteLine("\t{");
+            sw.WriteLine("");
+
+            //初始化
+            sw.WriteLine($"\t\tpublic {className}View (GameObject gameObjectRoot, ViewInitInfo initInfo) : base(gameObjectRoot, initInfo)");
+            sw.WriteLine("\t\t{");
+            sw.WriteLine("\t\t\tGetBindComponents(gameObjectRoot);");
+            sw.WriteLine("\t\t}");
+            sw.WriteLine("\t}");
+        }
+        Debug.Log("View 代码生成完毕");
+        //AssetDatabase.Refresh();
+
+    }
+
+    /// <summary>
+    /// 生成Mediator自动绑定代码
+    /// </summary>
+    private void GenAutoMediatorBindCode()
+    {
+        GameObject go = m_Target.gameObject;
+
+        string className = !string.IsNullOrEmpty(m_Target.ClassName) ? m_Target.ClassName : go.name;
+        string codePath = !string.IsNullOrEmpty(m_Target.CodePath) ? m_Target.CodePath : m_Setting.CodePath;
+
+        if (!Directory.Exists(codePath))
+        {
+            Debug.LogError($"{go.name}的代码保存路径{codePath}无效");
+        }
+
+        using (StreamWriter sw = new StreamWriter($"{codePath}/{className}Mediator.cs"))
+        {
+            sw.WriteLine("using UnityEngine;");
+            sw.WriteLine("using PureMVC.Interfaces;");
+            sw.WriteLine("using YatoUIFramework;");
+            sw.WriteLine("");
+
+            sw.WriteLine("//自动生成于：" + DateTime.Now);
+
+            if (!string.IsNullOrEmpty(m_Target.Namespace))
+            {
+                //命名空间
+                sw.WriteLine("namespace " + m_Target.Namespace);
+                sw.WriteLine("{");
+                sw.WriteLine("");
+            }
+
+            //类名
+            sw.WriteLine($"\tpublic class {className}Mediator : BaseMediator");
+            sw.WriteLine("\t{");
+            sw.WriteLine("");
+            sw.WriteLine($"\t\tpublic {className}View viewComponent;");
+            //sw.WriteLine($"public {className}Proxy proxy");
+
+          
+            sw.WriteLine($"\t\tpublic {className}Mediator(int uuid, string mediatorName, PageInfo pageInfo) : base(uuid, mediatorName, pageInfo)");
+            sw.WriteLine("\t\t{");
+            sw.WriteLine("\t\t}");
+
+            sw.WriteLine($"\t\tpublic override void OnInit()");
+            sw.WriteLine("\t\t{");
+            sw.WriteLine("\t\t\tif (GetViewComponent() == null)");
+            sw.WriteLine("\t\t\t{");
+            sw.WriteLine("\t\t\t\t Debug.LogError(\"cant find viewcomponent\");");
+            sw.WriteLine("\t\t\t}");
+            sw.WriteLine($"\t\t\t viewComponent = ({className}View)GetViewComponent();");
+            sw.WriteLine("\t\t}");
+
+            sw.WriteLine($"\t\tpublic override string[] ListNotificationInterests()");
+            sw.WriteLine("\t\t{");
+            sw.WriteLine("\t\t\tstring[] list = {");
+            sw.WriteLine("\t\t\t};");
+            sw.WriteLine("\t\t\treturn list;");
+            sw.WriteLine("\t\t}");
+
+            sw.WriteLine($"\t\tpublic override void HandleNotification(INotification notification)");
+            sw.WriteLine("\t\t{");
+            sw.WriteLine("\t\t\tswitch (notification.Name)");
+            sw.WriteLine("\t\t\t{");
+            sw.WriteLine("\t\t\t\tdefault:");
+            sw.WriteLine("\t\t\t\t\tbreak;");
+            sw.WriteLine("\t\t\t}");
+            sw.WriteLine("\t\t}");
+
+            sw.WriteLine("\t}");
+
+            if (!string.IsNullOrEmpty(m_Target.Namespace))
+            {
+                sw.WriteLine("}");
+            }
+        }
+
+        //AssetDatabase.Refresh();
+        Debug.Log("mediator 代码生成完毕");
+        //EditorUtility.DisplayDialog("提示", "代码生成完毕", "OK");
+    }
+
+    /// <summary>
+    /// 生成Proxy自动绑定代码
+    /// </summary>
+    private void GenAutoProxyBindCode()
+    {
+        GameObject go = m_Target.gameObject;
+
+        string className = !string.IsNullOrEmpty(m_Target.ClassName) ? m_Target.ClassName : go.name;
+        string codePath = !string.IsNullOrEmpty(m_Target.CodePath) ? m_Target.CodePath : m_Setting.CodePath;
+
+        if (!Directory.Exists(codePath))
+        {
+            Debug.LogError($"{go.name}的代码保存路径{codePath}无效");
+        }
+
+        using (StreamWriter sw = new StreamWriter($"{codePath}/{className}Proxy.cs"))
+        {
+            sw.WriteLine("using UnityEngine;");
+            sw.WriteLine("using PureMVC.Interfaces;");
+            sw.WriteLine("using YatoUIFramework;");
+            sw.WriteLine("");
+
+            sw.WriteLine("//自动生成于：" + DateTime.Now);
+
+            if (!string.IsNullOrEmpty(m_Target.Namespace))
+            {
+                //命名空间
+                sw.WriteLine("namespace " + m_Target.Namespace);
+                sw.WriteLine("{");
+                sw.WriteLine("");
+            }
+
+            //类名
+            sw.WriteLine($"\tpublic class {className}Proxy : BaseProxy");
+            sw.WriteLine("\t{");
+            sw.WriteLine("");
+            //sw.WriteLine($"\t\tpublic {className}View viewComponent;");
+
+
+            sw.WriteLine($"\t\tpublic {className}Proxy(string proxyName = \"\", object[] data = null) : base(proxyName, data)");
+            sw.WriteLine("\t\t{");
+            sw.WriteLine("\t\t}");
+
+            sw.WriteLine($"\t\tpublic override void OnInit()");
+            sw.WriteLine("\t\t{");
+            sw.WriteLine("\t\t}");
+
+            sw.WriteLine($"\t\tpublic override void Refresh()");
+            sw.WriteLine("\t\t{");
+            sw.WriteLine("\t\t}");
+
+            sw.WriteLine("\t}");
+
+            if (!string.IsNullOrEmpty(m_Target.Namespace))
+            {
+                sw.WriteLine("}");
+            }
+        }
+
+        //AssetDatabase.Refresh();
+        Debug.Log("proxy 代码生成完毕");
+        //EditorUtility.DisplayDialog("提示", "代码生成完毕", "OK");
     }
 }
  

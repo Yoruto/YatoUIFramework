@@ -18,7 +18,7 @@ namespace YatoUIFramework
         /// </summary>
         public override void OnInit()
         {
-            Debug.Log(name+" OnInit");
+            Debug.Log(name + " OnInit");
             if (GetViewComponent() == null)
             {
                 Debug.LogError("cant find viewcomponent");
@@ -46,7 +46,7 @@ namespace YatoUIFramework
             UINotificationType.TestValueChange,
             //如果你是通过持有的方式直接操作proxy，那就没必要去监听下面的消息，目前来说这只是一次性的消息。。。
             UINotificationType.TestValueInstantiated,
-        };
+            };
             return list;
         }
         /// <summary>

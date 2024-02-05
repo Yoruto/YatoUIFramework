@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 namespace YatoUIFramework
 {
@@ -28,7 +28,7 @@ namespace YatoUIFramework
         }
 
         /// <summary>
-        /// Èç¹ûÄãÍµÀÁµÄ»°¾ÍÖ±½Ó´Ómediatorµ÷ÓÃÕâ¸ö·½·¨È¥½øĞĞÖ÷¶¯»ñÈ¡...
+        /// å¦‚æœä½ å·æ‡’çš„è¯å°±ç›´æ¥ä»mediatorè°ƒç”¨è¿™ä¸ªæ–¹æ³•å»è¿›è¡Œä¸»åŠ¨è·å–...
         /// </summary>
         public void InitData()
         {
