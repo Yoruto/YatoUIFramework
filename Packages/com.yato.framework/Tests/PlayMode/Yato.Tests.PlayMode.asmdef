@@ -1,0 +1,25 @@
+{
+    "name": "Yato.Tests.PlayMode",
+    "rootNamespace": "Yato.Tests.PlayMode",
+    "references": [
+        "UnityEngine.TestRunner",
+        "Yato.Core",
+        "Yato.Mvc",
+        "Yato.Resources.Abstractions",
+        "Yato.Resources",
+        "Yato.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

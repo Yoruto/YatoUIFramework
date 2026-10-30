@@ -1,0 +1,12 @@
+<linker>
+  <!--
+    IL2CPP 裁剪兜底。
+    页面表（UIPages.g.cs）通过 typeof 持有 Mediator/View 类型，正常情况下不会被裁掉；
+    这里额外保留框架程序集，避免反射 / 序列化路径上的类型被剥离。
+  -->
+  <assembly fullname="Yato.Core" preserve="all" />
+  <assembly fullname="Yato.Mvc" preserve="all" />
+  <assembly fullname="Yato.Resources.Abstractions" preserve="all" />
+  <assembly fullname="Yato.Resources" preserve="all" />
+  <assembly fullname="Yato.UI" preserve="all" />
+</linker>

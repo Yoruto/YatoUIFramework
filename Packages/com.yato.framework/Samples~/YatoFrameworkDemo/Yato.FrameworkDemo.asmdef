@@ -1,0 +1,21 @@
+{
+    "name": "Yato.FrameworkDemo",
+    "rootNamespace": "Yato.FrameworkDemo",
+    "references": [
+        "Yato.Core",
+        "Yato.Mvc",
+        "Yato.Resources.Abstractions",
+        "Yato.Resources",
+        "Yato.UI",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

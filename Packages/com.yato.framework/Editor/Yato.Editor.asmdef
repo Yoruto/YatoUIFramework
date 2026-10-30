@@ -1,0 +1,22 @@
+{
+    "name": "Yato.Editor",
+    "rootNamespace": "Yato.Editor",
+    "references": [
+        "Yato.Core",
+        "Yato.Resources.Abstractions",
+        "Yato.Resources",
+        "Yato.UI",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

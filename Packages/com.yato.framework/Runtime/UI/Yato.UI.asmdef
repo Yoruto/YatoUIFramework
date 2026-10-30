@@ -1,0 +1,19 @@
+{
+    "name": "Yato.UI",
+    "rootNamespace": "Yato.UI",
+    "references": [
+        "Yato.Core",
+        "Yato.Mvc",
+        "Yato.Resources.Abstractions",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

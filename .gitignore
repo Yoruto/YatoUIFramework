@@ -70,3 +70,17 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# ==== Yato Framework ====
+# 资源打包产物（由 Yato.Editor/Build/BundleBuilder 生成，禁止入库）
+/[Aa]ssets/[Ss]treamingAssets/[Aa]sset[Bb]undles/
+/BuildOutput/
+/BundleOutput/
+# 代码生成中间产物
+*.generated.json
+
+# ==== 工具与本地配置 ====
+.codebuddy/
+.idea/
+.consulo/
+*.DotSettings.user
