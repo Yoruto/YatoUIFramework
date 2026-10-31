@@ -3,6 +3,31 @@
 所有对本包的改动都记录在此文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.3.0] - 2026-10-31
+
+### Added
+
+- 热更新统一 BundleRelativePath 校验、清单字段范围/数量/平台/重复与路径碰撞检查、链接路径拒绝、受限流式下载、超时与生产 HTTPS 默认策略。
+- 版本暂存、完整资源/依赖校验、D04 FileStore 原子活动指针提交、跨实例 Busy 和取消结果；失败保留最后成功版本，旧平铺缓存只读兼容。
+- BasicSample / FullSample 自带场景与预制体，无原工程 Assets/GameRes 或 TMP 字体依赖；不使用全局自动示例注册。
+- 可选 Input 包 0.1.0：游戏提供 action asset，运行时副本、上下文、对称订阅、交互重绑定与 Binding Override JSON。
+- 独立消费工程准备/验证工具、故障回归用例、安装/升级说明与 UI/MVC 可行性结论。无 CI 配置。
+
+### Changed
+
+- **支持范围变化**：仅支持 Unity 6，全部 Yato 包的 `unity` 字段统一为 `6000.0`，移除旧 `unityRelease: 13f1`；取消旧 Unity 大版本的兼容验收要求，当前开发与实测版本为 `6000.5.6f1`。
+- Resources 升为 0.2.0，依赖 Persistence 0.1.0 以复用安全提交；其余包的对应依赖同步。
+- **兼容性变化**：Bundle 模式默认 BundleRequired，初始化失败抛包含 Provider/平台/路径/阶段/原始异常的错误；显式 AllowResourcesFallback 才降级。编辑器默认 AssetDatabase 不变。
+- **兼容性变化**：远程默认只接受 HTTPS，file:// 与 loopback HTTP 需要显式测试开关；不接受跨平台、非规范 Bundle 名或不合法的 CRC/大小值。
+- Provider 固定创建时的快照，缺包不跨目录混用；已提交版本保守保留，当前不自动清理，避免破坏旧句柄。升级见安装指南。
+- Package Manager 推荐样例改为 BasicSample / FullSample；旧 YatoFrameworkDemo 源码保留供迁移，AppBootstrapSample 改为显式注册。
+
+### Fixed
+
+- 下载先删除目标导致最后可用文件丢失；更新失败删除活动 manifest；清单提交前覆盖活动 Bundle。
+- AppBootstrapSample 保存并对称移除场景委托，重复 Initialize/Shutdown 与初始化失败清理不叠加订阅。
+- CRC 从整文件读取改为 64 KiB 缓冲流式计算。
+
 ## [Unreleased]
 
 ### Fixed

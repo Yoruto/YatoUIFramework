@@ -169,6 +169,15 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.unity.inputsystem": {
+      "version": "1.20.0",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.uielements": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.mathematics": {
       "version": "1.4.0",
       "depth": 2,
@@ -228,7 +237,7 @@
       "source": "embedded",
       "dependencies": {
         "com.yato.core": "0.1.0",
-        "com.yato.resources": "0.1.0"
+        "com.yato.resources": "0.2.0"
       }
     },
     "com.yato.audio": {
@@ -237,7 +246,7 @@
       "source": "embedded",
       "dependencies": {
         "com.yato.core": "0.1.0",
-        "com.yato.resources": "0.1.0"
+        "com.yato.resources": "0.2.0"
       }
     },
     "com.yato.core": {
@@ -252,7 +261,7 @@
       "source": "embedded",
       "dependencies": {
         "com.yato.core": "0.1.0",
-        "com.yato.resources": "0.1.0",
+        "com.yato.resources": "0.2.0",
         "com.yato.ui": "0.1.0",
         "com.unity.ugui": "1.0.0",
         "com.unity.textmeshpro": "3.0.6"
@@ -265,21 +274,22 @@
       "dependencies": {
         "com.yato.core": "0.1.0",
         "com.yato.mvc": "0.1.0",
-        "com.yato.resources": "0.1.0",
+        "com.yato.resources": "0.2.0",
         "com.yato.ui": "0.1.0",
         "com.yato.app": "0.1.0",
         "com.yato.persistence": "0.1.0",
         "com.yato.settings": "0.1.0",
         "com.yato.audio": "0.1.0",
-        "com.yato.editor": "0.1.0",
-        "com.unity.textmeshpro": "3.0.6"
+        "com.yato.editor": "0.1.0"
       }
     },
     "com.yato.input": {
       "version": "file:com.yato.input",
       "depth": 0,
       "source": "embedded",
-      "dependencies": {}
+      "dependencies": {
+        "com.unity.inputsystem": "1.7.0"
+      }
     },
     "com.yato.mvc": {
       "version": "file:com.yato.mvc",
@@ -304,7 +314,8 @@
         "com.unity.modules.assetbundle": "1.0.0",
         "com.unity.modules.jsonserialize": "1.0.0",
         "com.unity.modules.unitywebrequest": "1.0.0",
-        "com.unity.modules.unitywebrequestassetbundle": "1.0.0"
+        "com.unity.modules.unitywebrequestassetbundle": "1.0.0",
+        "com.yato.persistence": "0.1.0"
       }
     },
     "com.yato.settings": {
@@ -323,7 +334,7 @@
       "dependencies": {
         "com.yato.core": "0.1.0",
         "com.yato.mvc": "0.1.0",
-        "com.yato.resources": "0.1.0",
+        "com.yato.resources": "0.2.0",
         "com.unity.ugui": "1.0.0"
       }
     },

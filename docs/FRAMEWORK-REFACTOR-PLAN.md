@@ -4,6 +4,7 @@
 > 范围：`e:/YatoUIFramework`（框架本体，下称「工作区」） + `E:/GameTest/Bang-`（使用现场，下称「Bang-」）
 > 目标：把当前「从游戏里抽出来的 UI 半成品」升级为可独立交付的 Unity 通用框架，内置 UI、资源管理、事件、日志、代码生成与资源打包/热更能力。
 > 本文档是执行依据：每一行改动都能对应到文件、任务编号和验收标准。
+> 版本范围更新（2026-10-31）：仅支持 Unity 6，包最低版本为 `6000.0`，当前实测为 `6000.5.6f1`；现状表中的旧编辑器版本仅保留为历史取样，不构成兼容要求。
 
 ---
 
@@ -999,7 +1000,7 @@ _bagSub = eventBus.Subscribe<BagChanged>(OnBagChanged); // Dispose 即退订
 
 | 项 | 说明 |
 |---|---|
-| Unity 版本 | 实施期工程升级到 6000.5.6f1；包 `unity` 字段仍为 2022.3（最低版本），代码未使用 Unity 6 专属 API |
+| Unity 版本 | 当前工程为 6000.5.6f1；包 `unity` 字段统一为 6000.0，仅支持 Unity 6 |
 | 生成物目录 | 由 `Runtime/Generated` 改为工程侧 `Assets/YatoGenerated`（页面表需 `typeof` 业务 Mediator，不能落在包内程序集） |
 | UI 程序集依赖 | `Yato.UI` 额外引用 `Yato.Mvc`（Mediator/Proxy 基类）与 `UnityEngine.UI` |
 | 公共 API | 新增 `UIRouter.Configure` / `CancelOpen` / `PreloadAsync` / `IsCached`、`ResourceServiceFactory`；核心契约严格按第 3 章，未增删 |

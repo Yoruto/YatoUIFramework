@@ -1,6 +1,6 @@
 # YatoFramework 手动验证清单（2026-10-31）
 
-> 适用版本：`com.yato.framework` 0.2.0（多包结构）
+> 适用版本：`com.yato.framework` 0.3.0（多包结构）
 > 对应设计：`docs/YatoFramework_ARCHITECTURE_AND_ROADMAP_2026-10-30.md`（§5、§5.2）
 > 自动化用例由本仓库提供，但**必须在 Unity 编辑器中手动执行并记录结果**。
 
@@ -9,10 +9,10 @@
 | # | 检查项 | 预期 |
 |---|---|---|
 | 0.1 | 用 Unity 打开工程（本工程为 6000.5.6f1） | Console 无 asmdef / package 解析错误 |
-| 0.2 | Package Manager 列表 | 能看到 `Yato Framework` 及 `Core / Mvc / Resources / UI / App / Persistence / Settings / Audio / Editor / Input(占位)` |
-| 0.3 | `Packages/manifest.json` | 含 `"testables": ["com.yato.framework"]` |
+| 0.2 | Package Manager 列表 | 能看到 `Yato Framework` 及 `Core / Mvc / Resources / UI / App / Persistence / Settings / Audio / Editor / Input(可选)` |
+| 0.3 | `Packages/manifest.json` | 含 `"testables": ["com.yato.framework", "com.yato.input"]`（Input 未安装时省略） |
 | 0.4 | 各包根目录 | 均有 `package.json`；运行时包另有 `link.xml` |
-| 0.5 | `com.yato.input` | 只有 `package.json` + `README.md`，无程序集 |
+| 0.5 | `com.yato.input` | 独立 `Yato.Input` 程序集；仅该包引用 Unity.InputSystem |
 
 ## 1. 自动化测试（Unity Test Runner）
 
@@ -131,19 +131,29 @@
 | 6. 冲突请求得 Busy；失败时 Loading UI 能结束 | 见 3.2；用不存在的场景名触发失败 | ☐ |
 | 7. 改音量并显式保存，重启恢复 | 见 5.2 / 6.11 | ☐ |
 | 8. 异步保存同路径 Busy、取消、临时文件清理 | 见 4.5 / 4.6 / 4.8 | ☐ |
-| 9. 安装 Input 模块后的上下文切换与重绑定 | **未实现**（D07 占位） | N/A |
+| 9. 安装 Input 模块后的上下文切换与重绑定 | 用游戏提供的 ActionAsset 执行上下文切换、订阅退订、取消重绑定、JSON 恢复默认 | N/A |
 | 10. 退出时反序清理，无重复释放与悬挂回调 | 见 2.7 / 6.12；Console 无异常 | ☐ |
 
 ## 8. 发布前回归
 
 - [ ] 所有 EditMode / PlayMode 用例通过（记录数量）
 - [ ] Windows Player 构建成功，启动无报错
-- [ ] Unity 2022.3 与 Unity 6 各导入一次，无编译错误（最低版本字段为 2022.3）
+- [ ] Unity 6 的全新工程导入无编译错误（最低版本字段为 `6000.0`，当前实测 `6000.5.6f1`）
 - [ ] 未安装 `com.yato.input` 时可正常编译
 - [ ] 新增公开 API 已在 `CHANGELOG.md` 记录
 - [ ] `package.json` 版本与 CHANGELOG 一致
 
-## 9. 记录模板
+## 9. 0.3 稳定性与复用专项
+
+- EditMode 新增 HotUpdateValidationTests / ResourceFailurePolicyTests / Yato.Input.Tests。
+- PlayMode 新增 HotUpdateTransactionTests / Yato.Input.Tests.PlayMode，实际 AB 另由 HotUpdateSmokeTests 覆盖。
+- 路径、重复/非法数字/平台/数量/大小、Windows junction、URL 策略、完整性、Busy、取消、指针失败和遗留暂存均需验证。
+- 热更失败时上一成功版本必须保留；不要再以删除持久化 manifest 为通过条件。旧 Provider 固定原快照，已提交目录暂不自动回收。
+- 按 [安装指南](EMBEDDED_INSTALL_AND_UPGRADE.md) 在全新工程验证完整/精简包集、缺 Input、BasicSample / FullSample 与卸载。
+- BundleRequired 必须给出明确异常；只有 AllowResourcesFallback 才允许降级。
+- 已执行结果与仍未完成的人工交互/Player 验收见 [本轮验证记录](OPTIMIZATION_VERIFICATION_2026-10-31.md)。Skip 不计入通过。
+
+## 10. 记录模板
 
 ```
 日期：____   Unity 版本：____   平台：Windows Player

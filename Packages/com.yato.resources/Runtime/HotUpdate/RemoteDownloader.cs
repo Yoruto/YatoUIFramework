@@ -8,175 +8,156 @@ using Yato.Core;
 
 namespace Yato.Resources
 {
-    /// <summary>
-    /// 远程下载器（T-P5-02）：失败重试、进度回调、取消、CRC 校验。
-    /// 「断点」粒度为文件：已存在且 CRC 正确的 bundle 直接跳过，不重复下载。
-    /// </summary>
+    /// <summary>Bounded downloads with unique temporary files and atomic destination replacement.</summary>
     public sealed class RemoteDownloader
     {
-        /// <summary>单文件最大重试次数。</summary>
         public int MaxRetry = 3;
-
-        /// <summary>重试间隔（秒）。</summary>
         public float RetryDelaySeconds = 1f;
+        public int TimeoutSeconds = 60;
+        public long MaxFileBytes = VersionManifest.MaxBundleBytes;
+        /// <summary>Explicit local-test opt-ins. Production accepts HTTPS only; redirects are disabled.</summary>
+        public bool AllowFileUrls;
+        public bool AllowInsecureLocalhost;
 
-        /// <summary>下载到目标路径，必要时校验 CRC。</summary>
-        public IAwaitable<long> DownloadAsync(
-            string url,
-            string savePath,
-            uint expectedCrc = 0u,
-            IProgress<float> progress = null,
-            CancellationToken ct = default(CancellationToken))
+        public string ValidateUrl(string url)
+        {
+            Uri uri;
+            if (!Uri.TryCreate(url, UriKind.Absolute, out uri) || !string.IsNullOrEmpty(uri.UserInfo) ||
+                !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment))
+                throw new ArgumentException("Invalid update URL: " + url);
+            bool allowed = uri.Scheme == Uri.UriSchemeHttps && !string.IsNullOrEmpty(uri.Host);
+            allowed |= AllowFileUrls && uri.IsFile && !uri.IsUnc;
+            allowed |= AllowInsecureLocalhost && uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback;
+            if (!allowed) throw new ArgumentException("Update URL requires HTTPS (local testing must be explicitly enabled): " + url);
+            return uri.AbsoluteUri;
+        }
+
+        public string FileUrl(string root, string relative)
+        {
+            BundleRelativePath.Validate(relative);
+            return ValidateUrl(ValidateUrl(root).TrimEnd('/') + "/" + relative);
+        }
+
+        public IAwaitable<long> DownloadAsync(string url, string savePath, uint expectedCrc = 0u,
+            IProgress<float> progress = null, CancellationToken ct = default(CancellationToken),
+            long expectedSize = -1, long maxBytes = -1, bool verifyCrc = false)
         {
             var source = new AwaitableCompletionSource<long>();
-            if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(savePath))
+            try
             {
-                source.SetException(new ResourceException(null, null, ResourceStage.BundleDownload, "下载参数为空"));
-                return source;
+                url = ValidateUrl(url);
+                savePath = Path.GetFullPath(savePath);
+                BundleRelativePath.EnsureNoLinks(savePath);
+                long limit = maxBytes < 0 ? MaxFileBytes : Math.Min(maxBytes, MaxFileBytes);
+                if (limit <= 0 || expectedSize < -1 || expectedSize > limit || TimeoutSeconds <= 0 ||
+                    MaxRetry < 1 || MaxRetry > 10 || RetryDelaySeconds < 0 || RetryDelaySeconds > 60)
+                    throw new ArgumentException("Invalid download limits");
+                RuntimeHost.RunCoroutine(Guard(DownloadRoutine(url, savePath, expectedCrc, progress, ct,
+                    expectedSize, limit, verifyCrc || expectedCrc != 0, source), source));
             }
-
-            RuntimeHost.RunCoroutine(DownloadRoutine(url, savePath, expectedCrc, progress, ct, source));
+            catch (Exception e) { source.SetException(e); }
             return source;
         }
 
-        private IEnumerator DownloadRoutine(
-            string url,
-            string savePath,
-            uint expectedCrc,
-            IProgress<float> progress,
-            CancellationToken ct,
-            AwaitableCompletionSource<long> source)
+        private static IEnumerator Guard(IEnumerator routine, AwaitableCompletionSource<long> source)
         {
-            int attempt = 0;
-            while (true)
+            try
             {
-                if (ct.IsCancellationRequested)
+                while (true)
                 {
-                    source.SetException(new OperationCanceledException());
-                    yield break;
+                    bool more;
+                    try { more = routine.MoveNext(); }
+                    catch (Exception e) { source.SetException(e); yield break; }
+                    if (!more) yield break;
+                    yield return routine.Current;
                 }
+            }
+            finally { (routine as IDisposable)?.Dispose(); }
+        }
 
-                attempt++;
-                string tempPath = savePath + ".part";
-                string directory = Path.GetDirectoryName(savePath);
-                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-
-                if (File.Exists(tempPath))
-                {
-                    File.Delete(tempPath);
-                }
-
-                using (UnityWebRequest request = UnityWebRequest.Get(url))
-                {
-                    request.downloadHandler = new DownloadHandlerFile(tempPath);
-                    UnityWebRequestAsyncOperation operation = request.SendWebRequest();
-
-                    while (!operation.isDone)
-                    {
-                        if (ct.IsCancellationRequested)
-                        {
-                            request.Abort();
-                            SafeDelete(tempPath);
-                            source.SetException(new OperationCanceledException());
-                            yield break;
-                        }
-
-                        if (progress != null)
-                        {
-                            progress.Report(request.downloadProgress);
-                        }
-
-                        yield return null;
-                    }
-
-                    if (request.result != UnityWebRequest.Result.Success)
-                    {
-                        SafeDelete(tempPath);
-                        if (attempt < MaxRetry)
-                        {
-                            Log.Warn(string.Format("[HotUpdate] 下载失败（第 {0} 次）：{1}（{2}）", attempt, url, request.error));
-                            yield return new WaitForSeconds(RetryDelaySeconds);
-                            continue;
-                        }
-
-                        source.SetException(new ResourceException(null, url, ResourceStage.BundleDownload,
-                            string.Format("下载失败：{0}（{1}）", url, request.error)));
-                        yield break;
-                    }
-                }
-
-                long size = 0;
-                if (File.Exists(tempPath))
-                {
-                    size = new FileInfo(tempPath).Length;
-                }
-
-                if (expectedCrc != 0u)
-                {
-                    uint actual = Crc32Util.Compute(tempPath);
-                    if (actual != expectedCrc)
-                    {
-                        SafeDelete(tempPath);
-                        if (attempt < MaxRetry)
-                        {
-                            Log.Warn(string.Format("[HotUpdate] CRC 不匹配（第 {0} 次）：{1}", attempt, url));
-                            yield return new WaitForSeconds(RetryDelaySeconds);
-                            continue;
-                        }
-
-                        source.SetException(new ResourceException(null, url, ResourceStage.BundleDownload,
-                            string.Format("CRC 校验失败：{0} 期望 {1}", url, expectedCrc)));
-                        yield break;
-                    }
-                }
-
-                TryDelete(savePath);
+        private IEnumerator DownloadRoutine(string url, string savePath, uint crc, IProgress<float> progress,
+            CancellationToken ct, long expectedSize, long limit, bool verifyCrc, AwaitableCompletionSource<long> source)
+        {
+            Exception last = null;
+            for (int attempt = 0; attempt < MaxRetry; attempt++)
+            {
+                ct.ThrowIfCancellationRequested();
+                BundleRelativePath.EnsureNoLinks(savePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(savePath));
+                string temporary = savePath + "." + Guid.NewGuid().ToString("N") + ".part";
                 try
                 {
-                    File.Move(tempPath, savePath);
+                    using (var request = UnityWebRequest.Get(url))
+                    {
+                        request.downloadHandler = new LimitedFileHandler(temporary, limit);
+                        request.timeout = TimeoutSeconds;
+                        request.redirectLimit = 0;
+                        var operation = request.SendWebRequest();
+                        while (!operation.isDone)
+                        {
+                            ct.ThrowIfCancellationRequested();
+                            if (request.downloadedBytes > (ulong)limit) throw new IOException("Download size limit exceeded");
+                            progress?.Report(request.downloadProgress);
+                            yield return null;
+                        }
+                        ct.ThrowIfCancellationRequested();
+                        ((LimitedFileHandler)request.downloadHandler).Finish();
+                        if (((LimitedFileHandler)request.downloadHandler).LimitExceeded)
+                            throw new IOException("Download size limit exceeded: " + url);
+                        if (request.result != UnityWebRequest.Result.Success)
+                            last = new IOException("Download failed: " + url + " (" + request.error + ")");
+                        else
+                        {
+                            long size = new FileInfo(temporary).Length;
+                            if (size > limit || (expectedSize >= 0 && size != expectedSize))
+                                throw new IOException("Downloaded length mismatch or size limit exceeded: " + url);
+                            if (verifyCrc && Crc32Util.Compute(temporary) != crc)
+                                throw new IOException("CRC verification failed: " + url);
+                            ct.ThrowIfCancellationRequested();
+                            BundleRelativePath.EnsureNoLinks(savePath);
+                            if (File.Exists(savePath)) File.Replace(temporary, savePath, null);
+                            else File.Move(temporary, savePath);
+                            source.SetResult(size); // Cancellation after commit does not change this result.
+                            yield break;
+                        }
+                    }
                 }
-                catch (Exception e)
+                finally
                 {
-                    source.SetException(new ResourceException(null, url, ResourceStage.BundleDownload, "落盘失败", e));
-                    yield break;
+                    if (File.Exists(temporary)) File.Delete(temporary);
                 }
-
-                source.SetResult(size);
-                yield break;
+                float until = Time.realtimeSinceStartup + RetryDelaySeconds;
+                while (Time.realtimeSinceStartup < until)
+                {
+                    ct.ThrowIfCancellationRequested();
+                    yield return null;
+                }
             }
+            throw new ResourceException(null, url, ResourceStage.BundleDownload, "Download failed", last);
         }
 
-        private static void SafeDelete(string path)
+        // Reject an oversized chunk before it reaches disk, including file:// responses.
+        private sealed class LimitedFileHandler : DownloadHandlerScript
         {
-            try
+            private readonly FileStream m_stream;
+            private readonly long m_limit;
+            public bool LimitExceeded { get; private set; }
+            public LimitedFileHandler(string path, long limit) : base(new byte[64 * 1024])
             {
-                if (File.Exists(path))
-                {
-                    File.Delete(path);
-                }
+                m_limit = limit;
+                m_stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.Read);
             }
-            catch (Exception e)
+            protected override bool ReceiveData(byte[] data, int length)
             {
-                Log.Warn("[HotUpdate] 删除临时文件失败：" + e.Message);
+                if (data == null || length < 0) return false;
+                if (m_stream.Length + length > m_limit) { LimitExceeded = true; return false; }
+                m_stream.Write(data, 0, length);
+                return true;
             }
-        }
-
-        private static void TryDelete(string path)
-        {
-            try
-            {
-                if (File.Exists(path))
-                {
-                    File.Delete(path);
-                }
-            }
-            catch (Exception)
-            {
-                // 落盘前清理旧文件失败不致命
-            }
+            private bool m_closed;
+            public void Finish() { if (m_closed) return; m_stream.Flush(true); m_stream.Dispose(); m_closed = true; }
+            protected override void CompleteContent() { Finish(); }
+            public override void Dispose() { m_stream.Dispose(); base.Dispose(); }
         }
     }
 }

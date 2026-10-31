@@ -18,7 +18,7 @@ namespace Yato.FrameworkDemo
         {
             m_facade = (DemoFacade)Facade.GetInstance(() => new DemoFacade());
 
-            // 编辑器下默认走 AssetDatabase；打包后按 manifest 走 BundleProvider，缺失则降级 Resources
+            // 编辑器下默认走 AssetDatabase；打包后按 manifest 走 BundleProvider，缺失时按显式失败策略处理
             UIRouter.Configure(ResourceServiceFactory.Create(), m_facade);
         }
 
@@ -42,7 +42,7 @@ namespace Yato.FrameworkDemo
         private void Update()
         {
             // Android 返回键 / ESC：逐层出栈（System 层不响应）
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (UnityEngine.Input.GetKeyDown(KeyCode.Escape))
             {
                 UIRouter.Back();
             }

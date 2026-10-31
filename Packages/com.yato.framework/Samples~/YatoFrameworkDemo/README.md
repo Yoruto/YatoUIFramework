@@ -1,6 +1,8 @@
-# YatoFrameworkDemo
+# Legacy sample (0.2 migration source)
 
-示例工程，不会被自动编译。通过 Package Manager（`Yato Framework` → Samples）导入到 `Assets/Samples/...` 后使用。
+Package Manager now offers self-contained BasicSample and FullSample. Prefer those for new projects; the old scene still assumes the original UI assets.
+
+AppBootstrapSample no longer registers automatically. Call AppBootstrapSample.RegisterServices() before GameBootstrap.Initialize() only when intentionally using this legacy service. Its events and audio are released symmetrically on Shutdown.
 
 ## 内容
 

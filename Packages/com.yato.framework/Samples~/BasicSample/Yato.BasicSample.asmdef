@@ -1,0 +1,13 @@
+{
+  "name": "Yato.BasicSample",
+  "rootNamespace": "Yato.BasicSample",
+  "references": [
+    "Yato.Core",
+    "Yato.Resources",
+    "Yato.Resources.Abstractions",
+    "Yato.UI",
+    "Yato.App",
+    "Yato.Mvc"
+  ],
+  "autoReferenced": true
+}

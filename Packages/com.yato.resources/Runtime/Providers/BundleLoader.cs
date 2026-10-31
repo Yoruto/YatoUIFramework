@@ -21,8 +21,9 @@ namespace Yato.Resources
             new Dictionary<string, IAwaitable>(StringComparer.Ordinal);
 
         private readonly BundleRefCounter m_refCounter;
+        private readonly string m_snapshotDirectory;
 
-        public BundleLoader(BundleRefCounter refCounter)
+        public BundleLoader(BundleRefCounter refCounter, string snapshotDirectory = null)
         {
             if (refCounter == null)
             {
@@ -30,6 +31,8 @@ namespace Yato.Resources
             }
 
             m_refCounter = refCounter;
+            m_snapshotDirectory = snapshotDirectory ?? (RuntimePaths.PreferPersistent && System.IO.File.Exists(RuntimePaths.GetManifestPath(true))
+                ? System.IO.Path.GetDirectoryName(RuntimePaths.GetManifestPath(true)) : RuntimePaths.StreamingAssetsBundleDir);
         }
 
         /// <summary>已加载的 bundle（未加载返回 null）。</summary>
@@ -129,7 +132,7 @@ namespace Yato.Resources
 
             try
             {
-                path = RuntimePaths.ResolveBundlePath(bundleName);
+                path = RuntimePaths.ResolveBundlePath(bundleName, m_snapshotDirectory);
             }
             catch (Exception e)
             {

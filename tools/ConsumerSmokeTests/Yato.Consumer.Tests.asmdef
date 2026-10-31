@@ -1,0 +1,25 @@
+{
+  "name": "Yato.Consumer.Tests",
+  "references": [
+    "Yato.BasicSample",
+    "Yato.FullSample",
+    "Yato.Core",
+    "Yato.Resources",
+    "Yato.Resources.Abstractions",
+    "Yato.UI",
+    "Yato.App",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner",
+    "Yato.Mvc",
+    "Yato.FrameworkDemo"
+  ],
+  "includePlatforms": [],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ]
+}

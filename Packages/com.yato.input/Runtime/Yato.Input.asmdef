@@ -1,0 +1,8 @@
+{
+  "name": "Yato.Input",
+  "rootNamespace": "Yato.Input",
+  "references": [
+    "Unity.InputSystem"
+  ],
+  "autoReferenced": true
+}

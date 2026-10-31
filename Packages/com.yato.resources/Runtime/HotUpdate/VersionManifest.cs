@@ -15,6 +15,9 @@ namespace Yato.Resources
     public sealed class VersionManifest
     {
         public const int CurrentSchema = 1;
+        public const int MaxBundleCount = 10000;
+        public const long MaxBundleBytes = 1024L * 1024 * 1024;
+        public const long MaxTotalBytes = 8L * 1024 * 1024 * 1024;
 
         private readonly Dictionary<string, BundleHash> m_bundles =
             new Dictionary<string, BundleHash>(StringComparer.Ordinal);
@@ -64,7 +67,7 @@ namespace Yato.Resources
             }
 
             var manifest = new VersionManifest();
-            manifest.Schema = (int)MiniJson.GetLong(root, "schema");
+            manifest.Schema = (int)MiniJson.RequireInteger(root, "schema", int.MaxValue);
             if (manifest.Schema != CurrentSchema)
             {
                 throw new ResourceException(null, null, ResourceStage.BundleDownload,
@@ -73,29 +76,52 @@ namespace Yato.Resources
 
             manifest.AppVersion = MiniJson.GetString(root, "appVersion");
             manifest.Platform = MiniJson.GetString(root, "platform");
-            manifest.ManifestCrc = (uint)MiniJson.GetLong(root, "manifestCrc");
+            manifest.ManifestCrc = (uint)MiniJson.RequireInteger(root, "manifestCrc", uint.MaxValue);
+            if (string.IsNullOrWhiteSpace(manifest.AppVersion) || manifest.AppVersion.Length > 128)
+                throw new FormatException("Invalid appVersion");
+            if (!string.Equals(manifest.Platform, RuntimePaths.PlatformName, StringComparison.Ordinal))
+                throw new FormatException("Update platform mismatch: " + manifest.Platform + " != " + RuntimePaths.PlatformName);
 
             object rawBundles;
+            if (!root.TryGetValue("bundles", out rawBundles) || !(rawBundles is IDictionary<string, object>))
+                throw new FormatException("version.bundles must be an object");
+            var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            long total = 0;
             if (root.TryGetValue("bundles", out rawBundles))
             {
                 var bundles = rawBundles as IDictionary<string, object>;
                 if (bundles != null)
                 {
+                    if (bundles.Count > MaxBundleCount) throw new FormatException("Too many bundles");
                     foreach (KeyValuePair<string, object> pair in bundles)
                     {
+                        BundleRelativePath.ValidateBundle(pair.Key);
+                        if (!names.Add(pair.Key)) throw new FormatException("Duplicate portable bundle path: " + pair.Key);
                         var data = pair.Value as IDictionary<string, object>;
                         if (data == null)
                         {
-                            continue;
+                            throw new FormatException("Invalid bundle entry: " + pair.Key);
                         }
 
                         manifest.m_bundles[pair.Key] = new BundleHash
                         {
                             Hash = MiniJson.GetString(data, "hash"),
-                            Crc = (uint)MiniJson.GetLong(data, "crc"),
-                            Size = MiniJson.GetLong(data, "size")
+                            Crc = (uint)MiniJson.RequireInteger(data, "crc", uint.MaxValue),
+                            Size = MiniJson.RequireInteger(data, "size", MaxBundleBytes)
                         };
+                        total += manifest.m_bundles[pair.Key].Size;
+                        if (total > MaxTotalBytes) throw new FormatException("Update size limit exceeded");
                     }
+                }
+            }
+
+            foreach (string name in names)
+            {
+                int separator = name.IndexOf('/');
+                while (separator >= 0)
+                {
+                    if (names.Contains(name.Substring(0, separator))) throw new FormatException("Bundle file/directory collision: " + name);
+                    separator = name.IndexOf('/', separator + 1);
                 }
             }
 

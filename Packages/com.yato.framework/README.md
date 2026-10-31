@@ -8,14 +8,14 @@ Unity 通用框架（UPM 多包）。`com.yato.framework` 自 `0.2.0` 起是**�
 |---|---|---|---|
 | `com.yato.core` | `Yato.Core` | UnityEngine | RuntimeHost、主线程投递、事件总线、服务定位、日志、异步工具 |
 | `com.yato.mvc` | `Yato.Mvc` | — | PureMVC（Facade / Mediator / Proxy / Command） |
-| `com.yato.resources` | `Yato.Resources`、`Yato.Resources.Abstractions` | Core + assetbundle / jsonserialize / unitywebrequest 模块 | 资源句柄与引用计数、Provider（Editor / Resources / Bundle）、热更、诊断 |
+| `com.yato.resources` | `Yato.Resources`、`Yato.Resources.Abstractions` | Core、Persistence + assetbundle / jsonserialize / unitywebrequest 模块 | 资源句柄与引用计数、Provider（Editor / Resources / Bundle）、热更、诊断 |
 | `com.yato.ui` | `Yato.UI` | Core、Mvc、Resources、`com.unity.ugui` | 页面路由、层级与页面栈、LRU 缓存、加载遮罩、绑定 |
 | `com.yato.app` | `Yato.App` | Core、Resources（Abstractions） | `GameBootstrap` 幂等初始化、`SceneService`（Single/Additive、五态、Ready 初始化器） |
 | `com.yato.persistence` | `Yato.Persistence` | Core | 安全相对路径、UTF-8 JsonUtility 序列化、临时文件安全替换、同路径互斥 |
 | `com.yato.settings` | `Yato.Settings` | Core、Persistence | 强类型设置：默认值 → 用户文件 → 校验 → 发布、变化事件、显式 Load/Save |
 | `com.yato.audio` | `Yato.Audio` | Core、Resources | 通道音量、双 Music 交叉渐变、SFX 池与溢出策略、AudioClip 句柄 |
 | `com.yato.editor` | `Yato.Editor` | 运行时包 + `com.unity.textmeshpro` | 打包、代码生成、绑定/字体校验、资源与泄漏诊断（仅 Editor） |
-| `com.yato.input` | — | （占位，未实现） | D07 可选输入适配层，目前仅 `package.json` + README |
+| `com.yato.input` | `Yato.Input` | Unity Input System | 可选 D07：运行时上下文、订阅、重绑定 |
 | `com.yato.framework` | — | 上面全部（不含 input） | 聚合包：示例 `Samples~`、`Tests`、`Documentation~` |
 
 ## 依赖规则
@@ -43,11 +43,13 @@ Packages/
 ├── com.yato.settings/        Runtime/  Yato.Settings
 ├── com.yato.audio/           Runtime/  Yato.Audio
 ├── com.yato.editor/          Editor/   Yato.Editor
-├── com.yato.input/           package.json + README（占位）
+├── com.yato.input/           Runtime/ Yato.Input（可选）
 └── com.yato.framework/       package.json（聚合）+ Tests/ + Samples~/ + Documentation~/
 ```
 
 每个运行时包根目录都有 `link.xml`，只保留自己的程序集；单独安装某个包时不会丢掉 IL2CPP 裁剪保护。
+
+安装、独立样例与 0.2 → 0.3 迁移见 [安装指南](Documentation~/installation.md)。Bundle 模式默认严格失败；本地下载需显式测试授权，旧 Provider 固定旧快照。
 
 ## 快速开始
 
@@ -83,8 +85,8 @@ audio.SetBusVolume(AudioBus.Music, settings.Current.MusicVolume);
 
 | 版本 | 状态 |
 |---|---|
-| 2022.3 LTS | `package.json` 的 `unity` 字段即最低版本 |
-| 6000.5（Unity 6.5） | 本工程实际版本，编译通过 |
+| Unity 6（6000.0 起） | 唯一支持的 Unity 大版本；各包 `unity` 字段为 `6000.0` |
+| 6000.5.6f1（Unity 6.5） | 当前开发与实测版本；其他 Unity 6 小版本不据此宣称已经实测 |
 
 Unity 6 下已知差异：
 
@@ -112,7 +114,7 @@ Unity 6 下已知差异：
 | D04 持久化基础设施 | 已实现：`FileStore` / `PersistencePaths` / `ISerializer` |
 | D05 设置管理 | 已实现：`SettingsService<T>` |
 | D06 音频管理 | 已实现：`AudioService` |
-| D07 输入适配 | 占位包，待整体审核 |
-| D08 工程与发布 | 持续进行：样例、文档、验证清单已补；UPM 发布与 Player 构建回归待执行 |
+| D07 输入适配 | 可选薄适配已实现；上下文、重绑定、订阅和 JSON 接口 |
+| D08 工程与发布 | 持续进行：独立安装、样例与本机 Player 验证见 Documentation~/verification.md；人工交互与正式发布仍待验收 |
 
 各阶段手动验证步骤见 `docs/YatoFramework_ManualVerification_2026-10-31.md`。
