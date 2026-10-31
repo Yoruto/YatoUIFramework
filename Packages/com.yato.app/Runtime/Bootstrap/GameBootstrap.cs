@@ -219,10 +219,7 @@ namespace Yato.App
                 s_globalResources = null;
             }
 
-            if (s_scene != null)
-            {
-                ServiceLocator.Default.Unregister<ISceneService>();
-            }
+            DetachSceneService();
 
             s_initialized = false;
 
@@ -331,6 +328,18 @@ namespace Yato.App
             ServiceLocator.Default.Register<ISceneService>(owned);
         }
 
+        private static void DetachSceneService()
+        {
+            if (s_scene != null)
+            {
+                ServiceLocator.Default.Unregister<ISceneService>();
+            }
+
+            // 保留注册列表中的服务实例：重新初始化时复用原 SceneService，
+            // 让尚未完成的旧 Unity 操作继续占用同一个互斥通道。
+            s_scene = null;
+        }
+
         private static List<IAppService> BuildOrderedList()
         {
             var ordered = new List<IAppService>(s_registered);
@@ -370,10 +379,7 @@ namespace Yato.App
                 s_globalResources = null;
             }
 
-            if (s_scene != null)
-            {
-                ServiceLocator.Default.Unregister<ISceneService>();
-            }
+            DetachSceneService();
 
             Application.quitting -= OnApplicationQuitting;
             s_initialized = false;

@@ -26,6 +26,8 @@ namespace Yato.App
 
         private SceneContext m_active;
         private bool m_busy;
+        private bool m_shutdown;
+        private int m_generation;
         private SceneLoadResult m_lastResult;
 
         public SceneService(float defaultReadyTimeoutSeconds = DefaultReadyTimeoutSeconds, ISceneBackend backend = null)
@@ -80,11 +82,15 @@ namespace Yato.App
 
         public void Initialize()
         {
+            // 若上一代操作尚在 Unity 内执行，m_busy 会一直保留到它真正结束。
+            m_shutdown = false;
         }
 
         public void Shutdown()
         {
-            m_busy = false;
+            // 旧协程不能在关闭后重新发布上下文；已启动的 Unity 操作仍须真正结束。
+            m_shutdown = true;
+            m_generation++;
 
             for (int i = m_contexts.Count - 1; i >= 0; i--)
             {
@@ -95,6 +101,7 @@ namespace Yato.App
 
             m_contexts.Clear();
             m_active = null;
+            // 不在这里清除 m_busy：否则重新 Initialize 后可能与旧 Unity 操作并发。
         }
 
         public IAwaitable<SceneLoadResult> LoadAsync(SceneLoadRequest request)
@@ -104,6 +111,13 @@ namespace Yato.App
             if (request == null || string.IsNullOrEmpty(request.SceneName))
             {
                 Reject(source, SceneLoadStatus.InvalidScene, SceneLoadStage.Validate, request, null, "场景名不能为空");
+                return source;
+            }
+
+            if (m_shutdown)
+            {
+                Reject(source, SceneLoadStatus.Failed, SceneLoadStage.Validate, request, null,
+                    "SceneService 已关闭，必须先 Initialize");
                 return source;
             }
 
@@ -129,11 +143,12 @@ namespace Yato.App
             }
 
             m_busy = true;
+            int generation = m_generation;
             Raise(LoadStarted, request);
 
             try
             {
-                RuntimeHost.RunCoroutine(LoadRoutine(request, source));
+                RuntimeHost.RunCoroutine(LoadRoutine(request, source, generation));
             }
             catch (Exception e)
             {
@@ -152,6 +167,14 @@ namespace Yato.App
             if (context == null)
             {
                 Reject(source, SceneLoadStatus.InvalidScene, SceneLoadStage.Validate, null, null, "场景上下文为空");
+                return source;
+            }
+
+            if (m_shutdown)
+            {
+                Reject(source, SceneLoadStatus.Failed, SceneLoadStage.Validate,
+                    new SceneLoadRequest(context.SceneName, context.Mode), context,
+                    "SceneService 已关闭，必须先 Initialize");
                 return source;
             }
 
@@ -184,7 +207,7 @@ namespace Yato.App
 
             try
             {
-                RuntimeHost.RunCoroutine(UnloadRoutine(context, source));
+                RuntimeHost.RunCoroutine(UnloadRoutine(context, source, m_generation));
             }
             catch (Exception e)
             {
@@ -195,10 +218,19 @@ namespace Yato.App
             return source;
         }
 
-        private IEnumerator LoadRoutine(SceneLoadRequest request, Yato.Resources.AwaitableCompletionSource<SceneLoadResult> source)
+        private IEnumerator LoadRoutine(
+            SceneLoadRequest request,
+            Yato.Resources.AwaitableCompletionSource<SceneLoadResult> source,
+            int generation)
         {
             // 1) 真正开始 Unity 加载之前留出一帧的取消窗口（D03：开始后不承诺取消）
             yield return null;
+
+            if (IsObsolete(generation))
+            {
+                FinishObsolete(source, SceneLoadStage.CancelCheck, request, null);
+                yield break;
+            }
 
             if (request.CancellationToken.IsCancellationRequested)
             {
@@ -229,11 +261,23 @@ namespace Yato.App
             {
                 while (!operation.IsDone)
                 {
-                    Report(request, operation.Progress);
+                    if (!IsObsolete(generation))
+                    {
+                        Report(request, operation.Progress);
+                    }
                     yield return null;
                 }
 
-                Report(request, 1f);
+                if (!IsObsolete(generation))
+                {
+                    Report(request, 1f);
+                }
+            }
+
+            if (IsObsolete(generation))
+            {
+                FinishObsolete(source, SceneLoadStage.SceneLoad, request, null);
+                yield break;
             }
 
             if (failure != null)
@@ -261,6 +305,12 @@ namespace Yato.App
                 Finish(source, SceneLoadStatus.Failed, SceneLoadStage.Loaded, request, null,
                     new InvalidOperationException("加载完成后找不到目标场景：" + request.SceneName),
                     "场景加载结果无效");
+                yield break;
+            }
+
+            if (IsObsolete(generation))
+            {
+                FinishObsolete(source, SceneLoadStage.Loaded, request, null);
                 yield break;
             }
 
@@ -294,6 +344,12 @@ namespace Yato.App
 
             Raise(ContextLoaded, context);
 
+            if (IsObsolete(generation))
+            {
+                FinishObsolete(source, SceneLoadStage.Loaded, request, context);
+                yield break;
+            }
+
             // 4) Ready（可选初始化器）
             InitializerOutcome outcome = null;
             if (request.Initializer != null)
@@ -303,7 +359,13 @@ namespace Yato.App
                     ? request.ReadyTimeoutSeconds
                     : m_defaultReadyTimeout;
 
-                yield return RunInitializer(context, request.Initializer, timeout, outcome);
+                yield return RunInitializer(context, request.Initializer, timeout, outcome, generation);
+
+                if (IsObsolete(generation))
+                {
+                    FinishObsolete(source, SceneLoadStage.Ready, request, context);
+                    yield break;
+                }
 
                 if (outcome.Error != null)
                 {
@@ -319,15 +381,31 @@ namespace Yato.App
 
             context.MarkReady();
             Raise(ContextReady, context);
+            if (IsObsolete(generation))
+            {
+                FinishObsolete(source, SceneLoadStage.Ready, request, context);
+                yield break;
+            }
+
             Finish(source, SceneLoadStatus.Success, SceneLoadStage.None, request, context, null, null);
         }
 
-        private IEnumerator UnloadRoutine(SceneContext context, Yato.Resources.AwaitableCompletionSource<SceneLoadResult> source)
+        private IEnumerator UnloadRoutine(
+            SceneContext context,
+            Yato.Resources.AwaitableCompletionSource<SceneLoadResult> source,
+            int generation)
         {
+            var request = new SceneLoadRequest(context.SceneName, context.Mode);
+            if (IsObsolete(generation))
+            {
+                FinishObsolete(source, SceneLoadStage.Unload, request, context);
+                yield break;
+            }
+
             context.State = SceneLoadState.Unloading;
 
-            // 先释放场景资源，再卸载场景；迟到的加载结果会因范围失效而立即回收
-            context.Resources.ReleaseAll();
+            // 阻止新的资源接管，但先保留既有句柄：卸载失败时场景仍可能使用它们。
+            context.Resources.BeginClose();
 
             ISceneOperation operation = null;
             Exception failure = null;
@@ -349,10 +427,15 @@ namespace Yato.App
                 }
             }
 
-            var request = new SceneLoadRequest(context.SceneName, context.Mode);
+            if (IsObsolete(generation))
+            {
+                FinishObsolete(source, SceneLoadStage.Unload, request, context);
+                yield break;
+            }
 
             if (failure != null)
             {
+                context.Resources.CancelClose();
                 context.MarkFailed(failure);
                 Finish(source, SceneLoadStatus.Failed, SceneLoadStage.Unload, request, context, failure,
                     string.Format("场景卸载失败：{0}", context.SceneName));
@@ -379,7 +462,8 @@ namespace Yato.App
             SceneContext context,
             ISceneInitializer initializer,
             float timeoutSeconds,
-            InitializerOutcome outcome)
+            InitializerOutcome outcome,
+            int generation)
         {
             var cts = new CancellationTokenSource();
             IAwaitable task = null;
@@ -407,6 +491,21 @@ namespace Yato.App
             float elapsed = 0f;
             while (!task.IsDone)
             {
+                if (IsObsolete(generation))
+                {
+                    outcome.Aborted = true;
+                    try
+                    {
+                        cts.Cancel();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Warn(string.Format("[Yato.App] 取消过期初始化器失败：{0}（{1}）", context.SceneName, e.Message));
+                    }
+
+                    break;
+                }
+
                 if (timeoutSeconds > 0f && elapsed >= timeoutSeconds)
                 {
                     outcome.TimedOut = true;
@@ -426,7 +525,7 @@ namespace Yato.App
                 yield return null;
             }
 
-            if (outcome.TimedOut)
+            if (outcome.TimedOut || outcome.Aborted)
             {
                 // 关键：不提前释放互斥通道，等待旧任务真正结束
                 while (!task.IsDone)
@@ -434,7 +533,9 @@ namespace Yato.App
                     yield return null;
                 }
 
-                outcome.Error = new SceneInitializerTimeoutException(context.SceneName, timeoutSeconds);
+                outcome.Error = outcome.TimedOut
+                    ? (Exception)new SceneInitializerTimeoutException(context.SceneName, timeoutSeconds)
+                    : new OperationCanceledException("场景服务已关闭，初始化器结果作废");
                 cts.Dispose();
                 yield break;
             }
@@ -449,6 +550,27 @@ namespace Yato.App
             }
 
             cts.Dispose();
+        }
+
+        private bool IsObsolete(int generation)
+        {
+            return m_shutdown || generation != m_generation;
+        }
+
+        /// <summary>
+        /// 已关闭服务的旧操作仍须完成自己的 awaitable，但不再发布上下文或旧事件。
+        /// 关闭期间保留的互斥通道直到这里才释放。
+        /// </summary>
+        private void FinishObsolete(
+            Yato.Resources.AwaitableCompletionSource<SceneLoadResult> source,
+            SceneLoadStage stage,
+            SceneLoadRequest request,
+            SceneContext context)
+        {
+            m_busy = false;
+            source.SetResult(SceneLoadResult.Create(
+                SceneLoadStatus.Canceled, stage, request, context, null,
+                "场景服务已关闭，过期操作结果已丢弃"));
         }
 
         /// <summary>移除已被 Unity 销毁（如 Single 加载）的上下文并释放其资源。</summary>
@@ -573,6 +695,7 @@ namespace Yato.App
         {
             public Exception Error;
             public bool TimedOut;
+            public bool Aborted;
         }
     }
 }
