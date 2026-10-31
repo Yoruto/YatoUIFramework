@@ -3,6 +3,11 @@
 所有对本包的改动都记录在此文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.3.1] - 2026-11-01
+
+- 检查 BundleBuildResult，批处理失败返回非零；自检失败不复制产物。
+- 显式启动缓存维护：保留当前/上一版本，资源已使用时拒绝清理，返回数量/字节/原因。
+
 ## [0.3.0] - 2026-10-31
 
 ### Added

@@ -164,7 +164,7 @@ namespace Yato.Editor
 
                 Validate(outputDir, manifestPath, assetRoot, result);
 
-                if (copyToStreamingAssets)
+                if (copyToStreamingAssets && result.Success)
                 {
                     CopyToStreamingAssets(outputDir, target);
                 }

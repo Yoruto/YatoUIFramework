@@ -104,6 +104,7 @@ namespace Yato.Resources
         public static string ResolveBundlePath(string bundleName, string snapshotDirectory)
         {
             BundleRelativePath.ValidateBundle(bundleName);
+            HotUpdateMaintenance.MarkUsed(snapshotDirectory);
             if (snapshotDirectory.Contains("://") || snapshotDirectory.StartsWith("jar:", StringComparison.Ordinal))
                 return snapshotDirectory.TrimEnd('/') + "/" + bundleName;
             return ToLoadPath(BundleRelativePath.Resolve(snapshotDirectory, bundleName));

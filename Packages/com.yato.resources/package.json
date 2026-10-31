@@ -1,6 +1,6 @@
 {
   "name": "com.yato.resources",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "displayName": "Yato Resources",
   "description": "Yato 框架资源层：资源句柄与引用计数、Provider（Editor / Resources / AssetBundle）、热更新与诊断。含 Yato.Resources.Abstractions 子程序集。",
   "unity": "6000.0",

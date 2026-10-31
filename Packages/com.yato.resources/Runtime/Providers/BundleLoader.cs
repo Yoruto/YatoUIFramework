@@ -33,6 +33,7 @@ namespace Yato.Resources
             m_refCounter = refCounter;
             m_snapshotDirectory = snapshotDirectory ?? (RuntimePaths.PreferPersistent && System.IO.File.Exists(RuntimePaths.GetManifestPath(true))
                 ? System.IO.Path.GetDirectoryName(RuntimePaths.GetManifestPath(true)) : RuntimePaths.StreamingAssetsBundleDir);
+            HotUpdateMaintenance.MarkUsed(m_snapshotDirectory);
         }
 
         /// <summary>已加载的 bundle（未加载返回 null）。</summary>

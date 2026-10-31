@@ -29,7 +29,6 @@ namespace Yato.Resources
     /// <summary>Single-writer update transaction; failures retain the last committed snapshot.</summary>
     public sealed class HotUpdateService
     {
-        private static int s_running;
         private readonly RemoteDownloader m_downloader;
         private readonly string m_storageRoot;
         private const long MetadataLimit = 4 * 1024 * 1024;
@@ -44,7 +43,7 @@ namespace Yato.Resources
             CancellationToken ct = default(CancellationToken))
         {
             var source = new AwaitableCompletionSource<HotUpdateResult>();
-            if (Interlocked.CompareExchange(ref s_running, 1, 0) != 0)
+            if (!HotUpdateGate.TryEnter())
             {
                 source.SetResult(new HotUpdateResult { Busy = true, Error = "An update is already running" });
                 return source;
@@ -52,7 +51,7 @@ namespace Yato.Resources
             try { RuntimeHost.RunCoroutine(Guard(remoteRootUrl, progress, ct, source)); }
             catch (Exception e)
             {
-                Interlocked.Exchange(ref s_running, 0);
+                HotUpdateGate.Exit();
                 source.SetResult(new HotUpdateResult { Error = e.ToString() });
             }
             return source;
@@ -92,7 +91,7 @@ namespace Yato.Resources
                 (routine as IDisposable)?.Dispose();
                 try { storage?.Discard(stage); }
                 catch (Exception e) { Log.Warn("[HotUpdate] Staging cleanup failed: " + e.Message); }
-                Interlocked.Exchange(ref s_running, 0);
+                HotUpdateGate.Exit();
                 source.SetResult(result);
             }
         }
