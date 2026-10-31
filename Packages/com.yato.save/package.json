@@ -1,0 +1,21 @@
+{
+  "name": "com.yato.save",
+  "version": "0.1.0",
+  "displayName": "Yato Save",
+  "description": "Optional Unity 6 foundation module: save",
+  "unity": "6000.0",
+  "author": {
+    "name": "Yato"
+  },
+  "dependencies": {
+    "com.yato.core": "0.1.0",
+    "com.yato.persistence": "0.1.0"
+  },
+  "samples": [
+    {
+      "displayName": "CounterSample",
+      "description": "Neutral slot counter; save, load and explicit recovery.",
+      "path": "Samples~/CounterSample"
+    }
+  ]
+}

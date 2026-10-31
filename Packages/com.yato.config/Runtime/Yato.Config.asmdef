@@ -1,0 +1,9 @@
+{
+  "name": "Yato.Config",
+  "rootNamespace": "Yato.Config",
+  "references": [
+    "Yato.Core",
+    "Yato.Resources.Abstractions"
+  ],
+  "autoReferenced": true
+}

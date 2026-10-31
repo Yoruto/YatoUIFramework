@@ -1,0 +1,8 @@
+{
+  "name": "Yato.Save.CounterSample",
+  "references": [
+    "Yato.Save",
+    "Yato.Persistence"
+  ],
+  "autoReferenced": true
+}

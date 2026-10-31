@@ -249,6 +249,16 @@
         "com.yato.resources": "0.2.1"
       }
     },
+    "com.yato.config": {
+      "version": "file:com.yato.config",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.yato.core": "0.1.0",
+        "com.yato.resources": "0.2.1",
+        "com.unity.modules.jsonserialize": "1.0.0"
+      }
+    },
     "com.yato.core": {
       "version": "file:com.yato.core",
       "depth": 0,
@@ -264,7 +274,18 @@
         "com.yato.resources": "0.2.1",
         "com.yato.ui": "0.1.0",
         "com.unity.ugui": "1.0.0",
-        "com.unity.textmeshpro": "3.0.6"
+        "com.unity.textmeshpro": "3.0.6",
+        "com.yato.config": "0.1.0"
+      }
+    },
+    "com.yato.flow": {
+      "version": "file:com.yato.flow",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.yato.core": "0.1.0",
+        "com.yato.app": "0.1.0",
+        "com.yato.resources": "0.2.1"
       }
     },
     "com.yato.framework": {
@@ -280,7 +301,9 @@
         "com.yato.persistence": "0.1.0",
         "com.yato.settings": "0.1.0",
         "com.yato.audio": "0.1.0",
-        "com.yato.editor": "0.1.1"
+        "com.yato.editor": "0.2.0",
+        "com.yato.flow": "0.1.0",
+        "com.yato.config": "0.1.0"
       }
     },
     "com.yato.input": {
@@ -315,6 +338,15 @@
         "com.unity.modules.jsonserialize": "1.0.0",
         "com.unity.modules.unitywebrequest": "1.0.0",
         "com.unity.modules.unitywebrequestassetbundle": "1.0.0",
+        "com.yato.persistence": "0.1.0"
+      }
+    },
+    "com.yato.save": {
+      "version": "file:com.yato.save",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.yato.core": "0.1.0",
         "com.yato.persistence": "0.1.0"
       }
     },

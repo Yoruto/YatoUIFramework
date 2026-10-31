@@ -3,6 +3,12 @@
 所有对本包的改动都记录在此文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.4.0] - 2026-11-01
+
+- 新增独立 Flow/Config 模块和可选 Save 包，保持同步 Bootstrap 与基础 Persistence 契约。
+- 配置目录复制运行数据，统一校验 ID/数值/引用并接入 Player/Bundle 构建前检查。
+- 存档支持槽位、备份、显式恢复与内存迁移，损坏时禁止静默覆盖；附计数器示例。
+
 ## [0.3.1] - 2026-11-01
 
 - 检查 BundleBuildResult，批处理失败返回非零；自检失败不复制产物。

@@ -8,3 +8,11 @@
 - 新增 HotUpdateMaintenance.PrepareStartup；保留当前及上一成功快照，Loader/路径已使用时拒绝清理。与 RunAsync 共用互斥保护。
 - EditMode：117 通过，0 失败，0 跳过，日志 Logs/Foundation-A-EditMode.xml。
 - PlayMode：68 通过，0 失败，0 跳过，日志 Logs/Foundation-A-PlayMode.xml。
+
+## 阶段 B
+
+- 新增 Flow、Config 和可选 Save；各自独立 asmdef 与测试。
+- 配置验证统一接入构建前，存档示例只包含计数器槽位。
+- EditMode：127 通过，0 失败，0 跳过，日志 Logs/Foundation-B-EditMode.xml。
+- PlayMode：72 通过，0 失败，0 跳过，日志 Logs/Foundation-B-PlayMode.xml。
+- 曾修正 Unity 6 AwaitableCompletionSource 同名和测试中的嵌套异步等待；无产品同步降级。

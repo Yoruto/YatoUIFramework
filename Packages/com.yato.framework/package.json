@@ -1,6 +1,6 @@
 {
   "name": "com.yato.framework",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "displayName": "Yato Framework",
   "description": "Yato 通用 Unity 框架聚合包：依赖 Core / Mvc / Resources / UI / Editor 各子包，并附带示例、测试与 IL2CPP 裁剪配置。",
   "unity": "6000.0",
@@ -23,7 +23,9 @@
     "com.yato.persistence": "0.1.0",
     "com.yato.settings": "0.1.0",
     "com.yato.audio": "0.1.0",
-    "com.yato.editor": "0.1.1"
+    "com.yato.editor": "0.2.0",
+    "com.yato.flow": "0.1.0",
+    "com.yato.config": "0.1.0"
   },
   "samples": [
     {

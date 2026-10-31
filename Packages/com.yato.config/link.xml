@@ -1,0 +1,3 @@
+<linker>
+  <assembly fullname="Yato.Config" preserve="all" />
+</linker>

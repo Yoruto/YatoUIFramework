@@ -76,6 +76,7 @@ namespace Yato.Editor
 
             try
             {
+                ConfigCatalogValidator.ValidateAll();
                 string warning = PlatformResolver.ValidateTarget(target);
                 if (!string.IsNullOrEmpty(warning))
                 {

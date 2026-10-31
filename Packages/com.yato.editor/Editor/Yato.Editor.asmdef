@@ -6,7 +6,8 @@
         "Yato.Resources.Abstractions",
         "Yato.Resources",
         "Yato.UI",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Yato.Config"
     ],
     "includePlatforms": [
         "Editor"
