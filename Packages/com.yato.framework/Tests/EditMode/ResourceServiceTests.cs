@@ -106,6 +106,94 @@ namespace Yato.Tests.EditMode
         }
 
         [Test]
+        public void LoadAsync_FirstConsumerCancels_SecondStillReceivesAsset()
+        {
+            m_provider.AutoComplete = false;
+            var cts = new CancellationTokenSource();
+
+            IAwaitable<IAssetHandle<ScriptableObject>> first =
+                m_service.LoadAsync<ScriptableObject>(Key, cts.Token);
+            IAwaitable<IAssetHandle<ScriptableObject>> second =
+                m_service.LoadAsync<ScriptableObject>(Key);
+
+            Assert.AreEqual(1, m_provider.LoadCalls, "同一 key 仍然只向 Provider 加载一次");
+
+            cts.Cancel();
+
+            Assert.IsFalse(
+                m_provider.LastToken.IsCancellationRequested,
+                "单个消费者取消不能中止共享的底层加载");
+
+            m_provider.CompleteAll();
+
+            Assert.Throws<OperationCanceledException>(delegate { first.GetResult(); });
+
+            IAssetHandle<ScriptableObject> handle = second.GetResult();
+            Assert.IsNotNull(handle);
+            Assert.AreEqual(m_asset, handle.Asset, "未取消的消费者必须拿到资源");
+            Assert.AreEqual(1, handle.RefCount);
+
+            handle.Dispose();
+            Assert.AreEqual(1, m_provider.ReleaseCalls);
+            Assert.AreEqual(0, m_service.ActiveAssetCount);
+
+            cts.Dispose();
+        }
+
+        [Test]
+        public void LoadAsync_AllConsumersCancel_AbortsProviderLoad()
+        {
+            m_provider.AutoComplete = false;
+            var firstCts = new CancellationTokenSource();
+            var secondCts = new CancellationTokenSource();
+
+            IAwaitable<IAssetHandle<ScriptableObject>> first =
+                m_service.LoadAsync<ScriptableObject>(Key, firstCts.Token);
+            IAwaitable<IAssetHandle<ScriptableObject>> second =
+                m_service.LoadAsync<ScriptableObject>(Key, secondCts.Token);
+
+            firstCts.Cancel();
+            Assert.IsFalse(m_provider.LastToken.IsCancellationRequested, "仍有消费者时不中止加载");
+
+            secondCts.Cancel();
+            Assert.IsTrue(m_provider.LastToken.IsCancellationRequested, "全部消费者取消后才中止底层加载");
+
+            m_provider.CompleteCancelled();
+
+            Assert.Throws<OperationCanceledException>(delegate { first.GetResult(); });
+            Assert.Throws<OperationCanceledException>(delegate { second.GetResult(); });
+            Assert.AreEqual(0, m_service.ActiveAssetCount);
+
+            firstCts.Dispose();
+            secondCts.Dispose();
+        }
+
+        [Test]
+        public void Load_SyncUnsupported_CancelsAndReleasesLateResult()
+        {
+            m_provider.AutoComplete = false;
+
+            Assert.Throws<ResourceException>(delegate { m_service.Load<ScriptableObject>(Key); });
+
+            Assert.IsTrue(m_provider.LastToken.IsCancellationRequested, "无法同步返回时必须取消 Provider 加载");
+
+            // Provider 不响应取消并最终成功：无人接管的引用必须归还
+            m_provider.CompleteAll();
+
+            Assert.AreEqual(1, m_provider.ReleaseCalls);
+            Assert.AreEqual(0, m_service.ActiveAssetCount);
+        }
+
+        [Test]
+        public void Load_SyncTypeMismatch_ReleasesProviderReference()
+        {
+            Assert.Throws<ResourceException>(delegate { m_service.Load<GameObject>(Key); });
+
+            Assert.AreEqual(1, m_provider.ReleaseCalls, "同步加载无法建立句柄时也必须归还 Provider 引用");
+            Assert.AreEqual(0, m_service.ActiveAssetCount);
+        }
+
+        [Test]
         public void LoadAsync_TypeMismatch_ReleasesProviderReference()
         {
             IAwaitable<IAssetHandle<GameObject>> loading = m_service.LoadAsync<GameObject>(Key);
@@ -170,6 +258,9 @@ namespace Yato.Tests.EditMode
             public int LoadCalls;
             public int ReleaseCalls;
 
+            /// <summary>最近一次传给 Provider 的取消令牌（用于验证 Provider 级取消语义）。</summary>
+            public CancellationToken LastToken;
+
             public FakeProvider(UnityEngine.Object asset)
             {
                 m_asset = asset;
@@ -183,6 +274,7 @@ namespace Yato.Tests.EditMode
             public IAwaitable<UnityEngine.Object> LoadAsync(AssetKey key, Type type, CancellationToken ct)
             {
                 LoadCalls++;
+                LastToken = ct;
 
                 var source = new Yato.Resources.AwaitableCompletionSource<UnityEngine.Object>();
                 if (AutoComplete)
@@ -204,6 +296,16 @@ namespace Yato.Tests.EditMode
                 for (int i = 0; i < pending.Length; i++)
                 {
                     pending[i].SetResult(m_asset);
+                }
+            }
+
+            public void CompleteCancelled()
+            {
+                Yato.Resources.AwaitableCompletionSource<UnityEngine.Object>[] pending = m_pending.ToArray();
+                m_pending.Clear();
+                for (int i = 0; i < pending.Length; i++)
+                {
+                    pending[i].SetException(new OperationCanceledException());
                 }
             }
 

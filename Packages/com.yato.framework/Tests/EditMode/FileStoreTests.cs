@@ -244,6 +244,70 @@ namespace Yato.Tests.EditMode
         }
 
         [Test]
+        public void CleanupTemporaryFiles_ConcurrentWrites_DoNotDeleteInFlightTemporaryFiles()
+        {
+            // 回归：清理只在开始时检查一次活动操作，之后新建的临时文件会被误删，
+            // 表现为写入抛 FileCommitException。清理期间写入必须快速失败（FileBusyException）。
+            m_store.WriteAllText("target.txt", "payload-initial");
+
+            const int iterations = 200;
+
+            // 放大写入窗口（写 + Flush(true)），让「清理扫描到写入中的临时文件」更容易复现
+            string payload = "payload-" + new string('x', 8 * 1024);
+            var failures = new List<Exception>();
+
+            var writer = new Thread(delegate()
+            {
+                for (int i = 0; i < iterations; i++)
+                {
+                    try
+                    {
+                        m_store.WriteAllText("target.txt", payload + i);
+                    }
+                    catch (FileBusyException)
+                    {
+                        // 清理持有独占权：快速失败是预期行为，可重试
+                    }
+                    catch (Exception e)
+                    {
+                        lock (failures)
+                        {
+                            failures.Add(e);
+                        }
+                    }
+                }
+            });
+
+            var cleaner = new Thread(delegate()
+            {
+                for (int i = 0; i < iterations; i++)
+                {
+                    try
+                    {
+                        m_store.CleanupTemporaryFiles();
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // 存在进行中的写入：拒绝执行是预期行为
+                    }
+                }
+            });
+
+            writer.Start();
+            cleaner.Start();
+
+            Assert.IsTrue(writer.Join(30000), "写入线程未在超时内结束");
+            Assert.IsTrue(cleaner.Join(30000), "清理线程未在超时内结束");
+
+            Assert.IsEmpty(failures, "清理期间的并发写入不能因临时文件被删而失败");
+            StringAssert.StartsWith("payload-", m_store.ReadAllText("target.txt"));
+            Assert.AreEqual(
+                0,
+                Directory.GetFiles(m_root, "*" + FileStore.TempFileSuffix, SearchOption.AllDirectories).Length,
+                "结束时不应残留临时文件");
+        }
+
+        [Test]
         public void JsonSerializer_RoundTripsAndRejectsEmptyContent()
         {
             var serializer = new JsonUtilitySerializer();

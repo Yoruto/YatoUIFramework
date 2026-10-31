@@ -54,10 +54,59 @@ namespace Yato.Tests.EditMode
         {
             SettingsService<TestSettings> service = CreateService();
 
-            service.Current.Volume = 1;
+            service.Apply(delegate(TestSettings settings) { settings.Volume = 1; });
 
             Assert.AreEqual(80, service.CreateDefaultsSnapshot().Volume, "运行期数据不能改写默认模板");
             Assert.AreEqual(80, service.ResetToDefaults().Volume);
+        }
+
+        [Test]
+        public void Current_ReturnsSnapshot_MutationDoesNotAffectService()
+        {
+            SettingsService<TestSettings> service = CreateService();
+            service.Apply(delegate(TestSettings settings) { settings.Volume = 42; });
+
+            int changes = 0;
+            service.Changed += delegate { changes++; };
+
+            service.Current.Volume = 5;
+
+            Assert.AreEqual(42, service.Current.Volume, "Current 是快照，修改它不能改变服务状态");
+            Assert.AreEqual(0, changes, "直接修改快照不能触发 Changed");
+        }
+
+        [Test]
+        public void Load_MissingFileTwice_RestoresDefaultsInsteadOfKeepingAppliedValues()
+        {
+            SettingsService<TestSettings> service = CreateService();
+
+            Assert.AreEqual(SettingsLoadStatus.DefaultsUsed, service.Load().Status);
+            service.Apply(delegate(TestSettings settings) { settings.Volume = 30; });
+            Assert.AreEqual(30, service.Current.Volume);
+
+            // 磁盘文件仍然不存在：再次加载必须真正回到默认值
+            SettingsLoadResult result = service.Load();
+
+            Assert.AreEqual(SettingsLoadStatus.DefaultsUsed, result.Status);
+            Assert.AreEqual(80, service.Current.Volume, "缺文件时必须恢复默认值");
+            Assert.AreEqual("zh-Hans", service.Current.Language);
+            Assert.IsFalse(m_store.Exists("settings/game.json"), "缺文件不应创建空文件");
+        }
+
+        [Test]
+        public void LoadAsync_MissingFileTwice_RestoresDefaultsInsteadOfKeepingAppliedValues()
+        {
+            SettingsService<TestSettings> service = CreateService();
+
+            Task.Run(delegate { return service.LoadAsync(); }).GetAwaiter().GetResult();
+            service.Apply(delegate(TestSettings settings) { settings.Volume = 30; });
+
+            SettingsLoadResult result = Task.Run(delegate { return service.LoadAsync(); })
+                .GetAwaiter()
+                .GetResult();
+
+            Assert.AreEqual(SettingsLoadStatus.DefaultsUsed, result.Status);
+            Assert.AreEqual(80, service.Current.Volume, "缺文件时必须恢复默认值（异步路径同样适用）");
         }
 
         [Test]

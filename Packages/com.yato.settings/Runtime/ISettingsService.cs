@@ -11,7 +11,10 @@ namespace Yato.Settings
     /// </summary>
     public interface ISettingsService<T> where T : class
     {
-        /// <summary>当前设置快照（运行期副本，绝不指向原始默认资源）。</summary>
+        /// <summary>
+        /// 当前设置快照（运行期副本，绝不指向原始默认资源）。
+        /// 每次读取都返回副本：修改返回值不会影响服务状态，也不会触发 <see cref="Changed"/>。
+        /// </summary>
         T Current { get; }
 
         /// <summary>是否至少完成过一次加载（或加载失败后回退默认值）。</summary>

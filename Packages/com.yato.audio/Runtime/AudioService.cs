@@ -174,6 +174,8 @@ namespace Yato.Audio
                 throw new ObjectDisposedException("AudioService");
             }
 
+            // 直接播放同样是「最新的播放意图」：进行中的异步请求必须作废，不能反过来覆盖它
+            m_musicRequestId++;
             PlayMusicCore(clip, null, options);
         }
 
@@ -224,8 +226,10 @@ namespace Yato.Audio
                         return;
                     }
 
-                    PlayMusicCore(handle.Asset, handle, options);
-                    source.SetResult(handle.Asset);
+                    // 先取出资源引用：同一首继续播放时 PlayMusicCore 会归还多余句柄，释放后 Asset 即为 null
+                    AudioClip clip = handle.Asset;
+                    PlayMusicCore(clip, handle, options);
+                    source.SetResult(clip);
                 }
                 catch (Exception e)
                 {
@@ -269,6 +273,9 @@ namespace Yato.Audio
             {
                 return;
             }
+
+            // 停止是最新的播放意图：作废进行中的异步请求，避免它稍后把音乐重新播起来
+            m_musicRequestId++;
 
             float fade = fadeOutSeconds < 0f ? m_options.DefaultFadeSeconds : fadeOutSeconds;
             MusicSlot slot = m_activeMusic;
@@ -943,18 +950,42 @@ namespace Yato.Audio
                 m_elapsed += deltaTime;
                 m_hasPlayed |= m_slot.Source.isPlaying;
 
-                if (!m_request.Loop)
+                if (m_request.Loop)
                 {
-                    // 正常结束，或用时长兜底：极短音效可能从未在帧边界观测到 isPlaying
-                    float length = m_slot.Source.clip != null ? m_slot.Source.clip.length : 0f;
-                    bool finished = (m_hasPlayed && !m_slot.Source.isPlaying) ||
-                                    (length > 0f && m_elapsed > length + 0.25f);
+                    return;
+                }
 
-                    if (finished)
+                AudioSource source = m_slot.Source;
+
+                // 播放状态可观测时以 AudioSource 为准（pitch、设备延迟都由引擎自己处理）
+                if (m_hasPlayed)
+                {
+                    if (!source.isPlaying)
                     {
-                        // 一次性音效播放结束：回池并释放资源
                         StopImmediate();
                     }
+
+                    return;
+                }
+
+                // 时长兜底只用于「从未在帧边界观测到 isPlaying」的极短音效
+                AudioClip clip = source.clip;
+                if (clip == null || clip.length <= 0f)
+                {
+                    return;
+                }
+
+                float pitch = Mathf.Abs(source.pitch);
+                if (pitch < 0.01f)
+                {
+                    // pitch≈0 时播放被冻结，不能按时长兜底回收
+                    return;
+                }
+
+                // pitch 改变播放速度：pitch 0.5 的实际时长是两倍
+                if (m_elapsed > clip.length / pitch + 0.25f)
+                {
+                    StopImmediate();
                 }
             }
 

@@ -31,6 +31,9 @@ namespace Yato.Persistence
 
         private readonly object m_gate = new object();
 
+        /// <summary>清理期间的独占标记：新操作必须被拒绝，否则刚创建的临时文件会被清理掉。</summary>
+        private bool m_cleaningUp;
+
         public FileStore(string rootPath = null)
             : this(new PersistencePaths(rootPath))
         {
@@ -261,6 +264,7 @@ namespace Yato.Persistence
 
         /// <summary>
         /// 清理残留临时文件；存在进行中的操作时拒绝执行（D04-6 的“确定没有活动操作”）。
+        /// 清理期间保持独占：新操作立即失败，避免刚写入的临时文件被误删。
         /// 返回清理的文件数量。
         /// </summary>
         public int CleanupTemporaryFiles(string relativeDirectory = null, bool recursive = true)
@@ -271,43 +275,67 @@ namespace Yato.Persistence
                 {
                     throw new InvalidOperationException("存在进行中的文件操作，不能清理临时文件");
                 }
-            }
 
-            string directory = string.IsNullOrEmpty(relativeDirectory)
-                ? m_paths.RootPath
-                : m_paths.Resolve(relativeDirectory);
-
-            if (!Directory.Exists(directory))
-            {
-                return 0;
-            }
-
-            string[] files = Directory.GetFiles(
-                directory,
-                "*" + TempFileSuffix,
-                recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-
-            int removed = 0;
-            for (int i = 0; i < files.Length; i++)
-            {
-                try
+                if (m_cleaningUp)
                 {
-                    File.Delete(files[i]);
-                    removed++;
+                    throw new InvalidOperationException("已有清理操作在进行中");
                 }
-                catch (Exception e)
-                {
-                    Log.Warn(string.Format("[Yato.Persistence] 清理临时文件失败：{0}（{1}）", files[i], e.Message));
-                }
+
+                // 与 AcquireResolved 共用同一把锁：判定「没有活动操作」与取得独占权之间没有窗口
+                m_cleaningUp = true;
             }
 
-            return removed;
+            try
+            {
+                string directory = string.IsNullOrEmpty(relativeDirectory)
+                    ? m_paths.RootPath
+                    : m_paths.Resolve(relativeDirectory);
+
+                if (!Directory.Exists(directory))
+                {
+                    return 0;
+                }
+
+                string[] files = Directory.GetFiles(
+                    directory,
+                    "*" + TempFileSuffix,
+                    recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+
+                int removed = 0;
+                for (int i = 0; i < files.Length; i++)
+                {
+                    try
+                    {
+                        File.Delete(files[i]);
+                        removed++;
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Warn(string.Format("[Yato.Persistence] 清理临时文件失败：{0}（{1}）", files[i], e.Message));
+                    }
+                }
+
+                return removed;
+            }
+            finally
+            {
+                lock (m_gate)
+                {
+                    m_cleaningUp = false;
+                }
+            }
         }
 
         private IDisposable AcquireResolved(string fullPath)
         {
             lock (m_gate)
             {
+                if (m_cleaningUp)
+                {
+                    // 清理持有独占权：此时新建的临时文件可能被正在扫描的清理任务误删
+                    throw new FileBusyException(fullPath);
+                }
+
                 if (!m_active.Add(fullPath))
                 {
                     throw new FileBusyException(fullPath);

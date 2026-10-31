@@ -20,11 +20,20 @@ namespace Yato.Tests.PlayMode
     {
         private readonly List<UnityEngine.Object> m_assets = new List<UnityEngine.Object>();
         private AudioService m_service;
+        private GameObject m_audioListener;
 
         [UnitySetUp]
         public IEnumerator SetUp()
         {
             Log.SetLogger(new SilentLogger());
+
+            // 测试场景没有音频监听器：不补一个的话，每次 AudioSource.Play 都会刷
+            // "There are no audio listeners in the scene"，淹没真正的错误日志
+            if (UnityEngine.Object.FindAnyObjectByType<AudioListener>() == null)
+            {
+                m_audioListener = new GameObject("[Yato.Tests] AudioListener");
+                m_audioListener.AddComponent<AudioListener>();
+            }
 
             m_service = new AudioService(NullResourceService.Instance, new AudioServiceOptions
             {
@@ -42,6 +51,12 @@ namespace Yato.Tests.PlayMode
             {
                 m_service.Shutdown();
                 m_service = null;
+            }
+
+            if (m_audioListener != null)
+            {
+                UnityEngine.Object.Destroy(m_audioListener);
+                m_audioListener = null;
             }
 
             for (int i = 0; i < m_assets.Count; i++)
@@ -359,6 +374,93 @@ namespace Yato.Tests.PlayMode
                 Assert.AreEqual(1, resources.Handles[i].DisposeCalls);
             }
 
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator Music_StopMusic_InvalidatesPendingAsyncRequest()
+        {
+            var resources = new FakeResourceService { Defer = true };
+            resources.Clips.Enqueue(CreateClip("Late", 1f));
+
+            var service = new AudioService(resources, new AudioServiceOptions { SfxPoolCapacity = 2 });
+
+            IAwaitable<AudioClip> loading = service.PlayMusicAsync(new AssetKey("music/late"));
+            service.StopMusic(0f);
+
+            resources.CompletePending();
+            yield return null;
+
+            Assert.IsTrue(loading.IsDone);
+            Assert.Throws<OperationCanceledException>(delegate { loading.GetResult(); });
+            Assert.IsNull(service.CurrentMusic, "迟到的异步结果不能覆盖 StopMusic");
+            Assert.AreEqual(1, resources.Handles.Count);
+            Assert.AreEqual(1, resources.Handles[0].DisposeCalls, "作废的异步结果必须归还资源");
+
+            service.Shutdown();
+        }
+
+        [UnityTest]
+        public IEnumerator Music_PlayMusicClip_InvalidatesPendingAsyncRequest()
+        {
+            var resources = new FakeResourceService { Defer = true };
+            resources.Clips.Enqueue(CreateClip("Late", 1f));
+
+            var service = new AudioService(resources, new AudioServiceOptions { SfxPoolCapacity = 2 });
+            AudioClip direct = CreateClip("Direct", 1f);
+
+            IAwaitable<AudioClip> loading = service.PlayMusicAsync(
+                new AssetKey("music/late"), new MusicOptions { FadeSeconds = 0f });
+            service.PlayMusic(direct, new MusicOptions { FadeSeconds = 0f });
+
+            resources.CompletePending();
+            yield return null;
+
+            Assert.AreEqual(direct, service.CurrentMusic, "直接播放不能被迟到的异步结果覆盖");
+            Assert.Throws<OperationCanceledException>(delegate { loading.GetResult(); });
+            Assert.AreEqual(1, resources.Handles[0].DisposeCalls);
+
+            service.Shutdown();
+        }
+
+        [UnityTest]
+        public IEnumerator Music_RepeatedSameClip_ReturnsClipInsteadOfNull()
+        {
+            var resources = new FakeResourceService();
+            AudioClip clip = CreateClip("SameSong", 1f);
+            resources.Clips.Enqueue(clip);
+            resources.Clips.Enqueue(clip);
+
+            var service = new AudioService(resources, new AudioServiceOptions { SfxPoolCapacity = 2 });
+
+            Await(service.PlayMusicAsync(new AssetKey("music/a"), new MusicOptions { FadeSeconds = 0f }));
+            yield return null;
+
+            AudioClip again = Await(
+                service.PlayMusicAsync(new AssetKey("music/b"), new MusicOptions { FadeSeconds = 0f }));
+
+            Assert.AreEqual(clip, again, "同一首继续播放也必须返回有效资源");
+            Assert.AreEqual(clip, service.CurrentMusic);
+            Assert.AreEqual(1, resources.Handles[1].DisposeCalls, "多余的加载结果仍然要归还");
+
+            service.Shutdown();
+        }
+
+        [UnityTest]
+        public IEnumerator Sfx_LowPitch_IsNotCutShortByDurationFallback()
+        {
+            // 0.4 秒素材以 pitch 0.25 播放：实际约 1.6 秒，按原始时长兜底会在 0.65 秒提前回收
+            AudioClip clip = CreateClip("Slow", 0.4f);
+
+            ISfxHandle handle;
+            Assert.IsTrue(m_service.TryPlaySfx(new SfxRequest(clip) { Pitch = 0.25f }, out handle));
+
+            yield return new WaitForSeconds(1f);
+
+            Assert.IsFalse(handle.IsReleased, "低音高音效不能按原始时长提前回收");
+
+            handle.Stop();
+            Assert.AreEqual(0, m_service.ActiveSfxCount);
             yield return null;
         }
 

@@ -58,9 +58,13 @@ namespace Yato.Settings
             m_current = Clone(defaults);
         }
 
+        /// <summary>
+        /// 当前设置的快照：每次读取都返回副本，调用方修改它不会影响服务状态，
+        /// 也不会绕过 <see cref="Apply"/> 的 Changed 通知与校验。
+        /// </summary>
         public T Current
         {
-            get { return m_current; }
+            get { return Clone(m_current); }
         }
 
         public bool IsLoaded
@@ -94,7 +98,8 @@ namespace Yato.Settings
 
             if (!exists)
             {
-                return Publish(SettingsLoadStatus.DefaultsUsed, null, "用户设置文件不存在，使用默认值");
+                // 缺文件必须真正回到默认值：重复 Load 时不能沿用上一次（可能已被 Apply 修改）的运行期状态
+                return ApplyDefaults(SettingsLoadStatus.DefaultsUsed, null, "用户设置文件不存在，使用默认值");
             }
 
             string text;
@@ -127,7 +132,8 @@ namespace Yato.Settings
 
             if (!exists)
             {
-                return Publish(SettingsLoadStatus.DefaultsUsed, null, "用户设置文件不存在，使用默认值");
+                // 与同步加载保持一致：缺文件时恢复默认值后再发布
+                return ApplyDefaults(SettingsLoadStatus.DefaultsUsed, null, "用户设置文件不存在，使用默认值");
             }
 
             string text;
@@ -178,7 +184,7 @@ namespace Yato.Settings
         {
             m_current = Clone(m_defaultsTemplate);
             RaiseChanged();
-            return m_current;
+            return Clone(m_current);
         }
 
         public T CreateDefaultsSnapshot()
@@ -213,6 +219,12 @@ namespace Yato.Settings
 
         /// <summary>回退到默认值，但绝不写盘（D05：不自动覆盖损坏文件）。</summary>
         private SettingsLoadResult FallbackToDefaults(SettingsLoadStatus status, Exception error, string message)
+        {
+            return ApplyDefaults(status, error, message);
+        }
+
+        /// <summary>把运行期状态恢复为默认值副本后再发布：缺文件与损坏/非法走同一条路径。</summary>
+        private SettingsLoadResult ApplyDefaults(SettingsLoadStatus status, Exception error, string message)
         {
             m_current = Clone(m_defaultsTemplate);
             return Publish(status, error, message);
@@ -273,6 +285,9 @@ namespace Yato.Settings
                 return;
             }
 
+            // 事件参数与 Current 一样是快照：订阅者修改它不会影响服务内部状态
+            T snapshot = Clone(m_current);
+
             // 逐个隔离：单个订阅者异常不能影响其它订阅者
             Delegate[] invocationList = handlers.GetInvocationList();
             for (int i = 0; i < invocationList.Length; i++)
@@ -280,7 +295,7 @@ namespace Yato.Settings
                 var handler = (Action<T>)invocationList[i];
                 try
                 {
-                    handler(m_current);
+                    handler(snapshot);
                 }
                 catch (Exception e)
                 {

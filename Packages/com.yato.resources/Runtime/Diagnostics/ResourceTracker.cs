@@ -18,7 +18,10 @@ namespace Yato.Resources
         private static readonly Dictionary<int, HandleRecord> s_records =
             new Dictionary<int, HandleRecord>();
 
+#if UNITY_EDITOR
+        // 只在编辑器下递增；Player 配置里 Track() 直接返回 0，字段保留在外层会产生 CS0414
         private static int s_nextId = 1;
+#endif
 
         public static int Count
         {
