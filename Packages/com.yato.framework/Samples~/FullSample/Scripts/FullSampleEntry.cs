@@ -7,12 +7,22 @@ using Yato.Persistence;
 using Yato.Resources;
 using Yato.Settings;
 using Yato.UI;
+using Yato.Flow;
+using Yato.Config;
+using Yato.Pooling;
+using System.Collections.Generic;
 
 namespace Yato.FullSample
 {
     public sealed class FullSampleEntry : MonoBehaviour
     {
         private FullSampleService m_service;
+        private FlowController m_flow;
+        private PauseService m_pause;
+        private IDisposable m_pauseToken;
+        private readonly List<PooledInstance> m_rentals = new List<PooledInstance>();
+        public ConfigService DemoConfig { get; private set; }
+        public ResourceInstancePool DemoPool { get; private set; }
         private CancellationTokenSource m_update;
         private string m_url = "https://example.com/bundles";
         private string m_status = "Ready";
@@ -20,16 +30,20 @@ namespace Yato.FullSample
         private readonly UIPageDef m_page = new UIPageDef("YatoFullPage", null, new AssetKey("yato/full/page"));
         private void Awake()
         {
+            Debug.Log("[FullSample] Startup cache: " + HotUpdateMaintenance.PrepareStartup());
             m_service = new FullSampleService();
             GameBootstrap.RegisterService(m_service);
             GameBootstrap.Initialize();
             UIRouter.Configure(m_service.Resources);
+            m_pause = new PauseService();
+            m_flow = new FlowController(new IFlowState[] { new DemoState(this, true), new DemoState(this, false) });
+            Observe(StartFoundationDemo(), result => "Flow: " + result.Status);
             if (FindObjectOfType<AudioListener>() == null) gameObject.AddComponent<AudioListener>();
         }
         private void OnGUI()
         {
             if (m_service == null || m_service.Resources == null) return;
-            GUILayout.BeginArea(new Rect(20, 20, 340, 450), GUI.skin.box);
+            GUILayout.BeginArea(new Rect(20, 20, 360, 680), GUI.skin.box);
             GUILayout.Label("Yato Full Sample");
             GUILayout.Label(m_status);
             if (GUILayout.Button("Open UI page")) Observe(UIRouter.OpenAsync(m_page), x => x.PageId);
@@ -50,7 +64,16 @@ namespace Yato.FullSample
                 operation.Completed += () => { m_update?.Dispose(); m_update = null; };
             }
             if (m_update != null && GUILayout.Button("Cancel update before commit")) m_update.Cancel();
-            GUILayout.Label("Input is optional; import its package separately.");
+            GUILayout.Label("Foundation demo: " + m_flow.CurrentStateId);
+            if (GUILayout.Button("Start flow/config/pool demo")) Observe(StartFoundationDemo(), result => result.Status + " " + result.Error?.Message);
+            if (GUILayout.Button("Stop demo and release state resources")) Observe(m_flow.SwitchAsync("idle"), result => result.Status.ToString());
+            GUILayout.Label("Pool: " + (DemoPool == null ? "not running" : DemoPool.ActiveCount + "/" + DemoPool.Capacity));
+            if (DemoPool != null && GUILayout.Button("Rent neutral instance"))
+            { if (DemoPool.TryRent(out var item)) m_rentals.Add(item); }
+            if (GUILayout.Button("Return all instances")) ReturnAll();
+            if (GUILayout.Button(m_pauseToken == null ? "Acquire pause token" : "Release pause token"))
+            { if (m_pauseToken == null) m_pauseToken = m_pause.Acquire("sample"); else { m_pauseToken.Dispose(); m_pauseToken = null; } }
+            GUILayout.Label("Input/Save demos are separately optional.");
             GUILayout.EndArea();
         }
         private void Observe<T>(IAwaitable<T> operation, Func<T, string> text)
@@ -62,8 +85,61 @@ namespace Yato.FullSample
                 catch (Exception e) { m_status = e.Message; }
             };
         }
+        public IAwaitable<FlowResult> StartFoundationDemo() => m_flow.SwitchAsync("ready");
+        public IAwaitable<FlowResult> StopFoundationDemo() => m_flow.SwitchAsync("idle");
+        public void ReturnAll()
+        {
+            foreach (var item in m_rentals) item.Dispose();
+            m_rentals.Clear();
+        }
+        private IAwaitable LoadFoundation(FlowContext context, CancellationToken ct)
+        {
+            var done = new Yato.Resources.AwaitableCompletionSource();
+            var config = ConfigService.LoadAsync(m_service.Resources, new AssetKey("yato/full/catalog"), ct);
+            config.Completed += () =>
+            {
+                ConfigService ownedConfig = null;
+                try
+                {
+                    ownedConfig = config.GetResult(); ct.ThrowIfCancellationRequested();
+                    DemoConfig = context.Resources.Track(ownedConfig); ownedConfig = null;
+                    var pool = ResourceInstancePool.CreateAsync(m_service.Resources, new AssetKey("yato/full/pool-item"),
+                        DemoConfig.Get<DemoConfigRecord>("demo").PoolCapacity, ct: ct);
+                    pool.Completed += () =>
+                    {
+                        ResourceInstancePool ownedPool = null;
+                        try
+                        {
+                            ownedPool = pool.GetResult(); ct.ThrowIfCancellationRequested();
+                            DemoPool = context.Resources.Track(ownedPool); ownedPool = null;
+                            DemoPool.Prewarm(DemoPool.Capacity); done.SetResult();
+                        }
+                        catch (Exception error) { ownedPool?.Dispose(); done.SetException(error); }
+                    };
+                }
+                catch (Exception error) { ownedConfig?.Dispose(); done.SetException(error); }
+            };
+            return done;
+        }
+        private sealed class DemoState : IFlowState
+        {
+            private readonly FullSampleEntry m_owner; private readonly bool m_ready;
+            public DemoState(FullSampleEntry owner, bool ready) { m_owner = owner; m_ready = ready; }
+            public string Id => m_ready ? "ready" : "idle";
+            public IAwaitable EnterAsync(FlowContext context, CancellationToken ct)
+            {
+                if (m_ready) return m_owner.LoadFoundation(context, ct);
+                var done = new Yato.Resources.AwaitableCompletionSource(); done.SetResult(); return done;
+            }
+            public void Exit(FlowContext context)
+            {
+                m_owner.ReturnAll(); m_owner.DemoPool = null; m_owner.DemoConfig = null;
+            }
+        }
         private void OnDestroy()
         {
+            m_flow?.Dispose();
+            m_pauseToken?.Dispose(); m_pauseToken = null; m_pause?.Dispose();
             m_update?.Cancel();
             m_update?.Dispose();
             m_update = null;

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Runtime.ExceptionServices;
 using Yato.Persistence;
 
 namespace Yato.Resources
@@ -12,7 +13,8 @@ namespace Yato.Resources
 
         public HotUpdateStorage(string root)
         {
-            Root = Path.GetFullPath(root);
+            string full = Path.GetFullPath(root);
+            Root = full.Length > Path.GetPathRoot(full).Length ? full.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) : full;
             BundleRelativePath.EnsureNoLinks(Root);
         }
 
@@ -41,13 +43,27 @@ namespace Yato.Resources
 
         public void Commit(string stagedDirectory)
         {
+            if (!TryCommit(stagedDirectory, out Exception error)) ExceptionDispatchInfo.Capture(error).Throw();
+        }
+
+        // Only directory promotion may be retried. Pointer replacement failures always escape immediately.
+        internal bool TryCommit(string stagedDirectory, out Exception promotionError)
+        {
+            promotionError = null;
             string id = Path.GetFileName(stagedDirectory);
             if (!Guid.TryParseExact(id, "N", out _) || stagedDirectory != BundleRelativePath.Resolve(Root, "staging/" + id))
                 throw new IOException("Unknown update staging directory");
             string old = ActiveDirectory;
             string target = BundleRelativePath.Resolve(Root, "versions/" + id);
             Directory.CreateDirectory(Path.GetDirectoryName(target));
-            Directory.Move(stagedDirectory, target);
+            try { Directory.Move(stagedDirectory, target); }
+            catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
+            {
+                // Retry only when promotion demonstrably did not happen; never overwrite a snapshot.
+                if (!Directory.Exists(stagedDirectory) || Directory.Exists(target) || File.Exists(target)) throw;
+                promotionError = e;
+                return false;
+            }
             try
             {
                 // Same failure/flush/atomic replacement guarantees as D04; never delete the old pointer first.
@@ -59,6 +75,7 @@ namespace Yato.Resources
                 throw;
             }
             // Committed versions are retained: existing BundleLoaders may still reference their files.
+            return true;
         }
 
         public void CleanupStaging()

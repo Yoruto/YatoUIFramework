@@ -11,7 +11,10 @@
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner",
     "Yato.Mvc",
-    "Yato.FrameworkDemo"
+    "Yato.FrameworkDemo",
+    "Yato.Flow",
+    "Yato.Config",
+    "Yato.Pooling"
   ],
   "includePlatforms": [],
   "overrideReferences": true,

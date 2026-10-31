@@ -160,7 +160,22 @@ namespace Yato.Resources
             ct.ThrowIfCancellationRequested();
             bool changed = !sameMetadata || result.DownloadedBundles > 0 ||
                 !File.Exists(BundleRelativePath.Resolve(previous, RuntimePaths.VersionFileName));
-            if (changed) storage.Commit(stage); // Synchronous commit: no cancellation check after this point.
+            if (changed)
+            {
+                // Windows may briefly deny a directory rename while a scanner holds a child file.
+                // Yield between bounded promotion attempts; the atomic pointer commit is never retried.
+                float deadline = Time.realtimeSinceStartup + 1f;
+                while (true)
+                {
+                    ct.ThrowIfCancellationRequested();
+                    if (storage.TryCommit(stage, out Exception promotionError)) break;
+                    if (Time.realtimeSinceStartup >= deadline)
+                        throw new IOException("Snapshot promotion remained unavailable; active pointer retained", promotionError);
+                    float nextAttempt = Time.realtimeSinceStartup + 0.05f;
+                    do { yield return null; ct.ThrowIfCancellationRequested(); }
+                    while (Time.realtimeSinceStartup < nextAttempt);
+                }
+            } // No cancellation check after the pointer has committed.
             result.Updated = changed;
             result.Success = true;
             try { progress?.Report(1f); }

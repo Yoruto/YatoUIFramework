@@ -10,7 +10,10 @@
     "Yato.Persistence",
     "Yato.Settings",
     "Yato.Audio",
-    "Yato.Mvc"
+    "Yato.Mvc",
+    "Yato.Flow",
+    "Yato.Config",
+    "Yato.Pooling"
   ],
   "autoReferenced": true
 }

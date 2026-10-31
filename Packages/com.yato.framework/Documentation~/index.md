@@ -1,3 +1,5 @@
+0.5.0 模块与通用演示见 [基础模块指南](foundation.md)。
+
 # Yato Framework 快速上手
 
 0.3.0 起的新手路径：Package Manager 导入 BasicSample / FullSample；详细安装、快照布局与兼容变化见 [嵌入式安装与升级](installation.md)。

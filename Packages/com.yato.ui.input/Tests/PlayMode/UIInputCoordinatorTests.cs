@@ -112,6 +112,35 @@ namespace Yato.UI.Input.Tests
             Assert.IsTrue(m_events.currentSelectedGameObject.GetComponent<Button>().IsInteractable());
         }
 
+        [UnityTest] public IEnumerator KeyboardCancel_ClosesCapturedPageThroughInputAction()
+        {
+            var background = InputSystem.settings.backgroundBehavior;
+            var editor = InputSystem.settings.editorInputBehaviorInPlayMode;
+            Keyboard keyboard = null;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            try
+            {
+                keyboard = InputSystem.AddDevice<Keyboard>();
+                InputSystem.EnableDevice(keyboard);
+                var opening = UIRouter.OpenAsync(new UIPageDef("CancelKey", null, new AssetKey("ui/cancelkey"), UILayer.Popup));
+                yield return opening.AsEnumerator();
+                var handle = opening.GetResult();
+                Assert.IsTrue(m_input.Actions.FindAction("UI/Cancel").enabled);
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape)); InputSystem.Update();
+                Assert.IsTrue(keyboard.escapeKey.isPressed, "Synthetic keyboard must be processed even in unfocused batch mode");
+                Assert.IsFalse(handle.IsValid);
+                Assert.IsTrue(m_input.Actions.FindActionMap("Gameplay").enabled);
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState()); InputSystem.Update();
+            }
+            finally
+            {
+                if (keyboard != null) InputSystem.RemoveDevice(keyboard);
+                InputSystem.settings.backgroundBehavior = background;
+                InputSystem.settings.editorInputBehaviorInPlayMode = editor;
+            }
+        }
+
         [UnityTest] public IEnumerator ExistingModule_DefaultActionsAreRestored()
         {
             m_ui.Dispose();

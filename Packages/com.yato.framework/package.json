@@ -2,7 +2,7 @@
   "name": "com.yato.framework",
   "version": "0.5.0",
   "displayName": "Yato Framework",
-  "description": "Yato 通用 Unity 框架聚合包：依赖 Core / Mvc / Resources / UI / Editor 各子包，并附带示例、测试与 IL2CPP 裁剪配置。",
+  "description": "Yato Unity 6 通用框架聚合包：流程、配置、资源、实例池、UI、App、设置、音频和编辑器工具；附独立示例、测试与裁剪配置。Save、Input 和 UI/Input 按需安装。",
   "unity": "6000.0",
   "keywords": [
     "framework",
@@ -36,7 +36,7 @@
     },
     {
       "displayName": "FullSample",
-      "description": "Standalone Settings, Audio and transactional hot-update demo.",
+      "description": "Standalone Flow, Config, Pooling, Settings, Audio and transactional hot-update demo.",
       "path": "Samples~/FullSample"
     }
   ]

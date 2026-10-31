@@ -1,6 +1,6 @@
 # YatoFramework 手动验证清单（2026-10-31）
 
-> 适用版本：`com.yato.framework` 0.3.0（多包结构）
+> 适用版本：`com.yato.framework` 0.5.0（多包结构）
 > 对应设计：`docs/YatoFramework_ARCHITECTURE_AND_ROADMAP_2026-10-30.md`（§5、§5.2）
 > 自动化用例由本仓库提供，但**必须在 Unity 编辑器中手动执行并记录结果**。
 
@@ -153,7 +153,17 @@
 - BundleRequired 必须给出明确异常；只有 AllowResourcesFallback 才允许降级。
 - 已执行结果与仍未完成的人工交互/Player 验收见 [本轮验证记录](OPTIMIZATION_VERIFICATION_2026-10-31.md)。Skip 不计入通过。
 
-## 10. 记录模板
+## 10. 0.5 基础模块验收
+
+- Flow：Busy、取消、进入失败、重复退出与迟到资源清理。
+- Config：真实目录资产、重复 ID、数值与跨表引用校验，运行副本不污染源资产。
+- Save：槽位、备份、显式恢复、迁移、新版本拒绝、同槽位互斥及提交失败。
+- Pooling/App：容量、代次句柄、外部销毁、预热取还零分配、叠加暂停、显式退出等待。
+- UI/Input：过渡取消、无 Facade 事件、默认模块恢复、真实手柄提交及可视窗口交互。
+- 完整/精简/可选消费工程、卸载、Mono/IL2CPP 状态见 docs/FOUNDATION_IMPLEMENTATION_2026-11-01.md。
+- Yato Survivor 全部延期，不作为本轮验收项。
+
+## 11. 记录模板
 
 ```
 日期：____   Unity 版本：____   平台：Windows Player

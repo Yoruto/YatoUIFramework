@@ -3,3 +3,5 @@
 导入后在空场景挂 FocusSampleEntry 并 Play。界面用代码生成真实 UGUI，不需要图片。使用鼠标点击、方向键/Enter，或手柄方向/确认/返回操作。打开弹窗再关闭，焦点恢复原页面。全部关闭后使用左上 Reopen 按钮重新打开。
 
 此示例接管当前 UIRouter，用于独立演示，请单独运行，不与其他入口混用。没有角色、敌人、武器或游戏场景。
+
+可直接打开 Scenes/FocusSample.unity。项目 Active Input Handling 必须选择 Input System 或 Both。

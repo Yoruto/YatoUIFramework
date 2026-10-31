@@ -8,6 +8,8 @@ using Yato.BasicSample;
 using Yato.FullSample;
 using Yato.Resources;
 using Yato.UI;
+using Yato.Config;
+using Yato.Pooling;
 
 namespace Yato.ConsumerTests
 {
@@ -34,6 +36,23 @@ namespace Yato.ConsumerTests
             Assert.IsTrue(full.GetResult().IsValid);
             UIRouter.CloseAll();
             Assert.IsFalse(full.GetResult().IsValid);
+            var entry = Object.FindObjectOfType<FullSampleEntry>();
+            float deadline = Time.realtimeSinceStartup + 5;
+            while (entry.DemoPool == null && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.IsNotNull(entry.DemoPool, "Foundation flow must load the real sample catalog");
+            Assert.AreEqual(8, entry.DemoConfig.Get<DemoConfigRecord>("demo").PoolCapacity);
+            for (int cycle = 0; cycle < 3; cycle++)
+            {
+                if (cycle > 0) yield return entry.StartFoundationDemo().AsEnumerator();
+                var pool = entry.DemoPool;
+                Assert.AreEqual(8, pool.CreatedCount);
+                Assert.IsTrue(pool.TryRent(out var lease));
+                yield return entry.StopFoundationDemo().AsEnumerator();
+                Assert.IsFalse(lease.IsValid);
+                Assert.IsNull(entry.DemoPool);
+                yield return null;
+                Assert.AreEqual(0, Yato.Resources.ResourceTracker.Count, "No resource handles after stopping foundation demo");
+            }
             var scenes = GameBootstrap.Scene;
             var startedField = scenes.GetType().GetField("LoadStarted", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             var completedField = scenes.GetType().GetField("LoadCompleted", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);

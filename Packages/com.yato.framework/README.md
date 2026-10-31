@@ -2,6 +2,8 @@
 
 Unity 通用框架（UPM 多包）。`com.yato.framework` 自 `0.2.0` 起是**聚合元包**：自身不含运行时代码，只依赖各子包并附带示例、测试与文档。
 
+当前聚合版本 **0.5.0**。Flow / Config / Pooling 为默认依赖；Save / Input / UI.Input 独立可选。最新 API、验证与限制见 [基础模块指南](Documentation~/foundation.md)。
+
 ## 包结构
 
 | 包 | 程序集 | 依赖 | 说明 |
@@ -16,6 +18,11 @@ Unity 通用框架（UPM 多包）。`com.yato.framework` 自 `0.2.0` 起是**�
 | `com.yato.audio` | `Yato.Audio` | Core、Resources | 通道音量、双 Music 交叉渐变、SFX 池与溢出策略、AudioClip 句柄 |
 | `com.yato.editor` | `Yato.Editor` | 运行时包 + `com.unity.textmeshpro` | 打包、代码生成、绑定/字体校验、资源与泄漏诊断（仅 Editor） |
 | `com.yato.input` | `Yato.Input` | Unity Input System | 可选 D07：运行时上下文、订阅、重绑定 |
+| `com.yato.flow` | `Yato.Flow` | Core、App、资源抽象 | 异步流程与状态资源清理 |
+| `com.yato.config` | `Yato.Config` | Core、资源抽象 | ScriptableObject 配置及引用校验 |
+| `com.yato.pooling` | `Yato.Pooling` | Core、资源抽象 | 有界实例池、零分配值句柄 |
+| `com.yato.save` | `Yato.Save` | Core、Persistence | 可选槽位存档、显式备份恢复 |
+| `com.yato.ui.input` | `Yato.UI.Input` | UI、Input | 可选 UGUI 输入与焦点适配 |
 | `com.yato.framework` | — | 上面全部（不含 input） | 聚合包：示例 `Samples~`、`Tests`、`Documentation~` |
 
 ## 依赖规则

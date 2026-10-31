@@ -36,7 +36,9 @@ namespace Yato.Resources
         internal static void MarkUsed(string directory)
         {
             if (directory.Contains("://") || directory.StartsWith("jar:", StringComparison.Ordinal)) return;
-            lock (Gate) Used.Add(Path.GetFullPath(directory).TrimEnd(Path.DirectorySeparatorChar));
+            string full = Path.GetFullPath(directory);
+            if (full.Length > Path.GetPathRoot(full).Length) full = full.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            lock (Gate) Used.Add(full);
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -53,7 +55,7 @@ namespace Yato.Resources
                 {
                     var comparison = Path.DirectorySeparatorChar == '\\' ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
                     foreach (string used in Used)
-                        if (used.Equals(storage.Root, comparison) || used.StartsWith(storage.Root + Path.DirectorySeparatorChar, comparison))
+                        if (used.Equals(storage.Root, comparison) || used.StartsWith(storage.Root.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal) ? storage.Root : storage.Root + Path.DirectorySeparatorChar, comparison))
                         { result.InUse = true; return result; }
                     Cleanup(storage, result);
                 }
@@ -78,7 +80,7 @@ namespace Yato.Resources
                     throw new IOException("Invalid active pointer");
                 retained.Add(BundleRelativePath.Resolve(storage.Root, "versions/" + lines[0]));
                 string previous = Path.GetFullPath(lines[1]);
-                if (previous != storage.Root)
+                if (!string.Equals(previous, storage.Root, Path.DirectorySeparatorChar == '\\' ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
                 {
                     string id = Path.GetFileName(previous);
                     if (!Guid.TryParseExact(id, "N", out _) ||
@@ -92,8 +94,8 @@ namespace Yato.Resources
             }
             else if (Directory.Exists(versions))
             {
-                // Without a committed pointer, only GUID snapshots not referenced by a flat manifest are orphans.
-                storage.ActiveDirectory.ToString();
+                // A missing pointer cannot distinguish an interrupted commit from lost metadata. Retain unknown snapshots.
+                if (Directory.GetDirectories(versions).Length > 0) throw new IOException("Active pointer missing; existing snapshots retained");
             }
             var candidates = new List<KeyValuePair<string, long>>();
             if (Directory.Exists(versions))

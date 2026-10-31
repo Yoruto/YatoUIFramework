@@ -2,12 +2,13 @@
 
 Yato 通用 Unity 框架（UPM 多包）：UI 路由与生命周期、资源与热更、启动与场景、持久化、设置、音频，以及编辑器工具链。
 
-当前状态：`0.3.0`（聚合包 `com.yato.framework`）。已实现热更事务与路径校验、独立示例、显式资源失败策略及可选 D07 Input；发布验收见验证记录。
+当前状态：`0.5.0`（聚合包 `com.yato.framework`）。已补齐流程、ScriptableObject 配置、实例池、暂停/退出协调和可选存档、UI/Input；框架验收见最新实施记录。Yato Survivor 整体延期。
 
 ## 文档
 
 | 文档 | 内容 |
 |---|---|
+| [0.5 框架实施记录](docs/FOUNDATION_IMPLEMENTATION_2026-11-01.md) | 分阶段提交、测试证据、性能与待验收项 |
 | [最新优化计划](docs/YatoFramework_STABILITY_AND_REUSE_IMPROVEMENT_PLAN_2026-10-31.md) | 稳定性与复用优化范围（不含 CI） |
 | [安装与升级](docs/EMBEDDED_INSTALL_AND_UPGRADE.md) | 完整/精简包集、独立示例 Quick Start、兼容性迁移 |
 | [本轮验证记录](docs/OPTIMIZATION_VERIFICATION_2026-10-31.md) | 实测证据与未完成的发布门槛 |
@@ -30,6 +31,11 @@ Packages/
 ├── com.yato.settings/      Yato.Settings     强类型设置与变化通知
 ├── com.yato.audio/         Yato.Audio        通道音量、音乐渐变、SFX 池
 ├── com.yato.editor/        Yato.Editor       打包 / 代码生成 / 校验 / 诊断（仅 Editor）
+├── com.yato.flow/         Yato.Flow         异步状态转换与资源范围
+├── com.yato.config/       Yato.Config       配置目录、类型查询与统一校验
+├── com.yato.pooling/      Yato.Pooling      资源实例池与代次句柄
+├── com.yato.save/         Yato.Save         可选槽位存档、显式恢复、迁移
+├── com.yato.ui.input/     Yato.UI.Input     可选 UGUI/Input 上下文与焦点
 ├── com.yato.input/         Yato.Input        可选 Input System 上下文与重绑定
 └── com.yato.framework/     聚合包 + Tests + Samples~ + Documentation~
 ```

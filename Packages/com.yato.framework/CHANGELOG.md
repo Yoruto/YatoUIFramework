@@ -10,6 +10,9 @@
 - UI 新增无 Facade 事件、焦点策略、可选非缩放时间过渡和 CloseAsync；同步 Close 保持原行为。
 - 新增可选 UI/Input 适配，接管及恢复事件模块、输入上下文和嵌套焦点。
 - Flow/Config/Pooling 加入聚合包；Save/Input/UI.Input 仍可选。Yato Survivor 整体延期。
+- FullSample 增加真实配置、通用流程和实例池演示；可选包附计数器存档及键鼠/手柄焦点场景。
+- 规范化启动缓存路径并保守处理丢失指针；Windows 快照目录暂时占用支持有界异步重试，活动指针提交仍失败即返回。
+- 完成独立包集安装/卸载、Windows Mono、资源和性能验证；IL2CPP 缺少本地模块，单独记录待验收。
 
 ## [0.4.0] - 2026-11-01
 

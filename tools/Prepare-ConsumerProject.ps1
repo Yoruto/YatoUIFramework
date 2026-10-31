@@ -2,15 +2,17 @@
 param(
     [Parameter(Mandatory = $true)][string]$Destination,
     [ValidateSet('Minimal', 'Full')][string]$PackageSet = 'Full',
-    [switch]$IncludeInput
+    [switch]$IncludeInput,
+    [switch]$IncludeSave
 )
 $ErrorActionPreference = 'Stop'
 $sourceRoot = Split-Path -Parent $PSScriptRoot
 $targetRoot = [IO.Path]::GetFullPath($Destination)
 if (Test-Path -LiteralPath $targetRoot) { throw "Destination must not exist: $targetRoot" }
 $packages = @('core', 'persistence', 'resources', 'mvc', 'ui')
-if ($PackageSet -eq 'Full') { $packages += @('app', 'settings', 'audio', 'editor', 'framework') }
-if ($IncludeInput) { $packages += 'input' }
+if ($PackageSet -eq 'Full') { $packages += @('app', 'settings', 'audio', 'flow', 'config', 'pooling', 'editor', 'framework') }
+if ($IncludeInput) { $packages += @('input', 'ui.input') }
+if ($IncludeSave) { $packages += 'save' }
 New-Item -ItemType Directory -Path (Join-Path $targetRoot 'Packages') -Force | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $targetRoot 'Assets') -Force | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $targetRoot 'ProjectSettings') -Force | Out-Null
@@ -25,13 +27,16 @@ if ($PackageSet -eq 'Full') {
     foreach ($sample in @('BasicSample', 'FullSample')) {
         Copy-Item -LiteralPath (Join-Path $sourceRoot "Packages/com.yato.framework/Samples~/$sample") -Destination $sampleRoot -Recurse
     }
+    if ($IncludeSave) { Copy-Item -LiteralPath (Join-Path $sourceRoot 'Packages/com.yato.save/Samples~/CounterSample') -Destination $sampleRoot -Recurse }
+    if ($IncludeInput) { Copy-Item -LiteralPath (Join-Path $sourceRoot 'Packages/com.yato.ui.input/Samples~/FocusSample') -Destination $sampleRoot -Recurse }
     $legacyTarget = Join-Path $sampleRoot 'LegacyCompatibility'
     New-Item -ItemType Directory -Path $legacyTarget -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $sourceRoot 'Packages/com.yato.framework/Samples~/YatoFrameworkDemo/Scripts') -Destination $legacyTarget -Recurse
     Copy-Item -LiteralPath (Join-Path $sourceRoot 'Packages/com.yato.framework/Samples~/YatoFrameworkDemo/Yato.FrameworkDemo.asmdef') -Destination $legacyTarget
     New-Item -ItemType Directory -Path (Join-Path $targetRoot 'Assets/Editor') -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityConsumerVerification.cs') -Destination (Join-Path $targetRoot 'Assets/Editor')
+    if ($IncludeInput -and $IncludeSave) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'OptionalConsumerSmokeTests') -Destination (Join-Path $targetRoot 'Assets') -Recurse }
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'ConsumerPlayerSmoke.cs') -Destination (Join-Path $targetRoot 'Assets')
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'ConsumerSmokeTests') -Destination (Join-Path $targetRoot 'Assets') -Recurse
 }
-Write-Output "Prepared $PackageSet consumer project at $targetRoot (Input: $IncludeInput). Open with the Unity version being verified."
+Write-Output "Prepared $PackageSet consumer project at $targetRoot (Input: $IncludeInput; Save: $IncludeSave). Open with the Unity version being verified."

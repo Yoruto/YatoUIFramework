@@ -8,6 +8,8 @@ using Yato.App;
 using Yato.FullSample;
 using Yato.Resources;
 using Yato.UI;
+using Yato.Config;
+using Yato.Pooling;
 
 namespace Yato
 {
@@ -40,7 +42,7 @@ namespace Yato
                 if (!next) break;
                 yield return routine.Current;
             }
-            Debug.Log("[Yato.ConsumerPlayerSmoke] PASS: Bootstrap, UI, Single/Additive scenes, Settings, Audio, transactional AB update and shutdown");
+            Debug.Log("[Yato.ConsumerPlayerSmoke] PASS: Bootstrap, UI, Single/Additive scenes, Settings, Audio, Flow, Config, Pooling, transactional AB update and shutdown");
             Application.Quit(0);
         }
 
@@ -64,6 +66,28 @@ namespace Yato
             while (!full.isDone) yield return null;
             yield return null;
             Check(GameBootstrap.IsInitialized, "Full Bootstrap");
+            var foundation = UnityEngine.Object.FindObjectOfType<FullSampleEntry>();
+            float deadline = Time.realtimeSinceStartup + 5;
+            while (foundation.DemoPool == null && Time.realtimeSinceStartup < deadline) yield return null;
+            Check(foundation.DemoPool != null, "Foundation configuration and pool");
+            Check(foundation.DemoConfig.Get<DemoConfigRecord>("demo").PoolCapacity == 8, "Config asset");
+            var instances = new PooledInstance[foundation.DemoPool.Capacity];
+            for (int i = 0; i < instances.Length; i++) Check(foundation.DemoPool.TryRent(out instances[i]), "Pool capacity");
+            Check(!foundation.DemoPool.TryRent(out _), "Pool rejects overflow");
+            foreach (var item in instances) item.Dispose();
+            for (int i = 0; i < 100; i++) { foundation.DemoPool.TryRent(out var item); item.Dispose(); }
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            for (int i = 0; i < 1000; i++) { foundation.DemoPool.TryRent(out var item); item.Dispose(); }
+            long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+            Check(allocated == 0, "Pool warm allocations: " + allocated);
+            float totalMs = 0, maxMs = 0;
+            for (int i = 0; i < 60; i++) { yield return null; float ms = Time.unscaledDeltaTime * 1000; totalMs += ms; maxMs = Mathf.Max(maxMs, ms); }
+            Debug.Log("[Yato.Performance] poolPeak=" + foundation.DemoPool.PeakActiveCount +
+                " created=" + foundation.DemoPool.CreatedCount + " warm1000Bytes=" + allocated +
+                " frameSamples=60 meanMs=" + (totalMs / 60).ToString("F3") + " maxMs=" + maxMs.ToString("F3"));
+            var stopped = foundation.StopFoundationDemo();
+            while (!stopped.IsDone) yield return null;
+            Check(stopped.GetResult().Status == Yato.Flow.FlowStatus.Success, "Flow exit");
             var service = new FullSampleService();
             service.Initialize();
             service.ApplyVolume(0.35f);

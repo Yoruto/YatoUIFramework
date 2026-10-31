@@ -15,6 +15,8 @@ namespace Yato.Tests.PlayMode
     {
         private string m_root, m_remote, m_local, m_url;
         private HotUpdateService m_service;
+        private FileStream m_promotionLock;
+        private bool m_lockNextPromotion;
         [SetUp] public void Setup()
         {
             m_root = Path.Combine(Application.temporaryCachePath, "yato-transaction-" + Guid.NewGuid().ToString("N"));
@@ -25,7 +27,7 @@ namespace Yato.Tests.PlayMode
             m_service = new HotUpdateService(new RemoteDownloader { AllowFileUrls = true, MaxRetry = 1 }, m_local);
             Publish("1", "first");
         }
-        [TearDown] public void Teardown() { if (Directory.Exists(m_root)) Directory.Delete(m_root, true); }
+        [TearDown] public void Teardown() { m_promotionLock?.Dispose(); m_promotionLock = null; if (Directory.Exists(m_root)) Directory.Delete(m_root, true); }
 
         private void Publish(string version, string content)
         {
@@ -96,6 +98,7 @@ namespace Yato.Tests.PlayMode
                 var updating = m_service.RunAsync(m_url, new CancelProgress(cts), cts.Token);
                 var busy = m_service.RunAsync(m_url);
                 Assert.IsTrue(busy.GetResult().Busy);
+                Assert.IsTrue(HotUpdateMaintenance.PrepareStartup(m_local).Busy);
                 yield return updating.AsEnumerator();
                 Assert.IsTrue(updating.GetResult().Canceled, updating.GetResult().Error);
                 Assert.AreEqual(active, new HotUpdateStorage(m_local).ActiveDirectory);
@@ -185,6 +188,86 @@ namespace Yato.Tests.PlayMode
             StringAssert.Contains("missing", operation.GetResult().Error);
             Assert.IsFalse(File.Exists(Path.Combine(m_local, HotUpdateStorage.PointerFile)));
         }
+
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+        // A non-delete-shared child file deterministically reproduces Windows rename denial.
+        private void LockStagedBundle(float value)
+        {
+            if (!m_lockNextPromotion || value < 1f) return;
+            string stage = Directory.GetDirectories(Path.Combine(m_local, "staging"))[0];
+            m_promotionLock = new FileStream(Path.Combine(stage, "ui", "example"), FileMode.Open, FileAccess.Read, FileShare.Read);
+            m_lockNextPromotion = false;
+        }
+
+        [UnityTest] public IEnumerator TransientPromotionLock_YieldsThenCommits()
+        {
+            var initial = m_service.RunAsync(m_url);
+            yield return initial.AsEnumerator();
+            Assert.IsTrue(initial.GetResult().Success, initial.GetResult().Error);
+            string active = new HotUpdateStorage(m_local).ActiveDirectory;
+            Publish("2", "second");
+            m_lockNextPromotion = true;
+            var update = m_service.RunAsync(m_url, new InlineProgress(LockStagedBundle));
+            while (m_promotionLock == null && !update.IsDone) yield return null;
+            Assert.IsNotNull(m_promotionLock);
+            float until = Time.realtimeSinceStartup + 0.12f;
+            while (Time.realtimeSinceStartup < until) yield return null;
+            Assert.IsFalse(update.IsDone, "Promotion must yield while the child file is held");
+            Assert.AreEqual(active, new HotUpdateStorage(m_local).ActiveDirectory);
+            Assert.IsTrue(m_service.RunAsync(m_url).GetResult().Busy);
+            m_promotionLock.Dispose(); m_promotionLock = null;
+            yield return update.AsEnumerator();
+            Assert.IsTrue(update.GetResult().Success, update.GetResult().Error);
+            Assert.AreNotEqual(active, new HotUpdateStorage(m_local).ActiveDirectory);
+            Assert.AreEqual("first", File.ReadAllText(BundleRelativePath.Resolve(active, "ui/example")));
+        }
+
+        [UnityTest] public IEnumerator PersistentPromotionLock_TimesOutAndPreservesPointer()
+        {
+            var initial = m_service.RunAsync(m_url);
+            yield return initial.AsEnumerator();
+            Assert.IsTrue(initial.GetResult().Success, initial.GetResult().Error);
+            string active = new HotUpdateStorage(m_local).ActiveDirectory;
+            Publish("2", "second");
+            m_lockNextPromotion = true;
+            var update = m_service.RunAsync(m_url, new InlineProgress(LockStagedBundle));
+            yield return update.AsEnumerator();
+            Assert.IsNotNull(m_promotionLock);
+            Assert.IsFalse(update.GetResult().Success);
+            StringAssert.Contains("Snapshot promotion remained unavailable", update.GetResult().Error);
+            Assert.AreEqual(active, new HotUpdateStorage(m_local).ActiveDirectory);
+            Assert.AreEqual(1, Directory.GetDirectories(Path.Combine(m_local, "versions")).Length);
+            m_promotionLock.Dispose(); m_promotionLock = null;
+            var retry = m_service.RunAsync(m_url);
+            yield return retry.AsEnumerator();
+            Assert.IsTrue(retry.GetResult().Success, retry.GetResult().Error);
+            Assert.IsEmpty(Directory.GetDirectories(Path.Combine(m_local, "staging")));
+        }
+
+        [UnityTest] public IEnumerator CanceledPromotionRetry_PreservesPointer()
+        {
+            var initial = m_service.RunAsync(m_url);
+            yield return initial.AsEnumerator();
+            Assert.IsTrue(initial.GetResult().Success, initial.GetResult().Error);
+            string active = new HotUpdateStorage(m_local).ActiveDirectory;
+            Publish("2", "second");
+            using (var cancellation = new CancellationTokenSource())
+            {
+                m_lockNextPromotion = true;
+                var update = m_service.RunAsync(m_url, new InlineProgress(LockStagedBundle), cancellation.Token);
+                while (m_promotionLock == null && !update.IsDone) yield return null;
+                Assert.IsNotNull(m_promotionLock);
+                cancellation.Cancel();
+                yield return update.AsEnumerator();
+                Assert.IsTrue(update.GetResult().Canceled, update.GetResult().Error);
+                Assert.AreEqual(active, new HotUpdateStorage(m_local).ActiveDirectory);
+                m_promotionLock.Dispose(); m_promotionLock = null;
+            }
+            var retry = m_service.RunAsync(m_url);
+            yield return retry.AsEnumerator();
+            Assert.IsTrue(retry.GetResult().Success, retry.GetResult().Error);
+        }
+#endif
 
         private sealed class InlineProgress : IProgress<float>
         {
