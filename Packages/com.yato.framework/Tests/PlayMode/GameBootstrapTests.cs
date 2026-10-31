@@ -124,6 +124,30 @@ namespace Yato.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator Shutdown_ThenInitialize_ReusesAndRegistersSceneService()
+        {
+            GameBootstrap.Initialize();
+            ISceneService first = GameBootstrap.Scene;
+
+            GameBootstrap.Shutdown();
+            ISceneService resolved;
+            Assert.IsNull(GameBootstrap.Scene);
+            Assert.IsFalse(ServiceLocator.Default.TryResolve<ISceneService>(out resolved));
+
+            GameBootstrap.Initialize();
+
+            ISceneService second = GameBootstrap.Scene;
+            Assert.IsNotNull(second);
+            Assert.AreSame(first, second,
+                "重启须复用同一 SceneService，以免旧场景操作未结束时创建第二个互斥通道");
+            Assert.IsTrue(ServiceLocator.Default.TryResolve<ISceneService>(out resolved));
+            Assert.AreSame(second, resolved, "Bootstrap 的 Scene 与 ServiceLocator 必须一致");
+            Assert.AreEqual(1, GameBootstrap.StartedServices.Count, "重启不能累积旧的默认场景服务");
+
+            yield return null;
+        }
+
+        [UnityTest]
         public IEnumerator Shutdown_ReleasesGlobalResources()
         {
             GameBootstrap.Initialize();

@@ -113,6 +113,78 @@ namespace Yato.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator Shutdown_DuringSceneLoad_KeepsBusyUntilOldOperationEnds()
+        {
+            m_backend.AutoComplete = false;
+            IAwaitable<SceneLoadResult> old = m_service.LoadAsync(new SceneLoadRequest("Old"));
+
+            while (m_backend.PendingCount == 0)
+            {
+                yield return null;
+            }
+
+            m_service.Shutdown();
+            Assert.IsTrue(m_service.IsBusy, "已进入 Unity 加载的操作结束前不能释放互斥通道");
+            Assert.AreEqual(0, m_service.LoadedContexts.Count);
+
+            m_service.Initialize();
+            Assert.AreEqual(SceneLoadStatus.Busy,
+                m_service.LoadAsync(new SceneLoadRequest("New")).GetResult().Status);
+
+            m_backend.CompletePending();
+            while (!old.IsDone)
+            {
+                yield return null;
+            }
+
+            Assert.AreEqual(SceneLoadStatus.Canceled, old.GetResult().Status);
+            Assert.AreEqual(0, m_service.LoadedContexts.Count, "旧协程不能重新向服务发布场景上下文");
+            Assert.IsFalse(m_service.IsBusy);
+
+            m_backend.AutoComplete = true;
+            var next = new ResultHolder();
+            yield return Load(new SceneLoadRequest("New"), next);
+            Assert.AreEqual(SceneLoadStatus.Success, next.Result.Status);
+        }
+
+        [UnityTest]
+        public IEnumerator Shutdown_DuringInitializer_CancelsAndWaitsForItsCompletion()
+        {
+            var initializer = new ManualInitializer();
+            IAwaitable<SceneLoadResult> old =
+                m_service.LoadAsync(new SceneLoadRequest("OldInit").WithInitializer(initializer));
+
+            while (initializer.Calls == 0)
+            {
+                yield return null;
+            }
+
+            var owned = new FakeDisposable();
+            m_service.LoadedContexts[0].Resources.Track(owned);
+            m_service.Shutdown();
+            Assert.IsTrue(owned.Disposed);
+            Assert.IsTrue(m_service.IsBusy);
+            Assert.AreEqual(0, m_service.LoadedContexts.Count);
+
+            for (int frame = 0; frame < 5 && !initializer.CancellationRequested; frame++)
+            {
+                yield return null;
+            }
+            Assert.IsTrue(initializer.CancellationRequested, "Shutdown 必须请求初始化器协作取消");
+            Assert.IsTrue(m_service.IsBusy, "初始化器未真正结束不能放开新场景操作");
+
+            initializer.Complete();
+            while (!old.IsDone)
+            {
+                yield return null;
+            }
+
+            Assert.AreEqual(SceneLoadStatus.Canceled, old.GetResult().Status);
+            Assert.IsFalse(m_service.IsBusy);
+            Assert.AreEqual(0, m_service.LoadedContexts.Count);
+        }
+
+        [UnityTest]
         public IEnumerator LoadAsync_CancelBeforeUnityLoad_ReturnsCanceled()
         {
             var cts = new CancellationTokenSource();
@@ -326,6 +398,47 @@ namespace Yato.Tests.PlayMode
             Assert.IsTrue(late.Disposed);
         }
 
+        [UnityTest]
+        public IEnumerator UnloadAsync_BackendFailure_PreservesPreviouslyOwnedResources()
+        {
+            var first = new ResultHolder();
+            yield return Load(new SceneLoadRequest("Persistent"), first);
+            var second = new ResultHolder();
+            yield return Load(new SceneLoadRequest("Overlay", LoadSceneMode.Additive), second);
+
+            SceneContext context = first.Result.Context;
+            var original = new FakeDisposable();
+            context.Resources.Track(original);
+
+            m_backend.ThrowOnUnload = true;
+            IAwaitable<SceneLoadResult> failed = m_service.UnloadAsync(context);
+            while (!failed.IsDone)
+            {
+                yield return null;
+            }
+
+            Assert.AreEqual(SceneLoadStatus.Failed, failed.GetResult().Status);
+            Assert.IsFalse(original.Disposed, "卸载失败且场景仍在时不能提前销毁它的资源");
+            Assert.IsFalse(context.Resources.IsReleased);
+            Assert.AreEqual(1, context.Resources.Count);
+
+            var afterFailure = new FakeDisposable();
+            context.Resources.Track(afterFailure);
+            Assert.IsFalse(afterFailure.Disposed, "卸载失败后应恢复正常的资源登记");
+
+            m_backend.ThrowOnUnload = false;
+            IAwaitable<SceneLoadResult> retried = m_service.UnloadAsync(context);
+            while (!retried.IsDone)
+            {
+                yield return null;
+            }
+
+            Assert.AreEqual(SceneLoadStatus.Success, retried.GetResult().Status);
+            Assert.IsTrue(original.Disposed);
+            Assert.IsTrue(afterFailure.Disposed);
+            Assert.IsTrue(context.Resources.IsReleased);
+        }
+
         private IEnumerator Load(SceneLoadRequest request, ResultHolder holder)
         {
             IAwaitable<SceneLoadResult> opening = m_service.LoadAsync(request);
@@ -351,6 +464,7 @@ namespace Yato.Tests.PlayMode
 
             public bool CanLoadResult = true;
             public bool ThrowOnLoad;
+            public bool ThrowOnUnload;
             public bool AutoComplete = true;
             public int LoadCalls;
 
@@ -403,6 +517,11 @@ namespace Yato.Tests.PlayMode
 
             public ISceneOperation UnloadScene(Scene scene)
             {
+                if (ThrowOnUnload)
+                {
+                    throw new InvalidOperationException("fake unload failure");
+                }
+
                 string key = FindKey(scene);
                 if (key != null)
                 {

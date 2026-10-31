@@ -13,6 +13,7 @@ namespace Yato.App
     {
         private readonly List<IDisposable> m_tracked = new List<IDisposable>();
         private bool m_released;
+        private bool m_closing;
 
         public ResourceScope(string name = "scope")
         {
@@ -42,9 +43,9 @@ namespace Yato.App
                 return null;
             }
 
-            if (m_released)
+            if (m_released || m_closing)
             {
-                // 迟到的加载结果：范围已结束，立即释放避免悬挂
+                // 范围已关闭或正在卸载：迟到结果不能重新接管场景资源。
                 DisposeSafely(resource);
                 return resource;
             }
@@ -69,6 +70,7 @@ namespace Yato.App
         public void ReleaseAll()
         {
             m_released = true;
+            m_closing = false;
 
             for (int i = m_tracked.Count - 1; i >= 0; i--)
             {
@@ -76,6 +78,24 @@ namespace Yato.App
             }
 
             m_tracked.Clear();
+        }
+
+        /// <summary>场景卸载开始时拒绝新句柄，但保留旧句柄直到卸载确认成功。</summary>
+        internal void BeginClose()
+        {
+            if (!m_released)
+            {
+                m_closing = true;
+            }
+        }
+
+        /// <summary>卸载失败时恢复资源登记；已彻底释放的范围不可重新打开。</summary>
+        internal void CancelClose()
+        {
+            if (!m_released)
+            {
+                m_closing = false;
+            }
         }
 
         public void Dispose()

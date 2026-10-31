@@ -169,6 +169,38 @@ namespace Yato.Tests.EditMode
         }
 
         [Test]
+        public void LoadAsync_AfterAllConsumersCancel_StartsFreshProviderLoad()
+        {
+            m_provider.AutoComplete = false;
+            var cts = new CancellationTokenSource();
+
+            IAwaitable<IAssetHandle<ScriptableObject>> abandoned =
+                m_service.LoadAsync<ScriptableObject>(Key, cts.Token);
+            CancellationToken abandonedToken = m_provider.LastToken;
+            cts.Cancel();
+
+            Assert.IsTrue(abandonedToken.IsCancellationRequested);
+            Assert.Throws<OperationCanceledException>(delegate { abandoned.GetResult(); });
+
+            IAwaitable<IAssetHandle<ScriptableObject>> fresh = m_service.LoadAsync<ScriptableObject>(Key);
+            Assert.AreEqual(2, m_provider.LoadCalls, "新请求不能复用已请求取消的底层任务");
+            Assert.IsFalse(m_provider.LastToken.IsCancellationRequested, "新任务必须持有独立的有效 token");
+
+            // 旧 Provider 即使不响应取消且迟到成功，也只能归还自己的引用。
+            m_provider.CompleteFirst();
+            Assert.IsFalse(fresh.IsDone, "旧任务完成不能结束新消费者的等待");
+            Assert.AreEqual(1, m_provider.ReleaseCalls, "旧任务的多余引用必须归还");
+
+            m_provider.CompleteAll();
+            IAssetHandle<ScriptableObject> handle = fresh.GetResult();
+            Assert.AreSame(m_asset, handle.Asset);
+            handle.Dispose();
+            Assert.AreEqual(2, m_provider.ReleaseCalls, "两个独立 Provider 请求分别归还一次引用");
+            Assert.AreEqual(0, m_service.ActiveAssetCount);
+            cts.Dispose();
+        }
+
+        [Test]
         public void Load_SyncUnsupported_CancelsAndReleasesLateResult()
         {
             m_provider.AutoComplete = false;
@@ -297,6 +329,13 @@ namespace Yato.Tests.EditMode
                 {
                     pending[i].SetResult(m_asset);
                 }
+            }
+
+            public void CompleteFirst()
+            {
+                var first = m_pending[0];
+                m_pending.RemoveAt(0);
+                first.SetResult(m_asset);
             }
 
             public void CompleteCancelled()

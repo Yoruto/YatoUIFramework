@@ -209,7 +209,12 @@ namespace Yato.Resources
 
             // 先登记消费者再订阅 Provider 完成事件：
             // Provider 同步完成时，CompletePending 必须能看到至少一个消费者，否则会误判为无人接管而提前归还引用。
-            pending.AddConsumer(consumer, ct);
+            // 最后一个消费者取消后，旧任务已请求中止，不能让后续请求重新加入它。
+            // 取消可能恰好发生在 AcquirePending 和登记消费者之间，因此需要重试。
+            while (!pending.TryAddConsumer(consumer, ct))
+            {
+                pending = AcquirePending(key, typeof(T));
+            }
             pending.Subscribe(delegate(PendingLoad p) { CompletePending(p); });
             return source;
         }
@@ -477,11 +482,13 @@ namespace Yato.Resources
             PendingLoad pending;
             lock (m_pendings)
             {
-                if (m_pendings.TryGetValue(key, out pending))
+                if (m_pendings.TryGetValue(key, out pending) && !pending.IsAbandoned)
                 {
                     return pending;
                 }
 
+                // 取消中的旧任务仍负责自己的完成回调与 Provider 引用回收；
+                // 新请求独立开始，不能复用已不可逆取消的 Provider token。
                 pending = new PendingLoad(key);
                 m_pendings[key] = pending;
             }
@@ -639,11 +646,27 @@ namespace Yato.Resources
                 get { return m_cancellation.Token; }
             }
 
-            public void AddConsumer(PendingConsumer consumer, CancellationToken ct)
+            public bool IsAbandoned
+            {
+                get
+                {
+                    lock (m_gate)
+                    {
+                        return m_cancelRequested;
+                    }
+                }
+            }
+
+            public bool TryAddConsumer(PendingConsumer consumer, CancellationToken ct)
             {
                 bool done;
                 lock (m_gate)
                 {
+                    if (m_cancelRequested)
+                    {
+                        return false;
+                    }
+
                     done = Done;
                     if (!done)
                     {
@@ -655,11 +678,12 @@ namespace Yato.Resources
                 if (done)
                 {
                     consumer.Complete(this);
-                    return;
+                    return true;
                 }
 
                 // 先计入消费者再订阅取消：恰好在此时取消时不会误判为「没有消费者」
                 consumer.Listen(this, ct);
+                return true;
             }
 
             /// <summary>某个消费者取消：只有最后一个消费者放弃时才中止 Provider 加载。</summary>
