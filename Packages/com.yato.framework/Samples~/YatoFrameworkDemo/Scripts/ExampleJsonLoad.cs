@@ -10,7 +10,8 @@ namespace Yato.FrameworkDemo
     {
         private void Start()
         {
-            TextAsset json = Resources.Load<TextAsset>("player");
+            // 全限定：Yato.FrameworkDemo 位于 Yato 命名空间下，裸写 Resources 会被解析成 Yato.Resources
+            TextAsset json = UnityEngine.Resources.Load<TextAsset>("player");
             if (json == null)
             {
                 Debug.LogWarning("[Demo] 未找到 Resources/player.json");

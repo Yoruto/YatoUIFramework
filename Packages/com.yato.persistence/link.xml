@@ -1,0 +1,4 @@
+<linker>
+  <!-- IL2CPP 裁剪兜底：序列化路径依赖反射读取既有字段。 -->
+  <assembly fullname="Yato.Persistence" preserve="all" />
+</linker>

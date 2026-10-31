@@ -3,6 +3,35 @@
 所有对本包的改动都记录在此文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.2.0] - 2026-10-31
+
+### Added
+
+- 新增 `com.yato.app`：`GameBootstrap`（DDOL 根、幂等初始化、按 `Order` 初始化/反序关闭、失败回滚、Domain Reload 静态重置、Editor-only 自动补初始化）与 `SceneService`（Single/Additive、互斥通道忙时立即 Busy、`Success/Busy/Canceled/InvalidScene/Failed` 五态与失败阶段、`SceneContext` 资源范围、`Loaded/Ready` 分离、可选 `ISceneInitializer` 与 60s 可配置超时、超时后等待旧任务结束才释放通道）。
+- 新增 `com.yato.persistence`：`PersistencePaths`（persistentDataPath 单根、拒绝绝对路径/`..`/盘符与数据流、逐段符号链接逃逸检查）、`IFileStore`/`FileStore`（同步 + 异步、同路径互斥抛 `FileBusyException`、同目录唯一临时文件 + `File.Replace` 原子提交、提交失败抛 `FileCommitException` 且不降级覆盖、提交前可取消、残留临时文件不参与枚举且可安全清理）、`ISerializer` / `JsonUtilitySerializer`（UTF-8 无 BOM）。
+- 新增 `com.yato.settings`：`SettingsService<T>`（默认值模板隔离、默认值 → 用户文件 → 自定义校验 → 发布、缺文件用默认值、损坏/非法保留原文件并回退、`Changed` 事件逐订阅者隔离、显式 `Load/Save` + 异步、`ResetToDefaults`）。
+- 新增 `com.yato.audio`：`AudioService`（Master/Music/Sfx/Ui/Voice 通道、双 Music 交叉渐变、SFX 池与 `DropNewest`/`ReplaceLowestPriority` 策略、2D/3D、AudioClip 句柄生命周期、迟到加载结果释放、可选 `AudioMixerVolumeSink`）。
+- 新增 `com.yato.input` 占位包（D07 待审核，仅 `package.json` + README，暂不被聚合包依赖）。
+- 新增测试：`ResourceServiceTests`、`UIPageCacheTests`、`RouterConcurrencyTests`、`ResourceScopeTests`、`SceneServiceTests`、`GameBootstrapTests`、`FileStoreTests`、`SettingsServiceTests`、`AudioServiceTests`。
+- 新增 `docs/YatoFramework_ManualVerification_2026-10-31.md`：分阶段手动验证清单与 §5.2 最小集成验收流程对照。
+- 示例新增 `Scripts/AppBootstrapSample.cs`：`BeforeSceneLoad` 注册 `IAppService`，演示设置→音频音量联动与场景事件订阅。
+
+### Changed
+
+- **结构拆分**：原单包拆为 `com.yato.core` / `mvc` / `resources` / `ui` / `app` / `persistence` / `settings` / `audio` / `editor`，`com.yato.framework` 改为聚合元包（仅依赖子包 + `Tests` + `Samples~` + `Documentation~`）。
+- 程序集名称保持不变（`Yato.Core` 等），asmdef 引用、示例与测试无需改动；`.meta`/GUID 随目录迁移保留。
+- `link.xml` 从包级单一文件拆到各运行时包，按包保留自身程序集。
+- `Packages/manifest.json` 增加 `"testables": ["com.yato.framework"]`，包内测试程序集才会被 Unity 编译。
+- 示例 asmdef 增加 `Yato.App` / `Yato.Persistence` / `Yato.Settings` / `Yato.Audio` 引用。
+
+### Fixed
+
+- 资源引用计数增删不对称：同一 key 的并发/重复加载改为单飞，句柄归零只归还一次 Provider 引用；取消/类型不符时无人接管的引用立即回滚。
+- `BundleProvider` 依赖链失败、取消、资产缺失时逐层回滚已 AddRef 的 bundle。
+- `IAssetHandle.RefCount` 改为实时读取，不再返回创建时快照。
+- UI：缓存恢复后同时存在于栈与缓存、`UIPageCache.Add` 同 key 静默替换导致实例泄漏、同页并发打开产生多个实例、`Activate` 失败不回收实例、过期句柄误销毁在用实例、按层 `CloseAll` 不清理该层缓存。
+- Domain Reload 关闭时 `RuntimeHost` / `MainThreadDispatcher` / `ResourceServiceFactory` / `UIRouter` 的静态状态与订阅残留；`UIRouter` 重置时释放栈与缓存中的句柄。
+
 ## [0.1.0] - 2026-10-29
 
 ### Added

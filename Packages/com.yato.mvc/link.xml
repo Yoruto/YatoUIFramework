@@ -1,0 +1,4 @@
+<linker>
+  <!-- IL2CPP 裁剪兜底：保留 PureMVC 程序集，避免按名字反射创建 Mediator/Proxy 时被剥离。 -->
+  <assembly fullname="Yato.Mvc" preserve="all" />
+</linker>

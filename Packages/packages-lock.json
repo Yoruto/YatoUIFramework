@@ -222,11 +222,110 @@
         "com.unity.modules.physics": "1.0.0"
       }
     },
+    "com.yato.app": {
+      "version": "file:com.yato.app",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.yato.core": "0.1.0",
+        "com.yato.resources": "0.1.0"
+      }
+    },
+    "com.yato.audio": {
+      "version": "file:com.yato.audio",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.yato.core": "0.1.0",
+        "com.yato.resources": "0.1.0"
+      }
+    },
+    "com.yato.core": {
+      "version": "file:com.yato.core",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "com.yato.editor": {
+      "version": "file:com.yato.editor",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.yato.core": "0.1.0",
+        "com.yato.resources": "0.1.0",
+        "com.yato.ui": "0.1.0",
+        "com.unity.ugui": "1.0.0",
+        "com.unity.textmeshpro": "3.0.6"
+      }
+    },
     "com.yato.framework": {
       "version": "file:com.yato.framework",
       "depth": 0,
       "source": "embedded",
+      "dependencies": {
+        "com.yato.core": "0.1.0",
+        "com.yato.mvc": "0.1.0",
+        "com.yato.resources": "0.1.0",
+        "com.yato.ui": "0.1.0",
+        "com.yato.app": "0.1.0",
+        "com.yato.persistence": "0.1.0",
+        "com.yato.settings": "0.1.0",
+        "com.yato.audio": "0.1.0",
+        "com.yato.editor": "0.1.0",
+        "com.unity.textmeshpro": "3.0.6"
+      }
+    },
+    "com.yato.input": {
+      "version": "file:com.yato.input",
+      "depth": 0,
+      "source": "embedded",
       "dependencies": {}
+    },
+    "com.yato.mvc": {
+      "version": "file:com.yato.mvc",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "com.yato.persistence": {
+      "version": "file:com.yato.persistence",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.yato.core": "0.1.0"
+      }
+    },
+    "com.yato.resources": {
+      "version": "file:com.yato.resources",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.yato.core": "0.1.0",
+        "com.unity.modules.assetbundle": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0",
+        "com.unity.modules.unitywebrequest": "1.0.0",
+        "com.unity.modules.unitywebrequestassetbundle": "1.0.0"
+      }
+    },
+    "com.yato.settings": {
+      "version": "file:com.yato.settings",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.yato.core": "0.1.0",
+        "com.yato.persistence": "0.1.0"
+      }
+    },
+    "com.yato.ui": {
+      "version": "file:com.yato.ui",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.yato.core": "0.1.0",
+        "com.yato.mvc": "0.1.0",
+        "com.yato.resources": "0.1.0",
+        "com.unity.ugui": "1.0.0"
+      }
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",

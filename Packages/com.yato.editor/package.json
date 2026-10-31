@@ -1,0 +1,24 @@
+{
+  "name": "com.yato.editor",
+  "version": "0.1.0",
+  "displayName": "Yato Editor",
+  "description": "Yato 框架编辑器工具链：资源打包、代码生成、绑定校验、泄漏与资源诊断。仅 Editor 平台，不进入 Player 构建。",
+  "unity": "2022.3",
+  "unityRelease": "13f1",
+  "keywords": [
+    "framework",
+    "editor",
+    "assetbundle",
+    "yato"
+  ],
+  "author": {
+    "name": "Yato"
+  },
+  "dependencies": {
+    "com.yato.core": "0.1.0",
+    "com.yato.resources": "0.1.0",
+    "com.yato.ui": "0.1.0",
+    "com.unity.ugui": "1.0.0",
+    "com.unity.textmeshpro": "3.0.6"
+  }
+}

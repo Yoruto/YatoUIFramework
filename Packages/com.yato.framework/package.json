@@ -1,8 +1,8 @@
 {
   "name": "com.yato.framework",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Yato Framework",
-  "description": "Yato 通用 Unity 框架：UI 路由与生命周期、资源管理（Editor/Resources/AssetBundle Provider）、事件总线、日志、代码生成与资源打包热更工具链。",
+  "description": "Yato 通用 Unity 框架聚合包：依赖 Core / Mvc / Resources / UI / Editor 各子包，并附带示例、测试与 IL2CPP 裁剪配置。",
   "unity": "2022.3",
   "unityRelease": "13f1",
   "keywords": [
@@ -15,12 +15,23 @@
   "author": {
     "name": "Yato"
   },
+  "dependencies": {
+    "com.yato.core": "0.1.0",
+    "com.yato.mvc": "0.1.0",
+    "com.yato.resources": "0.1.0",
+    "com.yato.ui": "0.1.0",
+    "com.yato.app": "0.1.0",
+    "com.yato.persistence": "0.1.0",
+    "com.yato.settings": "0.1.0",
+    "com.yato.audio": "0.1.0",
+    "com.yato.editor": "0.1.0",
+    "com.unity.textmeshpro": "3.0.6"
+  },
   "samples": [
     {
       "displayName": "YatoFrameworkDemo",
       "description": "框架示例：页面打开、Mediator/Proxy/View 分工、事件通知与 Resources 加载。",
       "path": "Samples~/YatoFrameworkDemo"
     }
-  ],
-  "dependencies": {}
+  ]
 }

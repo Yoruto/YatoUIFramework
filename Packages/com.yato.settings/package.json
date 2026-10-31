@@ -1,0 +1,21 @@
+{
+  "name": "com.yato.settings",
+  "version": "0.1.0",
+  "displayName": "Yato Settings",
+  "description": "Yato 框架设置层：强类型 SettingsDto 的默认值 → 用户文件 → 自定义校验 → 发布加载序，变化事件、恢复默认与显式 Load/Save。不直接控制音频/画面/输入/UI。",
+  "unity": "2022.3",
+  "unityRelease": "13f1",
+  "keywords": [
+    "framework",
+    "settings",
+    "preferences",
+    "yato"
+  ],
+  "author": {
+    "name": "Yato"
+  },
+  "dependencies": {
+    "com.yato.core": "0.1.0",
+    "com.yato.persistence": "0.1.0"
+  }
+}

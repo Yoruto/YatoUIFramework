@@ -1,0 +1,17 @@
+{
+    "name": "Yato.Settings",
+    "rootNamespace": "Yato.Settings",
+    "references": [
+        "Yato.Core",
+        "Yato.Persistence"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

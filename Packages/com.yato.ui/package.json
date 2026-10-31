@@ -1,0 +1,22 @@
+{
+  "name": "com.yato.ui",
+  "version": "0.1.0",
+  "displayName": "Yato UI",
+  "description": "Yato 框架 UI 层：页面路由、层级与页面栈、缓存、加载遮罩、绑定工具。只依赖资源抽象，不依赖具体资源实现。",
+  "unity": "2022.3",
+  "unityRelease": "13f1",
+  "keywords": [
+    "framework",
+    "ui",
+    "yato"
+  ],
+  "author": {
+    "name": "Yato"
+  },
+  "dependencies": {
+    "com.yato.core": "0.1.0",
+    "com.yato.mvc": "0.1.0",
+    "com.yato.resources": "0.1.0",
+    "com.unity.ugui": "1.0.0"
+  }
+}

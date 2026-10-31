@@ -1,0 +1,17 @@
+{
+    "name": "Yato.Audio",
+    "rootNamespace": "Yato.Audio",
+    "references": [
+        "Yato.Core",
+        "Yato.Resources.Abstractions"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

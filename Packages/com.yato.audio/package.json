@@ -1,0 +1,22 @@
+{
+  "name": "com.yato.audio",
+  "version": "0.1.0",
+  "displayName": "Yato Audio",
+  "description": "Yato 框架音频层：Master/Music/SFX/UI/Voice 通道、双 Music 交叉渐变、SFX 池与溢出拒绝策略、AudioClip 资源句柄生命周期、可选 AudioMixer 音量映射。",
+  "unity": "2022.3",
+  "unityRelease": "13f1",
+  "keywords": [
+    "framework",
+    "audio",
+    "music",
+    "sfx",
+    "yato"
+  ],
+  "author": {
+    "name": "Yato"
+  },
+  "dependencies": {
+    "com.yato.core": "0.1.0",
+    "com.yato.resources": "0.1.0"
+  }
+}

@@ -1,0 +1,4 @@
+<linker>
+  <!-- IL2CPP 裁剪兜底：设置 DTO 由游戏定义并走反射序列化。 -->
+  <assembly fullname="Yato.Settings" preserve="all" />
+</linker>

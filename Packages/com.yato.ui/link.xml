@@ -1,0 +1,4 @@
+<linker>
+  <!-- IL2CPP 裁剪兜底：页面表通过 typeof 持有 View/Mediator 类型，这里额外保留 UI 程序集。 -->
+  <assembly fullname="Yato.UI" preserve="all" />
+</linker>

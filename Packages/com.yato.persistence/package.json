@@ -1,0 +1,21 @@
+{
+  "name": "com.yato.persistence",
+  "version": "0.1.0",
+  "displayName": "Yato Persistence",
+  "description": "Yato 框架持久化基础设施：persistentDataPath 单根与安全相对路径、UTF-8 JsonUtility 序列化适配器、临时文件安全替换写入、同路径互斥的同步/异步文件读写。不包含游戏存档、槽位或版本迁移。",
+  "unity": "2022.3",
+  "unityRelease": "13f1",
+  "keywords": [
+    "framework",
+    "persistence",
+    "file",
+    "json",
+    "yato"
+  ],
+  "author": {
+    "name": "Yato"
+  },
+  "dependencies": {
+    "com.yato.core": "0.1.0"
+  }
+}

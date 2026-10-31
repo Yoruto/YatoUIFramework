@@ -1,0 +1,5 @@
+<linker>
+  <!-- IL2CPP 裁剪兜底：保留资源层程序集，避免 Provider / 序列化类型被剥离。 -->
+  <assembly fullname="Yato.Resources.Abstractions" preserve="all" />
+  <assembly fullname="Yato.Resources" preserve="all" />
+</linker>

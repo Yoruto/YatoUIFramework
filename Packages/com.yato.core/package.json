@@ -1,0 +1,17 @@
+{
+  "name": "com.yato.core",
+  "version": "0.1.0",
+  "displayName": "Yato Core",
+  "description": "Yato 框架基础层：RuntimeHost、主线程投递、事件总线、服务定位、日志、异步与工具。仅依赖 Unity/.NET 基础运行时。",
+  "unity": "2022.3",
+  "unityRelease": "13f1",
+  "keywords": [
+    "framework",
+    "core",
+    "yato"
+  ],
+  "author": {
+    "name": "Yato"
+  },
+  "dependencies": {}
+}

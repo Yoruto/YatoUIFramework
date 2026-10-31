@@ -1,0 +1,18 @@
+{
+  "name": "com.yato.input",
+  "version": "0.0.1",
+  "displayName": "Yato Input (Placeholder)",
+  "description": "占位包：Yato 输入适配层（D07）尚待整体审核，尚未提供任何代码。计划为 Unity Input System 的可选薄适配层：ActionMap 上下文切换、运行时重绑定、订阅清理；不安装该包的项目不受影响。",
+  "unity": "2022.3",
+  "unityRelease": "13f1",
+  "keywords": [
+    "framework",
+    "input",
+    "placeholder",
+    "yato"
+  ],
+  "author": {
+    "name": "Yato"
+  },
+  "dependencies": {}
+}

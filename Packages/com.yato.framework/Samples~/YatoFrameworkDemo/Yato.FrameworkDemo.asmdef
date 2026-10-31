@@ -7,6 +7,10 @@
         "Yato.Resources.Abstractions",
         "Yato.Resources",
         "Yato.UI",
+        "Yato.App",
+        "Yato.Persistence",
+        "Yato.Settings",
+        "Yato.Audio",
         "Unity.TextMeshPro"
     ],
     "includePlatforms": [],

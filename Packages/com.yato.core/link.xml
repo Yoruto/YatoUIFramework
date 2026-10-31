@@ -1,0 +1,4 @@
+<linker>
+  <!-- IL2CPP 裁剪兜底：保留 Yato 核心程序集，避免反射 / 序列化路径上的类型被剥离。 -->
+  <assembly fullname="Yato.Core" preserve="all" />
+</linker>

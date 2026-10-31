@@ -262,3 +262,36 @@ YatoFramework 是可在多个独立 Unity 游戏中复用的轻量基础框架�
 - [Unity Input System 1.6：Action Bindings](https://docs.unity.cn/Packages/com.unity.inputsystem@1.6/manual/ActionBindings.html)：官方按键覆盖、重绑定和恢复方式。
 - [Unity Settings Modifier](https://github.com/muhammadIdhamMaarif/Unity-Settings-Modifier)：设置数据、运行时状态、应用器和 UI 的分层实践；其完整依赖不属于本框架要求。
 - [Unity AudioMixer 文档](https://docs.unity3d.com/2022.3/Documentation/Manual/AudioMixer.html)：Unity 原生分组混音和参数管理。
+
+## 9. 实施进展（2026-10-31）
+
+> 本节记录落地情况，用于对照第 7 节的设计状态；第 1–8 节的设计内容未修改。
+> 验证步骤见 `docs/YatoFramework_ManualVerification_2026-10-31.md`。
+
+| 范围 | 设计状态 | 实现状态 | 对应包 | 验证方式 |
+|---|---|---|---|---|
+| 基线稳定（§5.1） | — | 已完成：引用计数增删对称、取消/失败回滚、缓存页所有权、同页并发单飞、Domain Reload 静态重置 | core / resources / ui | EditMode + PlayMode 用例 |
+| 包拆分 | 推荐 | 已完成：9 个包 + 聚合元包，asmdef 名称不变，meta/GUID 随迁移保留 | 全部 | Unity 导入无错误 |
+| D01 平台优先级 | 已冻结 | 未改变：Windows Player 优先，本工程编辑器为 Unity 6.5 | — | Player 构建待执行 |
+| D02 初始化与生命周期 | 已冻结 | 已实现 | `com.yato.app` | `GameBootstrapTests` |
+| D03 场景系统 | 已冻结 | 已实现 | `com.yato.app` | `SceneServiceTests` |
+| D04 持久化基础设施 | 已冻结 | 已实现 | `com.yato.persistence` | `FileStoreTests` |
+| D05 设置管理 | 推荐默认方案 | 已实现 | `com.yato.settings` | `SettingsServiceTests` |
+| D06 音频管理 | 推荐默认方案 | 已实现 | `com.yato.audio` | `AudioServiceTests` |
+| D07 输入适配 | 推荐默认方案 | 仅占位包（无代码，未加入聚合依赖） | `com.yato.input` | 待审核 |
+| D08 工程与发布 | 推荐默认方案 | 部分：样例/文档/验证清单已补；UPM 发布与 Player 构建回归待执行 | `com.yato.framework` | 手动验证清单 |
+
+### 9.1 与推荐方案的实现细节差异
+
+1. **App 的异步契约**：`Yato.App` 依赖 `Yato.Resources.Abstractions` 复用 `IAwaitable`/`AwaitableCompletionSource`，未另建一套 async 类型；场景资源句柄仍通过 `IDisposable` + `ResourceScope` 追踪，不依赖资源实现。
+2. **场景后端接缝**：`SceneService` 内部通过 `ISceneBackend` 调用 `SceneManager`（默认 `UnitySceneBackend`）。目的是让 Busy/取消/超时/Ready 编排可脱离真实场景资源测试，并为将来 Addressables 场景加载预留入口；默认行为仍是 D03 冻结的直接调用。
+3. **Settings 异步**：`SettingsService<T>` 的异步接口使用标准 `Task`，避免 Settings 反向依赖资源包；其余模块统一使用 `IAwaitable`。
+4. **Input 可选性**：`com.yato.input` 目前不被 `com.yato.framework` 依赖，确保「不安装输入包也能编译」。
+5. **测试位置**：测试集中在聚合包的 `Tests/`，通过宿主工程 `manifest.json` 的 `testables` 登记；按模块拆到各包内会需要逐个包登记 `testables`，暂未采用。
+
+### 9.2 已知限制
+
+- `FileStore` 的原子提交依赖 `File.Replace`；平台不支持时按 D04 直接报错，不降级为覆盖（Windows Player 已验证路径，其它平台待测）。
+- 场景初始化器超时后若旧任务永不结束，互斥通道会一直占用（D03 的明确取舍）。
+- `AudioService` 的 SFX 结束判定依赖 `AudioSource.isPlaying`，极短音效额外用 `clip.length + 0.25s` 兜底。
+- `JsonUtilitySerializer` 仅支持 `[Serializable]` + 公开字段的 DTO；需要其它格式时实现 `ISerializer`。

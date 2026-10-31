@@ -1,0 +1,18 @@
+{
+  "name": "com.yato.mvc",
+  "version": "0.1.0",
+  "displayName": "Yato Mvc",
+  "description": "Yato 框架的 PureMVC 实现（Facade / Mediator / Proxy / Command / Observer），供 UI 层使用。",
+  "unity": "2022.3",
+  "unityRelease": "13f1",
+  "keywords": [
+    "framework",
+    "mvc",
+    "puremvc",
+    "yato"
+  ],
+  "author": {
+    "name": "Yato"
+  },
+  "dependencies": {}
+}

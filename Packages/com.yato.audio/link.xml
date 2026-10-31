@@ -1,0 +1,4 @@
+<linker>
+  <!-- IL2CPP 裁剪兜底：保留音频服务程序集。 -->
+  <assembly fullname="Yato.Audio" preserve="all" />
+</linker>
