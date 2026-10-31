@@ -1,0 +1,23 @@
+{
+  "name": "Yato.UI.Input.Tests",
+  "references": [
+    "Yato.UI.Input",
+    "Yato.UI",
+    "Yato.Input",
+    "Yato.Mvc",
+    "Yato.Resources",
+    "Yato.Resources.Abstractions",
+    "Unity.InputSystem",
+    "UnityEngine.UI",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ]
+}

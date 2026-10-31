@@ -16,7 +16,7 @@
   "dependencies": {
     "com.yato.core": "0.1.0",
     "com.yato.resources": "0.2.1",
-    "com.yato.ui": "0.1.0",
+    "com.yato.ui": "0.2.0",
     "com.unity.ugui": "1.0.0",
     "com.unity.textmeshpro": "3.0.6",
     "com.yato.config": "0.1.0"

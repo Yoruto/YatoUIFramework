@@ -42,6 +42,8 @@
     "com.yato.input",
     "com.yato.flow",
     "com.yato.config",
-    "com.yato.save"
+    "com.yato.save",
+    "com.yato.pooling",
+    "com.yato.ui.input"
   ]
 }

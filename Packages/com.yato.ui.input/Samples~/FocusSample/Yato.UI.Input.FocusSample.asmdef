@@ -1,0 +1,14 @@
+{
+  "name": "Yato.UI.Input.FocusSample",
+  "references": [
+    "Yato.UI.Input",
+    "Yato.UI",
+    "Yato.Input",
+    "Yato.Mvc",
+    "Yato.Resources",
+    "Yato.Resources.Abstractions",
+    "UnityEngine.UI",
+    "Unity.InputSystem"
+  ],
+  "autoReferenced": true
+}

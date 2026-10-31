@@ -1,0 +1,22 @@
+{
+  "name": "com.yato.ui.input",
+  "version": "0.1.0",
+  "displayName": "Yato UI.Input",
+  "description": "Optional Unity 6 foundation module: ui.input",
+  "unity": "6000.0",
+  "author": {
+    "name": "Yato"
+  },
+  "dependencies": {
+    "com.yato.core": "0.1.0",
+    "com.yato.ui": "0.2.0",
+    "com.yato.input": "0.1.0"
+  },
+  "samples": [
+    {
+      "displayName": "FocusSample",
+      "description": "Neutral UGUI input, popup focus and transitions.",
+      "path": "Samples~/FocusSample"
+    }
+  ]
+}

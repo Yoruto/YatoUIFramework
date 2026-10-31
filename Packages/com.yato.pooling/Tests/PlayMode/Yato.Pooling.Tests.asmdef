@@ -1,0 +1,19 @@
+{
+  "name": "Yato.Pooling.Tests",
+  "references": [
+    "Yato.Pooling",
+    "Yato.Resources",
+    "Yato.Resources.Abstractions",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ]
+}

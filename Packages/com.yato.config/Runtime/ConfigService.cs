@@ -24,16 +24,6 @@ namespace Yato.Config
         public override Type RecordType => typeof(T);
         public override IEnumerable<ConfigRecord> Records => m_records ?? Array.Empty<T>();
     }
-    [CreateAssetMenu(menuName = "Yato/Config Catalog")]
-    public sealed class ConfigCatalog : ScriptableObject
-    {
-        public ConfigTableBase[] Tables = Array.Empty<ConfigTableBase>();
-        public IReadOnlyList<string> Validate()
-        {
-            try { using (var service = new ConfigService(this)) return Array.Empty<string>(); }
-            catch (ConfigValidationException error) { return error.Errors; }
-        }
-    }
     public sealed class ConfigValidationException : Exception
     {
         public IReadOnlyList<string> Errors { get; }

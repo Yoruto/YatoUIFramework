@@ -3,6 +3,14 @@
 所有对本包的改动都记录在此文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.5.0] - 2026-11-01
+
+- 新增资源实例池和值类型代次句柄，支持预热、容量和重复归还保护。
+- App 新增暂停令牌、生命周期信号和等待异步保存的显式退出协调器。
+- UI 新增无 Facade 事件、焦点策略、可选非缩放时间过渡和 CloseAsync；同步 Close 保持原行为。
+- 新增可选 UI/Input 适配，接管及恢复事件模块、输入上下文和嵌套焦点。
+- Flow/Config/Pooling 加入聚合包；Save/Input/UI.Input 仍可选。Yato Survivor 整体延期。
+
 ## [0.4.0] - 2026-11-01
 
 - 新增独立 Flow/Config 模块和可选 Save 包，保持同步 Bootstrap 与基础 Persistence 契约。
