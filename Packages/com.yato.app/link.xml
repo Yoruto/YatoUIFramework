@@ -1,0 +1,4 @@
+<linker>
+  <!-- IL2CPP 裁剪兜底：保留应用层程序集，避免按类型反射创建初始化器时被剥离。 -->
+  <assembly fullname="Yato.App" preserve="all" />
+</linker>

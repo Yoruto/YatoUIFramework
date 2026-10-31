@@ -1,0 +1,17 @@
+{
+    "name": "Yato.App",
+    "rootNamespace": "Yato.App",
+    "references": [
+        "Yato.Core",
+        "Yato.Resources.Abstractions"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

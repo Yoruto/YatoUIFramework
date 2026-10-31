@@ -1,0 +1,21 @@
+{
+  "name": "com.yato.app",
+  "version": "0.1.0",
+  "displayName": "Yato App",
+  "description": "Yato 框架应用层：GameBootstrap 幂等初始化/反向释放，SceneService 场景加载与卸载（Single/Additive、五态结果、SceneContext 资源追踪、Loaded/Ready 与初始化器超时）。",
+  "unity": "2022.3",
+  "unityRelease": "13f1",
+  "keywords": [
+    "framework",
+    "bootstrap",
+    "scene",
+    "yato"
+  ],
+  "author": {
+    "name": "Yato"
+  },
+  "dependencies": {
+    "com.yato.core": "0.1.0",
+    "com.yato.resources": "0.1.0"
+  }
+}

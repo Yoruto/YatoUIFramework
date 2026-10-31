@@ -59,7 +59,9 @@ sysinfo.txt
 *.apk
 *.aab
 *.unitypackage
+# macOS 应用包（*目录*）；必须排除 UPM 包目录 com.yato.app，否则整个包会被忽略
 *.app
+!/Packages/com.yato.app/
 
 # Crashlytics generated file
 crashlytics-build.properties
