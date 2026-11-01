@@ -87,6 +87,10 @@ namespace Yato.Save.Tests
             var saves = Service();
             await saves.SaveAsync("a", new Data { Count = 4 });
             await Expect<InvalidDataException>(async () => await saves.SaveAsync("a", new Data { Count = -1 }));
+            var diagnostic = saves.CaptureDiagnostics();
+            Assert.AreEqual("Idle", diagnostic.State);
+            StringAssert.Contains("Negative count", diagnostic.LastError);
+            Assert.AreEqual("Save", diagnostic.Values["Last operation"]);
             using (var cts = new CancellationTokenSource())
             {
                 cts.Cancel();
@@ -115,11 +119,16 @@ namespace Yato.Save.Tests
         {
             await Service().SaveAsync("a", new Data { Count = 1 });
             var heldStore = new HeldStore(m_store);
-            var first = new SaveService<Data>(heldStore, 1).LoadAsync("a");
+            var heldService = new SaveService<Data>(heldStore, 1);
+            var first = heldService.LoadAsync("a");
+            Assert.AreEqual("Busy", heldService.CaptureDiagnostics().State);
+            Assert.AreEqual("a", heldService.CaptureDiagnostics().Values["Active slots"]);
             await Expect<FileBusyException>(async () => await Service().LoadAsync("a"));
             await Service().SaveAsync("b", new Data { Count = 2 });
             heldStore.Read.SetResult(m_store.ReadAllText("saves/slot-a/primary.json"));
             Assert.AreEqual(1, (await first).Data.Count);
+            Assert.AreEqual("Idle", heldService.CaptureDiagnostics().State);
+            Assert.AreEqual("Loaded", heldService.CaptureDiagnostics().Values["Last load"]);
         }
 
         private static async Task Expect<TError>(Func<Task> operation) where TError : Exception

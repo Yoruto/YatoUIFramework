@@ -4,7 +4,8 @@
     "Yato.Save",
     "Yato.Persistence",
     "UnityEngine.TestRunner",
-    "UnityEditor.TestRunner"
+    "UnityEditor.TestRunner",
+    "Yato.Core"
   ],
   "includePlatforms": [
     "Editor"

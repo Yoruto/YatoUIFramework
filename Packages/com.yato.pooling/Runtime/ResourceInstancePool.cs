@@ -27,7 +27,7 @@ namespace Yato.Pooling
     }
 
     /// <summary>Main-thread, resource-owned bounded GameObject pool. Track the pool itself in a ResourceScope.</summary>
-    public sealed class ResourceInstancePool : IDisposable
+    public sealed class ResourceInstancePool : IDisposable, IDiagnosticSource
     {
         internal sealed class Slot
         {
@@ -42,6 +42,10 @@ namespace Yato.Pooling
         private readonly ObjectPool<Slot> m_pool;
         private readonly List<Slot> m_slots;
         private bool m_disposed;
+        private readonly IDisposable m_diagnostics;
+        private string m_lastFailure;
+        public DiagnosticSnapshot CaptureDiagnostics() => new DiagnosticSnapshot("Pooling", m_prefab.Key.ToString(), m_disposed ? "Disposed" : "Ready", m_lastFailure,
+            new Dictionary<string, string> { ["Capacity"] = Capacity.ToString(), ["Active"] = ActiveCount.ToString(), ["Peak"] = PeakActiveCount.ToString(), ["Created"] = CreatedCount.ToString(), ["Inactive"] = m_pool.CountInactive.ToString() });
         public int Capacity { get; }
         public int ActiveCount { get; private set; }
         public int PeakActiveCount { get; private set; }
@@ -54,6 +58,7 @@ namespace Yato.Pooling
             m_prefab = prefab; Capacity = capacity; m_parent = parent;
             m_slots = new List<Slot>(capacity);
             m_pool = new ObjectPool<Slot>(CreateSlot, null, Deactivate, null, false, capacity, capacity);
+            m_diagnostics = DiagnosticRegistry.Register(this);
         }
 
         public static IAwaitable<ResourceInstancePool> CreateAsync(IResourceService resources, AssetKey key,
@@ -138,7 +143,7 @@ namespace Yato.Pooling
                 if (!lease.IsValid) return false;
                 instance = lease; return true;
             }
-            catch { lease.Dispose(); throw; }
+            catch (Exception error) { m_lastFailure = error.ToString(); lease.Dispose(); throw; }
         }
         public void Prewarm(int count)
         {
@@ -153,7 +158,7 @@ namespace Yato.Pooling
         public void Dispose()
         {
             if (m_disposed) return;
-            m_disposed = true;
+            m_disposed = true; m_diagnostics.Dispose();
             foreach (var slot in m_slots)
             {
                 slot.Active = false; slot.Generation++;

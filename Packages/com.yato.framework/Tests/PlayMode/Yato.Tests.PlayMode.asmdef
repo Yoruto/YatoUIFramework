@@ -11,7 +11,9 @@
         "Yato.App",
         "Yato.Persistence",
         "Yato.Settings",
-        "Yato.Audio"
+        "Yato.Audio",
+        "Yato.Flow",
+        "Yato.Pooling"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

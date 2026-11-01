@@ -1,3 +1,5 @@
+最新 0.6 API 与接入工具见 [0.6 指南](foundation06.md)。
+
 0.5.0 模块与通用演示见 [基础模块指南](foundation.md)。
 
 # Yato Framework 快速上手

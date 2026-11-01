@@ -46,7 +46,19 @@ namespace Yato.Resources
 
         public ResourceStats Stats
         {
-            get { return m_provider.Stats ?? ResourceStats.Empty; }
+            get
+            {
+                // Providers know bundle residency; only this service owns the handle table.
+                // Return a snapshot without mutating a provider's shared stats (or Empty).
+                var provider = m_provider.Stats ?? ResourceStats.Empty;
+                return new ResourceStats
+                {
+                    ActiveAssetCount = ActiveAssetCount,
+                    LoadedBundleCount = provider.LoadedBundleCount,
+                    TotalBundleBytes = provider.TotalBundleBytes,
+                    Bundles = provider.Bundles
+                };
+            }
         }
 
         /// <summary>当前被句柄持有的资产数（诊断用）。</summary>

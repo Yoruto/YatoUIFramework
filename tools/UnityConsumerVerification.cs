@@ -39,7 +39,12 @@ namespace Yato
             var allScenes = new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
             foreach (string optional in new[] { "FocusSample/Scenes/FocusSample.unity", "CounterSample/Scenes/CounterSample.unity" })
                 if (File.Exists(Samples + optional)) allScenes.Add(new EditorBuildSettingsScene(Samples + optional, true));
+            const string starterFolder = "Assets/GeneratedYatoStarter";
+            if (!Directory.Exists(starterFolder)) Yato.Editor.ProjectSetupWizard.Create(starterFolder);
+            string starterScene = starterFolder + "/Bootstrap.unity";
+            if (!allScenes.Exists(x => x.path == starterScene)) allScenes.Add(new EditorBuildSettingsScene(starterScene, true));
             EditorBuildSettings.scenes = allScenes.ToArray();
+            Yato.Editor.ProjectDoctor.ValidateOrThrow();
             if (File.Exists(Samples + "FocusSample/Scenes/FocusSample.unity"))
             {
                 var settings = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/ProjectSettings.asset")[0]);
@@ -71,10 +76,10 @@ namespace Yato
             string output = Path.GetFullPath("Build/YatoConsumer.exe");
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
-                scenes = new[] { Samples + "BasicSample/Scenes/YatoBasic.unity", Samples + "BasicSample/Scenes/YatoBasicSecond.unity", Samples + "FullSample/Scenes/YatoFull.unity" },
+                scenes = new[] { Samples + "BasicSample/Scenes/YatoBasic.unity", Samples + "BasicSample/Scenes/YatoBasicSecond.unity", Samples + "FullSample/Scenes/YatoFull.unity", "Assets/GeneratedYatoStarter/Bootstrap.unity" },
                 locationPathName = output,
                 target = BuildTarget.StandaloneWindows64,
-                options = BuildOptions.Development
+                options = BuildOptions.None
             });
             if (report.summary.result != BuildResult.Succeeded) throw new InvalidOperationException(report.summary.result.ToString());
             Debug.Log("[Yato.ConsumerVerification] Windows Player built: " + output);

@@ -115,6 +115,20 @@ namespace Yato
             UIRouter.CloseAll();
             GameBootstrap.Shutdown();
             Check(!GameBootstrap.IsInitialized, "Shutdown");
+            var oldBootstrap = GameBootstrap.Instance;
+            if (oldBootstrap != null) UnityEngine.Object.Destroy(oldBootstrap.gameObject);
+            yield return null;
+            yield return SceneManager.LoadSceneAsync("Bootstrap");
+            deadline = Time.realtimeSinceStartup + 5;
+            while (UIRouter.Stack.Find("Main") == null && Time.realtimeSinceStartup < deadline) yield return null;
+            Check(GameBootstrap.IsInitialized && UIRouter.Stack.Find("Main") != null, "Generated starter catalog");
+            var starterPage = UnityEngine.Object.FindAnyObjectByType<UIPageView>();
+            Check(starterPage != null, "Generated starter view");
+            starterPage.GetComponentInChildren<UnityEngine.UI.Button>(true).onClick.Invoke();
+            yield return null;
+            Check(UIRouter.Stack.Find("Main") == null, "Generated starter button");
+            Check(UIRouter.Resources.Stats.ActiveAssetCount == 0, "Generated starter resource release");
+            GameBootstrap.Shutdown();
         }
         private static void Check(bool condition, string stage)
         {

@@ -3,6 +3,15 @@
 所有对本包的改动都记录在此文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.6.0] - 2026-11-01
+
+- 新增 Task/IAwaitable 互操作及直接 await，补齐主线程投递、会话生命周期和异常隔离。
+- 新增弱引用诊断快照和统一面板，接入 Flow、ResourceScope、UI、Pooling、Pause 与可选 Save。
+- 新增 UIPageCatalog、资源服务注入、无覆盖项目向导与统一构建预检。
+- 可选 UI/Input 新增配置资产和动作路径校验；FullSample 使用 await 演示资源范围。
+- 增加百轮生命周期回归与独立工程 Domain/Scene Reload 验证工具；IL2CPP 支持模块下载 404，单列待验收。
+- 修复资源活跃计数与旧统计快照受后续加载影响的问题，保留 Resources 共享资源释放策略。
+
 ## [0.5.0] - 2026-11-01
 
 - 新增资源实例池和值类型代次句柄，支持预热、容量和重复归还保护。

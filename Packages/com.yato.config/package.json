@@ -1,6 +1,6 @@
 {
   "name": "com.yato.config",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Yato Config",
   "description": "Optional Unity 6 foundation module: config",
   "unity": "6000.0",
@@ -8,8 +8,8 @@
     "name": "Yato"
   },
   "dependencies": {
-    "com.yato.core": "0.1.0",
-    "com.yato.resources": "0.2.1",
+    "com.yato.core": "0.2.0",
+    "com.yato.resources": "0.3.0",
     "com.unity.modules.jsonserialize": "1.0.0"
   }
 }

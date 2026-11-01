@@ -42,6 +42,16 @@ namespace Yato.UI.Input
         private UIPageTransition m_watchedTransition;
         private bool m_disposed;
 
+        public UIInputCoordinator(InputContextService input, EventSystem events, UIInputProfile profile)
+            : this(input, events, ValidateProfile(input, profile).BaseMap, profile.UIMap, profile.Bindings) { }
+        private static UIInputProfile ValidateProfile(InputContextService input, UIInputProfile profile)
+        {
+            if (profile == null) throw new ArgumentNullException(nameof(profile));
+            var errors = profile.ValidateAgainst(input?.Actions);
+            if (errors.Count > 0) throw new ArgumentException(string.Join("\n", errors));
+            return profile;
+        }
+
         public UIInputCoordinator(InputContextService input, EventSystem events, string baseMap,
             string uiMap, UIInputBindings bindings = null)
         {

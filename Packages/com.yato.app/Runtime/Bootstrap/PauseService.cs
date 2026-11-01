@@ -6,18 +6,22 @@ using Yato.Core;
 namespace Yato.App
 {
     /// <summary>Main-thread nested pause tokens. One service should own Time.timeScale for the application.</summary>
-    public sealed class PauseService : IDisposable
+    public sealed class PauseService : IDisposable, IDiagnosticSource
     {
         private readonly Dictionary<int, string> m_tokens = new Dictionary<int, string>();
         private int m_sequence;
         private float m_resumeScale;
         private bool m_disposed;
         private IDisposable m_focusPause;
+        private readonly IDisposable m_diagnostics;
+        public DiagnosticSnapshot CaptureDiagnostics() => new DiagnosticSnapshot("App", "PauseService", IsPaused ? "Paused" : "Running", values:
+            new Dictionary<string, string> { ["Tokens"] = PauseCount.ToString(), ["Reasons"] = string.Join(", ", m_tokens.Values), ["Time scale"] = Time.timeScale.ToString() });
         public bool IsPaused => m_tokens.Count > 0;
         public int PauseCount => m_tokens.Count;
         public event Action<bool> Changed;
         public PauseService(bool pauseOnFocusLoss = false)
         {
+            m_diagnostics = DiagnosticRegistry.Register(this);
             if (pauseOnFocusLoss)
             {
                 ApplicationLifecycle.FocusChanged += OnFocus;
@@ -52,7 +56,7 @@ namespace Yato.App
         public void Dispose()
         {
             if (m_disposed) return;
-            m_disposed = true;
+            m_disposed = true; m_diagnostics.Dispose();
             ApplicationLifecycle.FocusChanged -= OnFocus;
             m_focusPause?.Dispose(); m_focusPause = null;
             if (m_tokens.Count > 0) { m_tokens.Clear(); Time.timeScale = m_resumeScale; Raise(false); }

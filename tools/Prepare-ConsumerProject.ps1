@@ -16,6 +16,9 @@ if ($IncludeSave) { $packages += 'save' }
 New-Item -ItemType Directory -Path (Join-Path $targetRoot 'Packages') -Force | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $targetRoot 'Assets') -Force | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $targetRoot 'ProjectSettings') -Force | Out-Null
+# A bare Unity 6.5 batch project needs a search index before repeated domain reloads.
+$searchIndex = @{ name = 'assets'; type = 'asset'; roots = @('Assets'); includes = @(); excludes = @(); options = @{ disabled = $false; types = $true; properties = $false; extended = $false; dependencies = $false }; baseScore = 100 }
+$searchIndex | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $targetRoot 'Assets/YatoVerification.index') -Encoding utf8
 foreach ($package in $packages) {
     Copy-Item -LiteralPath (Join-Path $sourceRoot "Packages/com.yato.$package") -Destination (Join-Path $targetRoot 'Packages') -Recurse
 }
@@ -35,6 +38,7 @@ if ($PackageSet -eq 'Full') {
     Copy-Item -LiteralPath (Join-Path $sourceRoot 'Packages/com.yato.framework/Samples~/YatoFrameworkDemo/Yato.FrameworkDemo.asmdef') -Destination $legacyTarget
     New-Item -ItemType Directory -Path (Join-Path $targetRoot 'Assets/Editor') -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityConsumerVerification.cs') -Destination (Join-Path $targetRoot 'Assets/Editor')
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityLifecycleVerification.cs') -Destination (Join-Path $targetRoot 'Assets/Editor')
     if ($IncludeInput -and $IncludeSave) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'OptionalConsumerSmokeTests') -Destination (Join-Path $targetRoot 'Assets') -Recurse }
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'ConsumerPlayerSmoke.cs') -Destination (Join-Path $targetRoot 'Assets')
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'ConsumerSmokeTests') -Destination (Join-Path $targetRoot 'Assets') -Recurse

@@ -14,7 +14,8 @@
     "Yato.FrameworkDemo",
     "Yato.Flow",
     "Yato.Config",
-    "Yato.Pooling"
+    "Yato.Pooling",
+    "UnityEngine.UI"
   ],
   "includePlatforms": [],
   "overrideReferences": true,

@@ -72,6 +72,7 @@ namespace Yato.UI
         /// <summary>注入资源服务与门面（T-P1-09：UI 不依赖具体资源实现）。</summary>
         public static void Configure(IResourceService resources, IFacade facade = null)
         {
+            EnsureDiagnostics();
             s_resources = resources ?? NullResourceService.Instance;
             s_facade = facade;
             s_factory = new UIPageFactory(s_resources);
@@ -84,6 +85,7 @@ namespace Yato.UI
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetOnPlayMode()
         {
+            s_diagnosticRegistration?.Dispose(); s_diagnosticRegistration = null;
             ResetUiExtensions();
             // 丢弃前必须释放实例与句柄，否则关闭 Domain Reload 时缓存页会跨会话泄漏
             DisposeAllPages();

@@ -29,13 +29,19 @@ namespace Yato.Flow
     }
 
     /// <summary>Main-thread flow transitions, above the synchronous Bootstrap contract.</summary>
-    public sealed class FlowController : IDisposable
+    public sealed class FlowController : IDisposable, IDiagnosticSource
     {
         private readonly Dictionary<string, IFlowState> m_states = new Dictionary<string, IFlowState>(StringComparer.Ordinal);
         private IFlowState m_current;
         private FlowContext m_context;
         private CancellationTokenSource m_transition;
         private bool m_disposed;
+        private readonly IDisposable m_diagnostics;
+        private string m_target, m_lastFailure;
+        private double m_transitionStarted;
+        public DiagnosticSnapshot CaptureDiagnostics() => new DiagnosticSnapshot("Flow", "FlowController", IsBusy ? "Transitioning" : CurrentStateId ?? "Idle", m_lastFailure,
+            new Dictionary<string, string> { ["Current"] = CurrentStateId ?? "none", ["Target"] = m_target ?? "none",
+                ["Busy"] = IsBusy.ToString(), ["Wait seconds"] = (IsBusy ? UnityEngine.Time.realtimeSinceStartupAsDouble - m_transitionStarted : 0).ToString("F2") });
         public bool IsBusy { get; private set; }
         public string CurrentStateId => m_current?.Id;
         public event Action<FlowResult> TransitionCompleted;
@@ -49,6 +55,7 @@ namespace Yato.Flow
                     throw new ArgumentException("Null state, empty ID or duplicate flow ID");
                 m_states.Add(state.Id, state);
             }
+            m_diagnostics = DiagnosticRegistry.Register(this);
         }
 
         public IAwaitable<FlowResult> SwitchAsync(string stateId, CancellationToken ct = default)
@@ -61,6 +68,7 @@ namespace Yato.Flow
                 source.SetResult(new FlowResult { Status = FlowStatus.Failed, StateId = stateId, Error = new ArgumentException("Unknown flow state: " + stateId) });
                 return source;
             }
+            m_target = stateId; m_transitionStarted = UnityEngine.Time.realtimeSinceStartupAsDouble;
             IsBusy = true;
             m_transition = CancellationTokenSource.CreateLinkedTokenSource(ct);
             try { RuntimeHost.RunCoroutine(Guard(state, source, m_transition)); }
@@ -95,6 +103,7 @@ namespace Yato.Flow
             finally
             {
                 (routine as IDisposable)?.Dispose();
+                if (result.Status == FlowStatus.Failed) m_lastFailure = result.Error?.ToString();
                 source.SetResult(result);
                 Raise(result);
             }
@@ -176,6 +185,7 @@ namespace Yato.Flow
         {
             if (m_disposed) return;
             m_disposed = true;
+            m_diagnostics.Dispose();
             TransitionCompleted = null;
             m_transition?.Cancel();
             if (!IsBusy) ReleaseCurrent();

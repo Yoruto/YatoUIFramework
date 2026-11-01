@@ -10,7 +10,8 @@
     "Unity.InputSystem",
     "UnityEngine.UI",
     "UnityEngine.TestRunner",
-    "UnityEditor.TestRunner"
+    "UnityEditor.TestRunner",
+    "Yato.Core"
   ],
   "overrideReferences": true,
   "precompiledReferences": [

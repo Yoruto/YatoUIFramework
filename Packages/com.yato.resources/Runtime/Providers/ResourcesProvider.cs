@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using Yato.Core;
@@ -12,6 +13,7 @@ namespace Yato.Resources
     public sealed class ResourcesProvider : IResourceProvider
     {
         private readonly ResourceStats m_stats = new ResourceStats();
+        private readonly Dictionary<AssetKey, int> m_references = new Dictionary<AssetKey, int>();
 
         public ResourceStats Stats
         {
@@ -44,7 +46,9 @@ namespace Yato.Resources
                         "Resources 中不存在该资源（降级模式）");
                 }
 
-                m_stats.ActiveAssetCount++;
+                m_references.TryGetValue(key, out int references);
+                m_references[key] = references + 1;
+                m_stats.ActiveAssetCount = m_references.Count;
                 source.SetResult(asset);
             }
             catch (Exception e)
@@ -58,13 +62,16 @@ namespace Yato.Resources
         /// <summary>Resources 模式不做单资源释放，避免 <see cref="Resources.UnloadAsset"/> 误伤共享资源。</summary>
         public void Release(AssetKey key)
         {
+            if (!m_references.TryGetValue(key, out int references)) return;
+            if (references <= 1) m_references.Remove(key);
+            else m_references[key] = references - 1;
+            m_stats.ActiveAssetCount = m_references.Count;
         }
 
         public void ReleaseUnused()
         {
             // 只允许在场景切换 / 显式调用时触发（文档 3.3 第 4 条）
             UnityEngine.Resources.UnloadUnusedAssets();
-            m_stats.ActiveAssetCount = 0;
             Log.Debug("[ResourcesProvider] 已执行 UnloadUnusedAssets");
         }
     }

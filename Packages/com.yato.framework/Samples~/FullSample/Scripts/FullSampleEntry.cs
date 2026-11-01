@@ -92,34 +92,23 @@ namespace Yato.FullSample
             foreach (var item in m_rentals) item.Dispose();
             m_rentals.Clear();
         }
-        private IAwaitable LoadFoundation(FlowContext context, CancellationToken ct)
+        private IAwaitable LoadFoundation(FlowContext context, CancellationToken ct) => LoadFoundationAsync(context, ct).AsAwaitable();
+        private async System.Threading.Tasks.Task LoadFoundationAsync(FlowContext context, CancellationToken ct)
         {
-            var done = new Yato.Resources.AwaitableCompletionSource();
-            var config = ConfigService.LoadAsync(m_service.Resources, new AssetKey("yato/full/catalog"), ct);
-            config.Completed += () =>
+            ConfigService config = null;
+            ResourceInstancePool pool = null;
+            try
             {
-                ConfigService ownedConfig = null;
-                try
-                {
-                    ownedConfig = config.GetResult(); ct.ThrowIfCancellationRequested();
-                    DemoConfig = context.Resources.Track(ownedConfig); ownedConfig = null;
-                    var pool = ResourceInstancePool.CreateAsync(m_service.Resources, new AssetKey("yato/full/pool-item"),
-                        DemoConfig.Get<DemoConfigRecord>("demo").PoolCapacity, ct: ct);
-                    pool.Completed += () =>
-                    {
-                        ResourceInstancePool ownedPool = null;
-                        try
-                        {
-                            ownedPool = pool.GetResult(); ct.ThrowIfCancellationRequested();
-                            DemoPool = context.Resources.Track(ownedPool); ownedPool = null;
-                            DemoPool.Prewarm(DemoPool.Capacity); done.SetResult();
-                        }
-                        catch (Exception error) { ownedPool?.Dispose(); done.SetException(error); }
-                    };
-                }
-                catch (Exception error) { ownedConfig?.Dispose(); done.SetException(error); }
-            };
-            return done;
+                config = await ConfigService.LoadAsync(m_service.Resources, new AssetKey("yato/full/catalog"), ct);
+                ct.ThrowIfCancellationRequested();
+                DemoConfig = context.Resources.Track(config); config = null;
+                pool = await ResourceInstancePool.CreateAsync(m_service.Resources, new AssetKey("yato/full/pool-item"),
+                    DemoConfig.Get<DemoConfigRecord>("demo").PoolCapacity, ct: ct);
+                ct.ThrowIfCancellationRequested();
+                DemoPool = context.Resources.Track(pool); pool = null;
+                DemoPool.Prewarm(DemoPool.Capacity);
+            }
+            finally { pool?.Dispose(); config?.Dispose(); }
         }
         private sealed class DemoState : IFlowState
         {

@@ -85,14 +85,9 @@ namespace Yato.Resources
                 return;
             }
 
-            try
-            {
-                handler();
-            }
-            catch (Exception e)
-            {
-                Yato.Core.Log.Error("Awaitable", "完成回调异常", e);
-            }
+            foreach (Action callback in handler.GetInvocationList())
+                try { callback(); }
+                catch (Exception e) { Yato.Core.Log.Error("Awaitable", "完成回调异常", e); }
         }
     }
 
@@ -131,6 +126,7 @@ namespace Yato.Resources
 
         public void SetResult(T result)
         {
+            if (m_done) return;
             m_result = result;
             Complete(null);
         }
@@ -182,14 +178,9 @@ namespace Yato.Resources
                 return;
             }
 
-            try
-            {
-                handler();
-            }
-            catch (Exception e)
-            {
-                Yato.Core.Log.Error("Awaitable", "完成回调异常", e);
-            }
+            foreach (Action callback in handler.GetInvocationList())
+                try { callback(); }
+                catch (Exception e) { Yato.Core.Log.Error("Awaitable", "完成回调异常", e); }
         }
     }
 }

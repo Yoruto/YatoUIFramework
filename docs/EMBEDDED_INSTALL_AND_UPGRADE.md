@@ -1,6 +1,6 @@
-# 嵌入式安装、示例与升级（0.5.0）
+# 嵌入式安装、示例与升级（0.6.0）
 
-仅支持 Unity 6，包最低声明为 6000.0，当前开发与实测为 6000.5.6f1。当前结果见 [实施记录](FOUNDATION_IMPLEMENTATION_2026-11-01.md)，API 见 [基础模块指南](../Packages/com.yato.framework/Documentation~/foundation.md)。
+仅支持 Unity 6，包最低声明为 6000.0，当前开发与实测为 6000.5.6f1。当前结果见 [实施记录](FRAMEWORK_06_IMPLEMENTATION_2026-11-01.md)，API 见 [0.6 指南](../Packages/com.yato.framework/Documentation~/foundation06.md)。
 
 ## 包集
 
@@ -8,22 +8,22 @@
 
 | 包 | 版本 | 直接 Yato 依赖 |
 |---|---|---|
-| Core | 0.1.0 | 无 |
-| Persistence | 0.1.0 | Core |
-| Resources | 0.2.1 | Core、Persistence |
+| Core | 0.2.0 | 无 |
+| Persistence | 0.1.1 | Core |
+| Resources | 0.3.0 | Core、Persistence |
 | Mvc | 0.1.0 | 无 |
-| UI | 0.2.0 | Core、Resources、Mvc |
-| App | 0.2.0 | Core、Resources |
-| Settings | 0.1.0 | Core、Persistence |
-| Audio | 0.1.0 | Core、Resources |
-| Flow | 0.1.0 | Core、App、Resources |
-| Config | 0.1.0 | Core、Resources |
-| Pooling | 0.1.0 | Core、Resources |
-| Editor | 0.2.0 | Core、Resources、UI、Config |
-| Framework | 0.5.0 | 上述默认包 |
+| UI | 0.3.0 | Core、Resources、Mvc |
+| App | 0.3.0 | Core、Resources |
+| Settings | 0.1.1 | Core、Persistence |
+| Audio | 0.1.1 | Core、Resources |
+| Flow | 0.2.0 | Core、App、Resources |
+| Config | 0.2.0 | Core、Resources |
+| Pooling | 0.2.0 | Core、Resources |
+| Editor | 0.3.0 | Core、Resources、UI、Config、App |
+| Framework | 0.6.0 | 上述默认包 |
 | Input（可选） | 0.1.0 | 无；依赖 Unity Input System |
-| Save（可选） | 0.1.0 | Core、Persistence |
-| UI.Input（可选） | 0.1.0 | Core、UI、Input |
+| Save（可选） | 0.2.0 | Core、Persistence |
+| UI.Input（可选） | 0.2.0 | Core、UI、Input |
 
 - 完整默认包集共 13 包，不含 Save/Input/UI.Input。
 - 精简 UI 包集：Core、Persistence、Resources、Mvc、UI，共五包；BasicSample 再增加 App。
@@ -44,7 +44,7 @@
 
 ## 升级与行为
 
-- 各模块版本独立维护，整体功能版本为 Framework 0.5.0；替换完整包目录，保留 GUID，避免并排安装多个版本。
+- 各模块版本独立维护，整体功能版本为 Framework 0.6.0；替换完整包目录，保留 GUID，避免并排安装多个版本。
 - 导入到 Assets 的样例是副本，升级不会自动覆盖。备份或移除旧副本后再导入，避免重复 GUID。
 - Bundle 模式默认 BundleRequired；只有显式 AllowResourcesFallback 才降级。纯 Resources 项目直接传入 ResourcesProvider。
 - 热更采用 GUID 暂存、完整校验和活动指针提交；失败/提交前取消保留旧版本，提交后取消报告实际结果。Provider 固定其版本目录，缺包不跨版本混用。
@@ -70,3 +70,6 @@ UPM 卸载不会删除 persistentDataPath 中的设置或缓存，用户数据�
 目标目录必须不存在。Full 复制新样例、旧样例兼容脚本、Editor 检查和消费侧测试；同时开启两个可选开关时加入可选样例测试。
 手动执行 Unity 的 Yato.ConsumerVerification.Verify 检查场景与真实配置资产，再运行 PlayMode 测试。BuildWindows 构建基础 Player；BuildFocusWindows 构建可视焦点示例。
 工具只修改创建的消费工程设置，可选示例工程设置 Both 输入后应重启一次 Unity 再执行交互测试。无 Actions 或其他 CI 配置。
+
+
+0.6 新增接口与行为见 [0.6 指南](../Packages/com.yato.framework/Documentation~/foundation06.md)。

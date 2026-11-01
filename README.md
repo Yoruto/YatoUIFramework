@@ -2,12 +2,13 @@
 
 Yato 通用 Unity 框架（UPM 多包）：UI 路由与生命周期、资源与热更、启动与场景、持久化、设置、音频，以及编辑器工具链。
 
-当前状态：`0.5.0`（聚合包 `com.yato.framework`）。已补齐流程、ScriptableObject 配置、实例池、暂停/退出协调和可选存档、UI/Input；框架验收见最新实施记录。Yato Survivor 整体延期。
+当前状态：`0.6.0`（聚合包 `com.yato.framework`）。新增 Task/IAwaitable 桥接、统一诊断、项目接入向导与构建预检；已完成百轮生命周期及 Domain/Scene Reload 矩阵验证，详见最新实施记录。Yato Survivor 整体延期。
 
 ## 文档
 
 | 文档 | 内容 |
 |---|---|
+| [0.6 框架实施记录](docs/FRAMEWORK_06_IMPLEMENTATION_2026-11-01.md) | 异步桥接、诊断、接入与生命周期验收 |
 | [0.5 框架实施记录](docs/FOUNDATION_IMPLEMENTATION_2026-11-01.md) | 分阶段提交、测试证据、性能与待验收项 |
 | [最新优化计划](docs/YatoFramework_STABILITY_AND_REUSE_IMPROVEMENT_PLAN_2026-10-31.md) | 稳定性与复用优化范围（不含 CI） |
 | [安装与升级](docs/EMBEDDED_INSTALL_AND_UPGRADE.md) | 完整/精简包集、独立示例 Quick Start、兼容性迁移 |

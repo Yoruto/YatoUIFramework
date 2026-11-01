@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using Yato.Core;
@@ -15,6 +16,7 @@ namespace Yato.Resources
     public sealed class EditorAssetProvider : IResourceProvider
     {
         private readonly ResourceStats m_stats = new ResourceStats();
+        private readonly Dictionary<AssetKey, int> m_references = new Dictionary<AssetKey, int>();
 
         /// <summary>额外搜索根目录（相对 Assets），按顺序尝试。</summary>
         public readonly string[] SearchRoots;
@@ -67,7 +69,9 @@ namespace Yato.Resources
                         key.ToString(), null, ResourceStage.AssetLoad, "AssetDatabase 加载结果为空：" + path);
                 }
 
-                m_stats.ActiveAssetCount++;
+                m_references.TryGetValue(key, out int references);
+                m_references[key] = references + 1;
+                m_stats.ActiveAssetCount = m_references.Count;
                 Log.Debug(string.Format("[EditorAssetProvider] {0} -> {1}", key, path));
                 source.SetResult(asset);
             }
@@ -85,6 +89,10 @@ namespace Yato.Resources
 
         public void Release(AssetKey key)
         {
+            if (!m_references.TryGetValue(key, out int references)) return;
+            if (references <= 1) m_references.Remove(key);
+            else m_references[key] = references - 1;
+            m_stats.ActiveAssetCount = m_references.Count;
         }
 
         public void ReleaseUnused()

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Yato.Config
 {
     [CreateAssetMenu(menuName = "Yato/Config Catalog")]
-    public sealed class ConfigCatalog : ScriptableObject
+    public sealed class ConfigCatalog : ScriptableObject, Yato.Core.IProjectValidationSource
     {
         public ConfigTableBase[] Tables = Array.Empty<ConfigTableBase>();
         public IReadOnlyList<string> Validate()

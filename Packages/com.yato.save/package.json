@@ -1,6 +1,6 @@
 {
   "name": "com.yato.save",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Yato Save",
   "description": "Optional Unity 6 foundation module: save",
   "unity": "6000.0",
@@ -8,8 +8,8 @@
     "name": "Yato"
   },
   "dependencies": {
-    "com.yato.core": "0.1.0",
-    "com.yato.persistence": "0.1.0"
+    "com.yato.core": "0.2.0",
+    "com.yato.persistence": "0.1.1"
   },
   "samples": [
     {

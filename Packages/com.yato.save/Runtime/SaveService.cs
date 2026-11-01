@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Yato.Persistence;
+using Yato.Core;
 
 namespace Yato.Save
 {
@@ -64,7 +65,7 @@ namespace Yato.Save
     }
 
     /// <summary>Optional save policy above IFileStore. Corrupt files are never silently replaced or recovered.</summary>
-    public sealed class SaveService<T> : ISaveService<T> where T : class
+    public sealed class SaveService<T> : ISaveService<T>, IDiagnosticSource where T : class
     {
         private readonly IFileStore m_store;
         private readonly ISerializer m_serializer;
@@ -72,6 +73,16 @@ namespace Yato.Save
         private readonly Func<T, string> m_validate;
         private readonly string m_directory;
         private readonly int m_version;
+        private readonly object m_diagnosticGate = new object();
+        private readonly Dictionary<string, string> m_activeOperations = new Dictionary<string, string>();
+        private string m_lastOperation, m_lastSlot, m_lastFailure, m_lastLoadStatus;
+        public DiagnosticSnapshot CaptureDiagnostics()
+        {
+            lock (m_diagnosticGate) return new DiagnosticSnapshot("Save", typeof(T).Name, m_activeOperations.Count == 0 ? "Idle" : "Busy", m_lastFailure,
+                new Dictionary<string, string> { ["Last operation"] = m_lastOperation ?? "none", ["Last slot"] = m_lastSlot ?? "none",
+                    ["Last load"] = m_lastLoadStatus ?? "none", ["Active slots"] = string.Join(", ", m_activeOperations.Keys), ["Data version"] = m_version.ToString() });
+        }
+        private void RecordFailure(Exception error) { lock (m_diagnosticGate) m_lastFailure = error?.Message; }
 
         public SaveService(IFileStore store, int dataVersion, Func<T, string> validate = null,
             ISaveMigrator<T> migrator = null, string directory = "saves", ISerializer serializer = null)
@@ -81,6 +92,7 @@ namespace Yato.Save
             m_directory = PersistencePaths.Normalize(directory);
             m_version = dataVersion; m_validate = validate; m_migrator = migrator;
             m_serializer = serializer ?? new JsonUtilitySerializer();
+            DiagnosticRegistry.Register(this); // Registry is weak: diagnostics never extend a save service lifetime.
         }
 
         private string SlotDirectory(string id)
@@ -90,7 +102,25 @@ namespace Yato.Save
                 throw new ArgumentException("Slot ID must contain 1-64 ASCII letters, digits, '_' or '-'", nameof(id));
             return m_directory + "/slot-" + id;
         }
-        private IDisposable Acquire(string id) => SaveSlotGate.Acquire(Path.GetFullPath(Path.Combine(m_store.RootPath, SlotDirectory(id))));
+        private IDisposable Acquire(string id, string operation)
+        {
+            IDisposable gate;
+            try { gate = SaveSlotGate.Acquire(Path.GetFullPath(Path.Combine(m_store.RootPath, SlotDirectory(id)))); }
+            catch (Exception error) { RecordFailure(error); throw; }
+            lock (m_diagnosticGate) { m_activeOperations.Add(id, operation); m_lastOperation = operation; m_lastSlot = id; }
+            return new DiagnosticLease(this, id, gate);
+        }
+        private sealed class DiagnosticLease : IDisposable
+        {
+            private readonly SaveService<T> m_owner; private readonly string m_id; private IDisposable m_gate;
+            public DiagnosticLease(SaveService<T> owner, string id, IDisposable gate) { m_owner = owner; m_id = id; m_gate = gate; }
+            public void Dispose()
+            {
+                if (m_gate == null) return;
+                lock (m_owner.m_diagnosticGate) m_owner.m_activeOperations.Remove(m_id);
+                m_gate.Dispose(); m_gate = null;
+            }
+        }
         private string Primary(string id) => SlotDirectory(id) + "/primary.json";
         private string Backup(string id) => SlotDirectory(id) + "/backup.json";
         private void Validate(T data)
@@ -145,42 +175,52 @@ namespace Yato.Save
 
         public async Task<SaveLoadResult<T>> LoadAsync(string slotId, CancellationToken ct = default)
         {
-            using (Acquire(slotId))
+            using (Acquire(slotId, "Load"))
             {
                 var primary = await Read(Primary(slotId), ct);
                 primary.BackupAvailable = Valid(await Read(Backup(slotId), ct));
+                lock (m_diagnosticGate) m_lastLoadStatus = primary.Status.ToString();
+                if (primary.Error != null) RecordFailure(primary.Error);
                 return primary;
             }
         }
 
         public async Task SaveAsync(string slotId, T data, CancellationToken ct = default)
         {
-            using (Acquire(slotId))
+            try
             {
-                ct.ThrowIfCancellationRequested();
-                string next = Encode(data); // Snapshot caller data before the first asynchronous boundary.
-                string primaryPath = Primary(slotId);
-                if (m_store.Exists(primaryPath))
+                using (Acquire(slotId, "Save"))
                 {
-                    string old = await m_store.ReadAllTextAsync(primaryPath, ct);
-                    var previous = Decode(old);
-                    if (!Valid(previous)) throw new InvalidDataException("Existing save is unreadable; explicitly recover or delete it before saving", previous.Error);
-                    await m_store.WriteAllTextAsync(Backup(slotId), old, ct);
+                    ct.ThrowIfCancellationRequested();
+                    string next = Encode(data);
+                    string primaryPath = Primary(slotId);
+                    if (m_store.Exists(primaryPath))
+                    {
+                        string old = await m_store.ReadAllTextAsync(primaryPath, ct);
+                        var previous = Decode(old);
+                        if (!Valid(previous)) throw new InvalidDataException("Existing save is unreadable; explicitly recover or delete it before saving", previous.Error);
+                        await m_store.WriteAllTextAsync(Backup(slotId), old, ct);
+                    }
+                    await m_store.WriteAllTextAsync(primaryPath, next, ct);
                 }
-                await m_store.WriteAllTextAsync(primaryPath, next, ct); // Do not check cancellation after atomic commit.
             }
+            catch (Exception error) { RecordFailure(error); throw; }
         }
 
         public async Task<SaveLoadResult<T>> RecoverBackupAsync(string slotId, CancellationToken ct = default)
         {
-            using (Acquire(slotId))
+            try
             {
-                var backup = await Read(Backup(slotId), ct);
-                if (!Valid(backup)) return backup;
-                await m_store.WriteAllTextAsync(Primary(slotId), Encode(backup.Data), ct);
-                backup.BackupAvailable = true;
-                return backup;
+                using (Acquire(slotId, "Recover"))
+                {
+                    var backup = await Read(Backup(slotId), ct);
+                    if (!Valid(backup)) { if (backup.Error != null) RecordFailure(backup.Error); return backup; }
+                    await m_store.WriteAllTextAsync(Primary(slotId), Encode(backup.Data), ct);
+                    backup.BackupAvailable = true;
+                    return backup;
+                }
             }
+            catch (Exception error) { RecordFailure(error); throw; }
         }
 
         public async Task<IReadOnlyList<SaveSlotInfo>> ListAsync(CancellationToken ct = default)
@@ -210,12 +250,16 @@ namespace Yato.Save
 
         public Task DeleteAsync(string slotId, CancellationToken ct = default)
         {
-            using (Acquire(slotId))
+            try
             {
-                ct.ThrowIfCancellationRequested();
-                m_store.Delete(Primary(slotId));
-                m_store.Delete(Backup(slotId));
+                using (Acquire(slotId, "Delete"))
+                {
+                    ct.ThrowIfCancellationRequested();
+                    m_store.Delete(Primary(slotId));
+                    m_store.Delete(Backup(slotId));
+                }
             }
+            catch (Exception error) { RecordFailure(error); throw; }
             return Task.CompletedTask; // File deletion is explicit and not a multi-file atomic transaction.
         }
     }

@@ -43,6 +43,25 @@ namespace Yato.Tests.EditMode
         }
 
         [Test]
+        public void Stats_CountsDistinctHeldAssets_AndPreservesEarlierSnapshot()
+        {
+            using (var first = m_service.Load<ScriptableObject>(Key))
+            {
+                var snapshot = m_service.Stats;
+                Assert.AreEqual(1, snapshot.ActiveAssetCount);
+                using (var duplicate = m_service.Load<ScriptableObject>(Key))
+                using (var other = m_service.Load<ScriptableObject>(new AssetKey("ui/test/other")))
+                {
+                    m_service.ReleaseUnused();
+                    Assert.AreEqual(2, m_service.Stats.ActiveAssetCount);
+                    Assert.AreEqual(1, snapshot.ActiveAssetCount);
+                }
+                Assert.AreEqual(1, m_service.Stats.ActiveAssetCount);
+            }
+            Assert.AreEqual(0, m_service.Stats.ActiveAssetCount);
+        }
+
+        [Test]
         public void LoadAsync_SameKeyTwice_ReusesProviderReference()
         {
             IAssetHandle<ScriptableObject> first = Await(m_service.LoadAsync<ScriptableObject>(Key));
