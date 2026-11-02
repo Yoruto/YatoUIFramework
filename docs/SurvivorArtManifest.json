@@ -1,0 +1,1376 @@
+{
+  "sourceRoot": "E:\\GameTest\\Bang-\\Assets\\Sprites",
+  "importedAt": "2026-11-01",
+  "textureCount": 49,
+  "spriteCount": 152,
+  "assets": [
+    {
+      "source": "v1.1 dungeon crawler 16x16 pixel pack/heroes/knight/knight_idle_spritesheet.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Player/knight_idle_spritesheet.png",
+      "purpose": "主角骑士：idle，6 帧",
+      "sha256": "360623e121830c2a13445166fd0d1e3f5821c24d2b5d127b9ed6a9f72d2f16aa",
+      "width": 96,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": [
+        {
+          "name": "Knight_Idle_00",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "spriteId": "c1cf3b5217d746cbb91fb1c05d46852f"
+        },
+        {
+          "name": "Knight_Idle_01",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "spriteId": "4f683f1ad086475ca5c0c48d508a3191"
+        },
+        {
+          "name": "Knight_Idle_02",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "spriteId": "8f90e790884c4f53b7b61fc491ab5238"
+        },
+        {
+          "name": "Knight_Idle_03",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "spriteId": "00ec8723cb8e42ca853a3e323977ada4"
+        },
+        {
+          "name": "Knight_Idle_04",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "spriteId": "285ba33cc79f474587634dcf07b554a0"
+        },
+        {
+          "name": "Knight_Idle_05",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "spriteId": "6904b875fa864b78bd5051014db67443"
+        }
+      ]
+    },
+    {
+      "source": "v1.1 dungeon crawler 16x16 pixel pack/heroes/knight/knight_run_spritesheet.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Player/knight_run_spritesheet.png",
+      "purpose": "主角骑士：run，6 帧",
+      "sha256": "26318dcb6acf7e851afce86f5f2c96cd2d719a29b690f950c90f0cfe8f55e0ce",
+      "width": 96,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": [
+        {
+          "name": "Knight_Run_00",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "spriteId": "c88bdb5c204044dba6300c4183240069"
+        },
+        {
+          "name": "Knight_Run_01",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "spriteId": "2a7b76140bd441628cea09cd33422a9e"
+        },
+        {
+          "name": "Knight_Run_02",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "spriteId": "5d331794252c405c956201dd49b4a2be"
+        },
+        {
+          "name": "Knight_Run_03",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "spriteId": "8c2572c0ca4d4f77a06b4012a343831e"
+        },
+        {
+          "name": "Knight_Run_04",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "spriteId": "9565dcfb342f46e39e99c95430bce367"
+        },
+        {
+          "name": "Knight_Run_05",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "spriteId": "dc6f039af7cf40a4b3936f0769627ea7"
+        }
+      ]
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skeleton1/v2/skeleton_v2_1.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/skeleton1/skeleton_v2_1.png",
+      "purpose": "敌人 skeleton1：循环帧 1/4（无边角标记）",
+      "sha256": "f2daec798ab154432ba23ba366e6ca690d1565ceacdce7f5ad2da0c9cfe56089",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skeleton1/v2/skeleton_v2_2.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/skeleton1/skeleton_v2_2.png",
+      "purpose": "敌人 skeleton1：循环帧 2/4（无边角标记）",
+      "sha256": "233383462b097ae6410cb8000825bd578cf9624cbe61663cec49b8a169ab1ffa",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skeleton1/v2/skeleton_v2_3.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/skeleton1/skeleton_v2_3.png",
+      "purpose": "敌人 skeleton1：循环帧 3/4（无边角标记）",
+      "sha256": "63c2f06f5e0de3f091d7805c15b3b8b8eb8d2509357a07df87392510d54b2b10",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skeleton1/v2/skeleton_v2_4.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/skeleton1/skeleton_v2_4.png",
+      "purpose": "敌人 skeleton1：循环帧 4/4（无边角标记）",
+      "sha256": "33d9935536d3e7f60454e6bb3428a889d1f18d821d34c89c502c6e945d435b26",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skeleton2/v2/skeleton2_v2_1.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/skeleton2/skeleton2_v2_1.png",
+      "purpose": "敌人 skeleton2：循环帧 1/4（无边角标记）",
+      "sha256": "06ad1dfd57d5e7db51d2664f99218d1ef367e5d36f99dae106dbe3a4b4762e5d",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skeleton2/v2/skeleton2_v2_2.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/skeleton2/skeleton2_v2_2.png",
+      "purpose": "敌人 skeleton2：循环帧 2/4（无边角标记）",
+      "sha256": "d4e446be2ab45ce23c66283c4abd33e7778d9eb14e652df33ff596d65dd8019a",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skeleton2/v2/skeleton2_v2_3.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/skeleton2/skeleton2_v2_3.png",
+      "purpose": "敌人 skeleton2：循环帧 3/4（无边角标记）",
+      "sha256": "a95662ebfe3c5704348cf4ef2231b29de933a16a14bc2365a34d6dedba472ff7",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skeleton2/v2/skeleton2_v2_4.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/skeleton2/skeleton2_v2_4.png",
+      "purpose": "敌人 skeleton2：循环帧 4/4（无边角标记）",
+      "sha256": "ccf7cb597a565d5c33e901c503196fb7ccf66d4dc004789959ea78d05ec1ca9a",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skull/v2/skull_v2_1.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/skull/skull_v2_1.png",
+      "purpose": "敌人 skull：循环帧 1/4（无边角标记）",
+      "sha256": "01e0faab84c338bfe4a032e9c8b1c42cf72b801078c5a27e7ffc818d1e91e4cd",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skull/v2/skull_v2_2.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/skull/skull_v2_2.png",
+      "purpose": "敌人 skull：循环帧 2/4（无边角标记）",
+      "sha256": "65abf07e73118b7eab30d2c6dd69e814f938aaeaf991dc238e6e55e50cc908b3",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skull/v2/skull_v2_3.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/skull/skull_v2_3.png",
+      "purpose": "敌人 skull：循环帧 3/4（无边角标记）",
+      "sha256": "03404811350588740dada80b5603abb006e93a6d3b010d3986f7ed6c9774c7fd",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skull/v2/skull_v2_4.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/skull/skull_v2_4.png",
+      "purpose": "敌人 skull：循环帧 4/4（无边角标记）",
+      "sha256": "68154b1cf6d33f3da712aa1aa9016bca9d83ef4315c80dc8ac3770df9a017961",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/vampire/v2/vampire_v2_1.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/vampire/vampire_v2_1.png",
+      "purpose": "敌人 vampire：循环帧 1/4（无边角标记）",
+      "sha256": "e8078967f115f96780f454cab6f058d8f03d78205f5ee55f8fb11085f1b879ae",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/vampire/v2/vampire_v2_2.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/vampire/vampire_v2_2.png",
+      "purpose": "敌人 vampire：循环帧 2/4（无边角标记）",
+      "sha256": "67be3e29d2d5b5dcac2e2403e1f32b7f458f00ed1cc9e04c735974571005e3d0",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/vampire/v2/vampire_v2_3.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/vampire/vampire_v2_3.png",
+      "purpose": "敌人 vampire：循环帧 3/4（无边角标记）",
+      "sha256": "ceeaa24919bbb25ab0bcf89942e697a9403654b70302db47b24e0493905dfabd",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/vampire/v2/vampire_v2_4.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Characters/Enemies/vampire/vampire_v2_4.png",
+      "purpose": "敌人 vampire：循环帧 4/4（无边角标记）",
+      "sha256": "b45db0c1bcc63b471c5f6a810b042ac1bc6b654978bfe4e1ed8930befdf07cb5",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "v1.1 dungeon crawler 16x16 pixel pack/tiles/floor/floor_1.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Environment/Floors/floor_1.png",
+      "purpose": "地牢地板：基础铺设 / 随机变化",
+      "sha256": "25113546703609ece816960050b15bf60c4ee6b6d757366540b81000a895f3c1",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "v1.1 dungeon crawler 16x16 pixel pack/tiles/floor/floor_5.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Environment/Floors/floor_5.png",
+      "purpose": "地牢地板：基础铺设 / 随机变化",
+      "sha256": "98bd77d95407bee616a1e38819b104575014efcd414ef792143a702dcdacaec1",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "v1.1 dungeon crawler 16x16 pixel pack/tiles/floor/floor_6.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Environment/Floors/floor_6.png",
+      "purpose": "地牢地板：基础铺设 / 随机变化",
+      "sha256": "d214945a4dade42241f619e93bf23bed2d8d3036fb4de97e3e3d1f76701d4e36",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "v1.1 dungeon crawler 16x16 pixel pack/tiles/floor/floor_7.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Environment/Floors/floor_7.png",
+      "purpose": "地牢地板：基础铺设 / 随机变化",
+      "sha256": "8c72217d09629dbfb8f539e8bbb6bc57e3837044c9ec563a7f54ae3e983436c6",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "v1.1 dungeon crawler 16x16 pixel pack/tiles/floor/floor_8.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Environment/Floors/floor_8.png",
+      "purpose": "地牢地板：基础铺设 / 随机变化",
+      "sha256": "4df18bfdd180d0be402576b98b2b93b905a1a954eca6b74caa2bffa3296faa0b",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "v1.1 dungeon crawler 16x16 pixel pack/tiles/floor/floor_9.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Environment/Floors/floor_9.png",
+      "purpose": "地牢地板：基础铺设 / 随机变化",
+      "sha256": "e3a6ace7186f1345efa1fe157d1d29825c5f1a94177d9394e8327ea4a7eaa654",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "v1.1 dungeon crawler 16x16 pixel pack/tiles/floor/floor_10.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Environment/Floors/floor_10.png",
+      "purpose": "地牢地板：基础铺设 / 随机变化",
+      "sha256": "3d136ca69978123018238bc5b7ac9f8780679da4d0ca66d6223f56cf70a8aba3",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "v1.1 dungeon crawler 16x16 pixel pack/tiles/wall/wall_1.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Environment/Walls/wall_1.png",
+      "purpose": "墙面 / 场景装饰",
+      "sha256": "33dd3bd0e48698e3788e57fd4d772e363a2808bf4ad046a0eae7e1488f1ea85e",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "v1.1 dungeon crawler 16x16 pixel pack/tiles/wall/wall_2.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Environment/Walls/wall_2.png",
+      "purpose": "墙面 / 场景装饰",
+      "sha256": "ed46df5fd0827ef77103725908ff678f5e93007107579eface93945bc11da7a9",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "v1.1 dungeon crawler 16x16 pixel pack/tiles/wall/wall_3.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Environment/Walls/wall_3.png",
+      "purpose": "墙面 / 场景装饰",
+      "sha256": "5edd8f1eb0435722ec7f661a0da6d843b302870b1ba572ad570e9e7f0095de7a",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "v1.1 dungeon crawler 16x16 pixel pack/tiles/wall/wall_crack.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Environment/Walls/wall_crack.png",
+      "purpose": "墙面 / 场景装饰",
+      "sha256": "b007b04646dac3d226b237433853fec7c19826dd7d728cb636f3ced627b213a4",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/coin/coin_1.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Coins/coin_1.png",
+      "purpose": "金币掉落：旋转帧 1/4",
+      "sha256": "7e5956295c3b484f1d8dc3cc4d620538fe666bd23492a329e485c2a634df5989",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/flasks/flasks_1_1.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Health/flasks_1_1.png",
+      "purpose": "红色恢复药水：循环帧 1/4",
+      "sha256": "0765ce56baa31b4ff05bceb6f0ab1e4e5ed2ee908ab71aac852389d8e4bbaf34",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/coin/coin_2.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Coins/coin_2.png",
+      "purpose": "金币掉落：旋转帧 2/4",
+      "sha256": "7bfb1fe833ae9da9097edf914fd78a43f72421fb633913020f41bf9286025755",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/flasks/flasks_1_2.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Health/flasks_1_2.png",
+      "purpose": "红色恢复药水：循环帧 2/4",
+      "sha256": "12ad5c626e9cce4e2daca5319bbe84c2b5ff03a05b75ff0f176aa8c22c1b83fe",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/coin/coin_3.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Coins/coin_3.png",
+      "purpose": "金币掉落：旋转帧 3/4",
+      "sha256": "0f54e2f2b5a71b6a03a61addf7aa0752bddc2abb50c8d24b5b4ece77d1de2370",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/flasks/flasks_1_3.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Health/flasks_1_3.png",
+      "purpose": "红色恢复药水：循环帧 3/4",
+      "sha256": "f90d608d68c6d7aaefbb2fe47b3d296a2cdb9953ce622e0fae84330fd73b2a2d",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/coin/coin_4.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Coins/coin_4.png",
+      "purpose": "金币掉落：旋转帧 4/4",
+      "sha256": "7bfb1fe833ae9da9097edf914fd78a43f72421fb633913020f41bf9286025755",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/flasks/flasks_1_4.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Health/flasks_1_4.png",
+      "purpose": "红色恢复药水：循环帧 4/4",
+      "sha256": "12ad5c626e9cce4e2daca5319bbe84c2b5ff03a05b75ff0f176aa8c22c1b83fe",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/chest/chest_1.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Chests/chest_1.png",
+      "purpose": "奖励宝箱：待机帧 1/4",
+      "sha256": "4c8ef8f968cf9df56bd8b911dd83d49cfdcc04072988307d92d7c4329af358ad",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/chest/chest_2.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Chests/chest_2.png",
+      "purpose": "奖励宝箱：待机帧 2/4",
+      "sha256": "98b27ab9c0f5bfc48087d7bbd3f91428e7a6ea3cf0b1c0857b0424e61a6c5b3e",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/chest/chest_3.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Chests/chest_3.png",
+      "purpose": "奖励宝箱：待机帧 3/4",
+      "sha256": "87daa60c9f73305aee21d15425a0f839d3a5810db847e3f5bcfe2d8276dbf0fd",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/chest/chest_4.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Chests/chest_4.png",
+      "purpose": "奖励宝箱：待机帧 4/4",
+      "sha256": "541278f2bdb89b9870e3afe05c00173e373d6eed767154c0328568995867025c",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/chest/chest_open_1.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Chests/chest_open_1.png",
+      "purpose": "奖励宝箱：开启帧 1/4",
+      "sha256": "c7f35f7e31f1c610b32802555d4ec5bfe5574fdebde9192ac1749b1d6602402f",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/chest/chest_open_2.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Chests/chest_open_2.png",
+      "purpose": "奖励宝箱：开启帧 2/4",
+      "sha256": "b90c2f60caf28cbebef137e0358144fa7742cb00f0b3d0f990f2842d7b5e942a",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/chest/chest_open_3.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Chests/chest_open_3.png",
+      "purpose": "奖励宝箱：开启帧 3/4",
+      "sha256": "1bca175e573a8920dc820a0aa7693d65de7c776f589574361f2fc30a0e58830f",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "2D Pixel Dungeon Asset Pack/items and trap_animation/chest/chest_open_4.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Pickups/Chests/chest_open_4.png",
+      "purpose": "奖励宝箱：开启帧 4/4",
+      "sha256": "9f1bd64a5c1168573318530c41988d9672133173446be625d8cf34226e6f43e5",
+      "width": 16,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "sprites": []
+    },
+    {
+      "source": "v1.1 dungeon crawler 16x16 pixel pack/effects (new)/explosion_anim_spritesheet.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Effects/explosion_anim_spritesheet.png",
+      "purpose": "爆炸 / 命中闪光：7 帧（含黑白闪帧）",
+      "sha256": "23ee0cd7b3b416d93988e802097a0e2df7adf1d71527214a5f332c395afd90a6",
+      "width": 224,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "sprites": [
+        {
+          "name": "Explosion_00",
+          "x": 0,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "f9bd31efb6964c6e9c303a16876c71fd"
+        },
+        {
+          "name": "Explosion_01",
+          "x": 32,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "eb3715a8cfe64a8b94380f377f9d5de1"
+        },
+        {
+          "name": "Explosion_02",
+          "x": 64,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "c0b921e81aeb49a1be23e4635ca46ce6"
+        },
+        {
+          "name": "Explosion_03",
+          "x": 96,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "a89e4af6cafd44168ac7df8483c3b9c9"
+        },
+        {
+          "name": "Explosion_04",
+          "x": 128,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "c064562888704e329ddfcfcdc6b4d9e8"
+        },
+        {
+          "name": "Explosion_05",
+          "x": 160,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "113fa19c3833449b9d71f67f8ee5a5b4"
+        },
+        {
+          "name": "Explosion_06",
+          "x": 192,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "af8358e6969b4bee97c25f613d1de561"
+        }
+      ]
+    },
+    {
+      "source": "Weapons/Weapons 2-Sheet.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Weapons/Weapons 2-Sheet.png",
+      "purpose": "攻击特效图集：53 帧，供近战挥砍 / 远程攻击选用",
+      "sha256": "e6686d62048984870e2ddc2069b96a6aa52197d87d6bc9138aabc02e0abcebe8",
+      "width": 256,
+      "height": 352,
+      "pixelsPerUnit": 32,
+      "sprites": [
+        {
+          "name": "Attack_00",
+          "x": 0,
+          "y": 320,
+          "width": 32,
+          "height": 32,
+          "spriteId": "969aa1fac007496bb4caa73c624be09f"
+        },
+        {
+          "name": "Attack_01",
+          "x": 32,
+          "y": 320,
+          "width": 32,
+          "height": 32,
+          "spriteId": "484dc8d6587f4bd7b35d6235d12925df"
+        },
+        {
+          "name": "Attack_02",
+          "x": 64,
+          "y": 320,
+          "width": 32,
+          "height": 32,
+          "spriteId": "e96aa7fba8f54a38bcfa121ffc4a43d8"
+        },
+        {
+          "name": "Attack_03",
+          "x": 96,
+          "y": 320,
+          "width": 32,
+          "height": 32,
+          "spriteId": "6948a54136304378820538fb40761935"
+        },
+        {
+          "name": "Attack_04",
+          "x": 0,
+          "y": 288,
+          "width": 32,
+          "height": 32,
+          "spriteId": "ea29380d17b14604933365c3ca00fbcf"
+        },
+        {
+          "name": "Attack_05",
+          "x": 32,
+          "y": 288,
+          "width": 32,
+          "height": 32,
+          "spriteId": "e3448a8dd522435484b00b755d9b6d7b"
+        },
+        {
+          "name": "Attack_06",
+          "x": 64,
+          "y": 288,
+          "width": 32,
+          "height": 32,
+          "spriteId": "0351fb0ecf4243a8afaff5bce3444aa1"
+        },
+        {
+          "name": "Attack_07",
+          "x": 96,
+          "y": 288,
+          "width": 32,
+          "height": 32,
+          "spriteId": "9d8063e75e0e461095ad177789c34d80"
+        },
+        {
+          "name": "Attack_08",
+          "x": 128,
+          "y": 288,
+          "width": 32,
+          "height": 32,
+          "spriteId": "0ab0cf21e4c84e84858c954a4ea4f6ba"
+        },
+        {
+          "name": "Attack_09",
+          "x": 160,
+          "y": 288,
+          "width": 32,
+          "height": 32,
+          "spriteId": "478e9fcefbd04443a80b953a59ac2b70"
+        },
+        {
+          "name": "Attack_10",
+          "x": 192,
+          "y": 288,
+          "width": 32,
+          "height": 32,
+          "spriteId": "5ebc66a8ead94a008cbe6955f544ae2b"
+        },
+        {
+          "name": "Attack_11",
+          "x": 224,
+          "y": 288,
+          "width": 32,
+          "height": 32,
+          "spriteId": "57366e15460d40a9a6d753e55ce784bc"
+        },
+        {
+          "name": "Attack_12",
+          "x": 0,
+          "y": 256,
+          "width": 32,
+          "height": 32,
+          "spriteId": "e9f3b309e13748fdae753cff0dbacf16"
+        },
+        {
+          "name": "Attack_13",
+          "x": 32,
+          "y": 256,
+          "width": 32,
+          "height": 32,
+          "spriteId": "d21bc9377d2a49dc8257242b841a8415"
+        },
+        {
+          "name": "Attack_14",
+          "x": 64,
+          "y": 256,
+          "width": 32,
+          "height": 32,
+          "spriteId": "faa5ea0d3a0a485685d15606aa040410"
+        },
+        {
+          "name": "Attack_15",
+          "x": 0,
+          "y": 224,
+          "width": 32,
+          "height": 32,
+          "spriteId": "6b3dbba2780c449f9631f0f8780778e3"
+        },
+        {
+          "name": "Attack_16",
+          "x": 32,
+          "y": 224,
+          "width": 32,
+          "height": 32,
+          "spriteId": "cc99cf8439bd4e78bdb8f85e144d306d"
+        },
+        {
+          "name": "Attack_17",
+          "x": 64,
+          "y": 224,
+          "width": 32,
+          "height": 32,
+          "spriteId": "25f50c0ca6254107850218363620da18"
+        },
+        {
+          "name": "Attack_18",
+          "x": 0,
+          "y": 192,
+          "width": 32,
+          "height": 32,
+          "spriteId": "fb9c4b79fc4e40d1a00dda8a087185d4"
+        },
+        {
+          "name": "Attack_19",
+          "x": 32,
+          "y": 192,
+          "width": 32,
+          "height": 32,
+          "spriteId": "ab8a50976b504d06b7cb10ee28007059"
+        },
+        {
+          "name": "Attack_20",
+          "x": 64,
+          "y": 192,
+          "width": 32,
+          "height": 32,
+          "spriteId": "2071acf938564af7a56744a3629dfad2"
+        },
+        {
+          "name": "Attack_21",
+          "x": 96,
+          "y": 192,
+          "width": 32,
+          "height": 32,
+          "spriteId": "b412addeff0c40ae9e398da199a52958"
+        },
+        {
+          "name": "Attack_22",
+          "x": 128,
+          "y": 192,
+          "width": 32,
+          "height": 32,
+          "spriteId": "29357a5ec43d47e39ad8507d0fdc9c88"
+        },
+        {
+          "name": "Attack_23",
+          "x": 160,
+          "y": 192,
+          "width": 32,
+          "height": 32,
+          "spriteId": "3da7e51337034d2ea50c011b0b8bbf9a"
+        },
+        {
+          "name": "Attack_24",
+          "x": 192,
+          "y": 192,
+          "width": 32,
+          "height": 32,
+          "spriteId": "5115a3b1981446ae87f3ee75fe045436"
+        },
+        {
+          "name": "Attack_25",
+          "x": 224,
+          "y": 192,
+          "width": 32,
+          "height": 32,
+          "spriteId": "dd4eeb8f5ed943cc9a30698a2d24bce9"
+        },
+        {
+          "name": "Attack_26",
+          "x": 0,
+          "y": 160,
+          "width": 32,
+          "height": 32,
+          "spriteId": "d85891e34fc94dd1856bada56133ef09"
+        },
+        {
+          "name": "Attack_27",
+          "x": 32,
+          "y": 160,
+          "width": 32,
+          "height": 32,
+          "spriteId": "afdfbf1bc9664d2981bc88c9d16c608f"
+        },
+        {
+          "name": "Attack_28",
+          "x": 64,
+          "y": 160,
+          "width": 32,
+          "height": 32,
+          "spriteId": "557030218fbf40d0855ef5e3eb9c013f"
+        },
+        {
+          "name": "Attack_29",
+          "x": 96,
+          "y": 160,
+          "width": 32,
+          "height": 32,
+          "spriteId": "34e39bd69a934780be335609c8288775"
+        },
+        {
+          "name": "Attack_30",
+          "x": 128,
+          "y": 160,
+          "width": 32,
+          "height": 32,
+          "spriteId": "5d56f81b4c8d4e3c941cf5c74102fe58"
+        },
+        {
+          "name": "Attack_31",
+          "x": 160,
+          "y": 160,
+          "width": 32,
+          "height": 32,
+          "spriteId": "edb9eee8475841fb9b3cc5c19a2d3370"
+        },
+        {
+          "name": "Attack_32",
+          "x": 192,
+          "y": 160,
+          "width": 32,
+          "height": 32,
+          "spriteId": "8f4dee0683444cfa95e4454df50cec60"
+        },
+        {
+          "name": "Attack_33",
+          "x": 0,
+          "y": 128,
+          "width": 32,
+          "height": 32,
+          "spriteId": "1886d98c7df14c9e98045cca3e2a380b"
+        },
+        {
+          "name": "Attack_34",
+          "x": 32,
+          "y": 128,
+          "width": 32,
+          "height": 32,
+          "spriteId": "7a3b71bdfc254a058412b23291753f2f"
+        },
+        {
+          "name": "Attack_35",
+          "x": 64,
+          "y": 128,
+          "width": 32,
+          "height": 32,
+          "spriteId": "6393356699d8432daba5d0c404160d38"
+        },
+        {
+          "name": "Attack_36",
+          "x": 96,
+          "y": 128,
+          "width": 32,
+          "height": 32,
+          "spriteId": "d11c6c094572450fb3e5461b4a739e58"
+        },
+        {
+          "name": "Attack_37",
+          "x": 0,
+          "y": 96,
+          "width": 32,
+          "height": 32,
+          "spriteId": "013e668d24d54d12aa3090aecd03f4c6"
+        },
+        {
+          "name": "Attack_38",
+          "x": 32,
+          "y": 96,
+          "width": 32,
+          "height": 32,
+          "spriteId": "c59f10e8d1ff416a9670f7351e79ad9a"
+        },
+        {
+          "name": "Attack_39",
+          "x": 64,
+          "y": 96,
+          "width": 32,
+          "height": 32,
+          "spriteId": "42c22becaf304b2aa5dea7df24c544de"
+        },
+        {
+          "name": "Attack_40",
+          "x": 0,
+          "y": 64,
+          "width": 32,
+          "height": 32,
+          "spriteId": "e301824226e941bea8edc0ace71e5f3c"
+        },
+        {
+          "name": "Attack_41",
+          "x": 32,
+          "y": 64,
+          "width": 32,
+          "height": 32,
+          "spriteId": "25b287aef10f47b3b0ad42200a08d270"
+        },
+        {
+          "name": "Attack_42",
+          "x": 64,
+          "y": 64,
+          "width": 32,
+          "height": 32,
+          "spriteId": "43c1880aa9384baaa0ecb51aac28fdbc"
+        },
+        {
+          "name": "Attack_43",
+          "x": 96,
+          "y": 64,
+          "width": 32,
+          "height": 32,
+          "spriteId": "94a770c7a8474114abcbbe0eca1357ac"
+        },
+        {
+          "name": "Attack_44",
+          "x": 128,
+          "y": 64,
+          "width": 32,
+          "height": 32,
+          "spriteId": "c51387e7582448cdb6ba7a86dae2a467"
+        },
+        {
+          "name": "Attack_45",
+          "x": 0,
+          "y": 32,
+          "width": 32,
+          "height": 32,
+          "spriteId": "24eb2da0e2ea41578cf2b684d5ef34c5"
+        },
+        {
+          "name": "Attack_46",
+          "x": 32,
+          "y": 32,
+          "width": 32,
+          "height": 32,
+          "spriteId": "9003cd2487e8426c805e038d791eb925"
+        },
+        {
+          "name": "Attack_47",
+          "x": 64,
+          "y": 32,
+          "width": 32,
+          "height": 32,
+          "spriteId": "6c5813429b924d5792f0ee6b0e758c67"
+        },
+        {
+          "name": "Attack_48",
+          "x": 96,
+          "y": 32,
+          "width": 32,
+          "height": 32,
+          "spriteId": "528e3cd07f614c9180df538291c52f14"
+        },
+        {
+          "name": "Attack_49",
+          "x": 0,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "b4f1d0a346544c88a91dc68db1bea8bb"
+        },
+        {
+          "name": "Attack_50",
+          "x": 32,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "548df51e104145f5bb6a36fc0f8539bf"
+        },
+        {
+          "name": "Attack_51",
+          "x": 64,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "9aaca5d168cb4ac5b6efd7c45bc3a0df"
+        },
+        {
+          "name": "Attack_52",
+          "x": 96,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "bc3909eecd15460698972194e202c560"
+        }
+      ]
+    },
+    {
+      "source": "Weapons/Bullets 3-Sheet.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Weapons/Bullets 3-Sheet.png",
+      "purpose": "投射物图集：25 种子弹 / 能量弹外观",
+      "sha256": "23e88d67d8fbbc74516b0e236ed93264364afb6cb0cb0db0d3087dd0b79af1f8",
+      "width": 800,
+      "height": 32,
+      "pixelsPerUnit": 32,
+      "sprites": [
+        {
+          "name": "Projectile_00",
+          "x": 0,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "384b8ae0f96049919749a1e9624562df"
+        },
+        {
+          "name": "Projectile_01",
+          "x": 32,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "e088aaae14c5435982890a80c202bdb1"
+        },
+        {
+          "name": "Projectile_02",
+          "x": 64,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "c843bee06e094a849ea1945d722990ef"
+        },
+        {
+          "name": "Projectile_03",
+          "x": 96,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "0e57e8e00a3d4cb0bab6a3da1287b161"
+        },
+        {
+          "name": "Projectile_04",
+          "x": 128,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "85e9471a3c9245918d52991a05ce2b1b"
+        },
+        {
+          "name": "Projectile_05",
+          "x": 160,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "9c7ce95e741d4853b6a6f1b005e0ba92"
+        },
+        {
+          "name": "Projectile_06",
+          "x": 192,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "bc497759e0844ec79d8ee2a3ed28225e"
+        },
+        {
+          "name": "Projectile_07",
+          "x": 224,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "4874b50c837043928fb20099fcbf4311"
+        },
+        {
+          "name": "Projectile_08",
+          "x": 256,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "ea934448c0984be8b118715f9ce37e65"
+        },
+        {
+          "name": "Projectile_09",
+          "x": 288,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "7d1d9d050d344e9bbff82288aaf184e5"
+        },
+        {
+          "name": "Projectile_10",
+          "x": 320,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "96e698ec462e462cb8eb183e75825bca"
+        },
+        {
+          "name": "Projectile_11",
+          "x": 352,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "2c679cd1fcfb410b9245015c4094f0d8"
+        },
+        {
+          "name": "Projectile_12",
+          "x": 384,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "25ac22db38cf42219d74348a5a613558"
+        },
+        {
+          "name": "Projectile_13",
+          "x": 416,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "c7aaf53574ed42a9b9396a0ba68ee7df"
+        },
+        {
+          "name": "Projectile_14",
+          "x": 448,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "7d10c632addc413581487b3cf73df64f"
+        },
+        {
+          "name": "Projectile_15",
+          "x": 480,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "9b554abc8bee44c8997e35f30f899a4e"
+        },
+        {
+          "name": "Projectile_16",
+          "x": 512,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "b241a266f7b442a9886691d298ad0b46"
+        },
+        {
+          "name": "Projectile_17",
+          "x": 544,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "e4991b982d484f5080d9a87075b7e64e"
+        },
+        {
+          "name": "Projectile_18",
+          "x": 576,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "7fa40bb1eb394e4fbdb9091125dd5f73"
+        },
+        {
+          "name": "Projectile_19",
+          "x": 608,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "d3ceb4a3b2ad44df83e0d0d66ecd4c9e"
+        },
+        {
+          "name": "Projectile_20",
+          "x": 640,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "b883f5be321e40929c26c4c0533f2551"
+        },
+        {
+          "name": "Projectile_21",
+          "x": 672,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "e8661ac176984c34911bbf8e84845ac6"
+        },
+        {
+          "name": "Projectile_22",
+          "x": 704,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "945a5a2b1c57473288dfaa38f9d447a4"
+        },
+        {
+          "name": "Projectile_23",
+          "x": 736,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "074e636139be43d7ad7fcb51683ee0ed"
+        },
+        {
+          "name": "Projectile_24",
+          "x": 768,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "spriteId": "a91d4c32ea0d4df08d3a649014efdc7d"
+        }
+      ]
+    },
+    {
+      "source": "Shikashi's Fantasy Icons Pack v2/#1 - Transparent Icons.png",
+      "assetPath": "Assets/GameRes/Survivor/Art/Icons/FantasyIcons.png",
+      "purpose": "剑 / 斧 / 弓 / 双法杖、经验宝石、生命与升级图标（12 个切片）",
+      "sha256": "e5dced4f6e04f7f79101f189f95124a0dba93546e464d76af8af6b72f1d670e8",
+      "width": 512,
+      "height": 867,
+      "pixelsPerUnit": 32,
+      "sprites": [
+        {
+          "name": "Sword",
+          "x": 32,
+          "y": 675,
+          "width": 32,
+          "height": 32,
+          "spriteId": "584e4ee141304730954dd8a6ac31fd82"
+        },
+        {
+          "name": "Axe",
+          "x": 320,
+          "y": 675,
+          "width": 32,
+          "height": 32,
+          "spriteId": "52ed32d8789b4e92898e0549ea3c89f6"
+        },
+        {
+          "name": "Bow",
+          "x": 96,
+          "y": 643,
+          "width": 32,
+          "height": 32,
+          "spriteId": "03bdad2f938d49d7aca58f395e133f07"
+        },
+        {
+          "name": "BlueStaff",
+          "x": 256,
+          "y": 643,
+          "width": 32,
+          "height": 32,
+          "spriteId": "6ad175c28b184560b6f0aae54882fbd8"
+        },
+        {
+          "name": "GreenStaff",
+          "x": 320,
+          "y": 643,
+          "width": 32,
+          "height": 32,
+          "spriteId": "c2f516f2b01c40d8a6ad8db1c5b68273"
+        },
+        {
+          "name": "HealthHeart",
+          "x": 192,
+          "y": 835,
+          "width": 32,
+          "height": 32,
+          "spriteId": "251477990e114c86810c99c90b06ae0e"
+        },
+        {
+          "name": "ExperienceGem",
+          "x": 448,
+          "y": 451,
+          "width": 32,
+          "height": 32,
+          "spriteId": "a6714828c1f54225bec373b0f4d6b9f6"
+        },
+        {
+          "name": "FireSkill",
+          "x": 288,
+          "y": 739,
+          "width": 32,
+          "height": 32,
+          "spriteId": "5cb377088d9041e3b1f2f250e3934a13"
+        },
+        {
+          "name": "IceSkill",
+          "x": 256,
+          "y": 739,
+          "width": 32,
+          "height": 32,
+          "spriteId": "7ed36e8c1fbd4016a41f44ee5b3e5511"
+        },
+        {
+          "name": "SpeedSkill",
+          "x": 416,
+          "y": 739,
+          "width": 32,
+          "height": 32,
+          "spriteId": "ce100a9fb0704a64abcd7a0de16483df"
+        },
+        {
+          "name": "DamageSkill",
+          "x": 0,
+          "y": 739,
+          "width": 32,
+          "height": 32,
+          "spriteId": "c60aa53ac64c4624adaae034ba0d738e"
+        },
+        {
+          "name": "ShieldSkill",
+          "x": 224,
+          "y": 739,
+          "width": 32,
+          "height": 32,
+          "spriteId": "8d02047ae00a42308d6e12fba13612ef"
+        }
+      ]
+    }
+  ]
+}

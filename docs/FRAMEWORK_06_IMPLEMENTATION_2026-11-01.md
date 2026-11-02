@@ -2,6 +2,8 @@
 
 日期：2026-11-01（Asia/Shanghai）。仅 Unity 6，实测 Editor 6000.5.6f1。Yato Survivor 继续延期。
 
+后续状态（2026-11-02）：本文保留框架阶段的历史验收范围。Survivor 首版已在后续工作中实现，原缺失构建场景也已替换为有效入口；当前状态与独立构建证据见 [Survivor 实施记录](SURVIVOR_IMPLEMENTATION_2026-11-01.md)。下文的延期、旧场景及工作区说明均描述本阶段结束时的状态。
+
 ## 实现
 
 - TaskBridge：IAwaitable 可直接 await、AsTask，Task 可 AsAwaitable；原操作取消与资源所有权保持，后台完成投递主线程，退出时处理适配器及迟到异常。

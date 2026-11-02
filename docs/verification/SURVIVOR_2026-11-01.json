@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "implementationDate": "2026-11-01",
+  "reviewedOn": "2026-11-02",
+  "timezone": "Asia/Shanghai",
+  "unity": "6000.5.6f1",
+  "framework": "0.6.0",
+  "game": "0.1.0",
+  "scope": "Historical local evidence reviewed during documentation update; not rerun on 2026-11-02.",
+  "records": [
+    {
+      "source": "Logs/Survivor-Art-Import-Verification.json",
+      "sha256": "13e38116dd2526cca13f592bc613ac47b9f28173105d21fa39b38062a93d8856",
+      "result": {
+        "textureCount": 49,
+        "spriteCount": 152,
+        "compilationFailed": false,
+        "failures": []
+      }
+    },
+    {
+      "source": "Logs/Survivor-Final-EditMode.json",
+      "sha256": "c9aff65b05e7efa94c0ddb2f67cf674272f0f4d6e779e26d5e234e0c71f60c9c",
+      "result": {
+        "status": "completed",
+        "duration": 0.13,
+        "summary": {
+          "total": 9,
+          "passed": 9,
+          "failed": 0,
+          "skipped": 0,
+          "inconclusive": 0
+        }
+      }
+    },
+    {
+      "source": "Logs/Survivor-Final-PlayMode-Passed.json",
+      "sha256": "3df27425b0b8af557bf97b04e0681da639b695dd3efa5139e3ae39ae67e3a381",
+      "result": {
+        "status": "completed",
+        "duration": 1.48,
+        "summary": {
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "inconclusive": 0
+        }
+      }
+    },
+    {
+      "source": "Logs/Survivor-Lifecycle-Verification.json",
+      "sha256": "aaf7a61fec4bed7009aba0c730a874ef5dcf9961eb259bd0ee527967f31b91e6",
+      "result": {
+        "cycles": 100,
+        "pauseAndUpgrades": true,
+        "sceneLeaks": 0,
+        "stableAssetCount": 3
+      }
+    },
+    {
+      "source": "Logs/Survivor-Bundle-Lifecycle-Verification.json",
+      "sha256": "aaf7a61fec4bed7009aba0c730a874ef5dcf9961eb259bd0ee527967f31b91e6",
+      "result": {
+        "cycles": 100,
+        "pauseAndUpgrades": true,
+        "sceneLeaks": 0,
+        "stableAssetCount": 3
+      }
+    },
+    {
+      "source": "Logs/Survivor-Full-Combat.json",
+      "sha256": "2abad04b0999570a3b3feb60042c74bb90a5856d8f2da02f36e940edfea2e37b",
+      "result": {
+        "result": {
+          "Victory": true,
+          "Seconds": 600.0378,
+          "Kills": 2339,
+          "Coins": 718,
+          "Level": 38,
+          "Reason": "You held the line until dawn."
+        },
+        "ticks": 11905,
+        "bundle": true,
+        "simulation": "accelerated actual session ticks, actual routed upgrade buttons, no health/damage cheats"
+      }
+    },
+    {
+      "source": "Logs/Survivor-Settings-Input-Verification.json",
+      "sha256": "0e5ee8f8837d2cf3b455e2584753c32a3e5506ef16df4ae4fe11df5080a2942f",
+      "result": {
+        "settingsRoundTrip": true,
+        "rebindRoundTrip": true,
+        "sourceActionsUnchanged": true,
+        "gamepadSubmit": true,
+        "keyboardMove": true,
+        "escapePauseResume": true,
+        "hudPointer": true,
+        "corruptSavePreserved": true,
+        "explicitBackupRecovery": true
+      }
+    },
+    {
+      "source": "Logs/Survivor-Windows-Build.json",
+      "sha256": "6c4f5abcca1229a27fdbbf8104f9bc0f7860e5d05ece9c1ec6704f1acbce1c34",
+      "result": {
+        "result": "Succeeded",
+        "errors": 0,
+        "warnings": 1,
+        "bytes": 101117867
+      }
+    },
+    {
+      "source": "Logs/Survivor-Release-Pressure.json",
+      "sha256": "40d1dd7473e10241274f10572cec59db432fb15e566ea35b828f2fb9af826f89",
+      "result": {
+        "Seconds": 60.00301501760259,
+        "MeanMilliseconds": 6.071950517871139,
+        "P95Milliseconds": 6.065398454666138,
+        "Frames": 9882,
+        "MinimumEnemies": 200,
+        "MinimumProjectiles": 100,
+        "MinimumPickups": 200,
+        "PoolOverflows": 0,
+        "Width": 1600,
+        "Height": 900,
+        "MemoryMegabytes": 16106,
+        "PoolActiveEnemies": 200,
+        "PoolActiveProjectiles": 100,
+        "Gen0Collections": 4,
+        "MainThreadAllocatedBytes": -1,
+        "AllocationProbeDelta": 0,
+        "ManagedMemoryBefore": 2822144,
+        "ManagedMemoryAfter": 2899968,
+        "AllocationCounterSupported": false,
+        "Quality": "Ultra",
+        "Cpu": "11th Gen Intel(R) Core(TM) i7-11800H @ 2.30GHz",
+        "Gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+        "Notes": "Release rendered pressure fixture; fixed population, excess drops returned; health and pending upgrades stabilized. Allocation bytes are -1 if a 4096-byte positive control fails. Managed heap is net usage, not cumulative allocations. Not a gameplay victory test."
+      }
+    },
+    {
+      "source": "Logs/Survivor-Consumer-Final-Build.log",
+      "sha256": "f41f36031a31115403e63cfdd6a029455c54e3ba83f9f881689f510f6b6e7a36",
+      "observedMarkers": [
+        "Build Finished, Result: Success.",
+        "Exiting without the bug reporter. Application will terminate with return code 0"
+      ]
+    },
+    {
+      "source": "Logs/Survivor-Native-UI-Final.log",
+      "sha256": "86f3efdff9dc8202d93a3b8482c0dea7650d520fca53b4ce7c58184551597daa",
+      "observedMarkers": [
+        "[Yato] [Yato.Resources] 使用 BundleProvider：version=1.0.0 bundles=4 assets=86",
+        "CodeReloadManager destroyed"
+      ]
+    }
+  ],
+  "limitations": [
+    "The forced-bundle 100-cycle report predates the final asset and input changes.",
+    "Full combat uses accelerated actual session ticks; not a real-time manual playthrough.",
+    "Native startup/shutdown log does not prove all mouse, physical keyboard/gamepad or cross-process persistence interactions.",
+    "The pressure fixture stabilizes health/upgrades; allocation counter positive control failed, so no zero-allocation claim.",
+    "IL2CPP, physical gamepad and listening verification remain unverified."
+  ]
+}
