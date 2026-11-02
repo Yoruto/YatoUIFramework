@@ -1,0 +1,9 @@
+{
+  "name": "Yato.Pooling",
+  "rootNamespace": "Yato.Pooling",
+  "references": [
+    "Yato.Core",
+    "Yato.Resources.Abstractions"
+  ],
+  "autoReferenced": true
+}

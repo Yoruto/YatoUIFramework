@@ -85,7 +85,9 @@ namespace Yato.Core
 
         /// <summary>关闭 Domain Reload 时重置静态状态，避免上一会话的队列与线程标记残留。</summary>
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetStatics()
+        private static void ResetStatics() => Shutdown();
+
+        internal static void Shutdown()
         {
             s_initialized = false;
             s_mainThreadId = -1;

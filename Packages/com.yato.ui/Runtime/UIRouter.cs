@@ -14,7 +14,7 @@ namespace Yato.UI
     /// 打开时序：加载 → 实例化 → 创建 Mediator/Proxy → 注册 → OnCreate → 入栈(旧页 OnCover)
     /// → OnOpen(args) → 激活 GameObject（最后一步）。
     /// </summary>
-    public static class UIRouter
+    public static partial class UIRouter
     {
         private static IResourceService s_resources = NullResourceService.Instance;
         private static IFacade s_facade;
@@ -72,6 +72,7 @@ namespace Yato.UI
         /// <summary>注入资源服务与门面（T-P1-09：UI 不依赖具体资源实现）。</summary>
         public static void Configure(IResourceService resources, IFacade facade = null)
         {
+            EnsureDiagnostics();
             s_resources = resources ?? NullResourceService.Instance;
             s_facade = facade;
             s_factory = new UIPageFactory(s_resources);
@@ -84,6 +85,8 @@ namespace Yato.UI
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetOnPlayMode()
         {
+            s_diagnosticRegistration?.Dispose(); s_diagnosticRegistration = null;
+            ResetUiExtensions();
             // 丢弃前必须释放实例与句柄，否则关闭 Domain Reload 时缓存页会跨会话泄漏
             DisposeAllPages();
 
@@ -265,6 +268,7 @@ namespace Yato.UI
                 return;
             }
 
+            if (context.Instance != null) context.Instance.GetComponent<UIPageTransition>()?.Cancel();
             handle.IsValid = false;
 
             bool cacheable = context.Def != null && context.Def.Cacheable && context.Def.Singleton;
@@ -295,6 +299,8 @@ namespace Yato.UI
             }
 
             Notify(FrameworkNotifications.UIPageClosed, context.PageId);
+            RaisePage(PageClosed, handle);
+            PublishTop();
             RefreshMask();
         }
 
@@ -307,6 +313,8 @@ namespace Yato.UI
                 return false;
             }
 
+            var focus = top.Context.Instance != null ? top.Context.Instance.GetComponent<UIPageFocus>() : null;
+            if (focus != null && !focus.AllowBack) return false;
             Close(top);
             return true;
         }
@@ -638,12 +646,15 @@ namespace Yato.UI
             }
 
             Notify(FrameworkNotifications.UIPageOpened, handle);
+            RaisePage(PageOpened, handle);
+            PublishTop();
             return handle;
         }
 
         /// <summary>单例页面重复打开：只重新播报 OnOpen 并激活。</summary>
         private static void Reveal(UIPageContext context, object args)
         {
+            if (context.Instance != null) context.Instance.GetComponent<UIPageTransition>()?.Cancel();
             context.Args = args;
             if (context.Instance != null)
             {
@@ -680,6 +691,8 @@ namespace Yato.UI
             }
 
             Notify(FrameworkNotifications.UIPageOpened, handle);
+            RaisePage(PageOpened, handle);
+            PublishTop();
             return handle;
         }
 

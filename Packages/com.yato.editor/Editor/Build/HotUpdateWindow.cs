@@ -64,7 +64,8 @@ namespace Yato.Editor
                 "本地模拟步骤：\n" +
                 "1) 打包（生成 Build/AssetBundles/{Platform}/manifest.json 与 version.json）\n" +
                 "2) 在 Build/AssetBundles 下启动静态服务器，如 python -m http.server 8080\n" +
-                "3) 地址填 http://127.0.0.1:8080，运行 HotUpdateService.RunAsync 验证",
+                "3) 本地测试需显式创建 RemoteDownloader { AllowFileUrls = true, AllowInsecureLocalhost = true }\n" +
+                "4) 生产仅使用 HTTPS；旧 Provider 固定旧快照，新建 Provider 才使用已提交版本",
                 MessageType.Info);
         }
     }

@@ -80,7 +80,7 @@ namespace Yato.Resources
 
         public static string GetManifestPath(bool persistent)
         {
-            string dir = persistent ? PersistentBundleDir : StreamingAssetsBundleDir;
+            string dir = persistent ? new HotUpdateStorage(PersistentBundleDir).ActiveDirectory : StreamingAssetsBundleDir;
             return Path.Combine(dir, ManifestFileName);
         }
 
@@ -90,18 +90,31 @@ namespace Yato.Resources
         /// </summary>
         public static string ResolveBundlePath(string bundleName)
         {
-            if (string.IsNullOrEmpty(bundleName))
+            BundleRelativePath.ValidateBundle(bundleName);
+            if (PreferPersistent)
             {
-                throw new ArgumentException("bundleName 为空", "bundleName");
+                string active = new HotUpdateStorage(PersistentBundleDir).ActiveDirectory;
+                if (File.Exists(BundleRelativePath.Resolve(active, ManifestFileName)))
+                    return ResolveBundlePath(bundleName, active);
             }
+            return ResolveBundlePath(bundleName, StreamingAssetsBundleDir);
+        }
 
-            string persistentPath = Path.Combine(PersistentBundleDir, bundleName);
-            if (PreferPersistent && File.Exists(persistentPath))
-            {
-                return ToLoadPath(persistentPath);
-            }
+        /// <summary>Resolve against a provider's fixed snapshot. Missing files never fall through to another version.</summary>
+        public static string ResolveBundlePath(string bundleName, string snapshotDirectory)
+        {
+            BundleRelativePath.ValidateBundle(bundleName);
+            HotUpdateMaintenance.MarkUsed(snapshotDirectory);
+            if (snapshotDirectory.Contains("://") || snapshotDirectory.StartsWith("jar:", StringComparison.Ordinal))
+                return snapshotDirectory.TrimEnd('/') + "/" + bundleName;
+            return ToLoadPath(BundleRelativePath.Resolve(snapshotDirectory, bundleName));
+        }
 
-            return ToLoadPath(Path.Combine(StreamingAssetsBundleDir, bundleName));
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            PreferPersistent = true;
+            RemoteRootUrl = null;
         }
 
         /// <summary>把物理路径转换成 UnityWebRequest 可用的 URL（按平台）。</summary>
@@ -137,7 +150,7 @@ namespace Yato.Resources
             }
 
             string root = RemoteRootUrl.TrimEnd('/');
-            return string.Format("{0}/{1}/{2}", root, PlatformName, fileName.TrimStart('/'));
+            return new RemoteDownloader().FileUrl(root, PlatformName + "/" + fileName);
         }
 
         /// <summary>确保可写目录存在。</summary>

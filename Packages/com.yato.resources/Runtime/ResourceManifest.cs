@@ -77,7 +77,7 @@ namespace Yato.Resources
             }
 
             var manifest = new ResourceManifest();
-            manifest.Schema = (int)MiniJson.GetLong(root, "schema");
+            manifest.Schema = (int)MiniJson.RequireInteger(root, "schema", int.MaxValue);
             if (manifest.Schema != CurrentSchema)
             {
                 throw new ResourceException(null, null, ResourceStage.ManifestLoad,
@@ -177,6 +177,7 @@ namespace Yato.Resources
                 return;
             }
 
+            if (visiting.Count >= 256) throw new ResourceException(null, bundleName, ResourceStage.BundleLoad, "Bundle dependency depth limit exceeded");
             if (!visiting.Add(bundleName))
             {
                 throw new ResourceException(null, bundleName, ResourceStage.BundleLoad,
@@ -218,6 +219,7 @@ namespace Yato.Resources
 
             foreach (KeyValuePair<string, object> pair in bundles)
             {
+                BundleRelativePath.ValidateBundle(pair.Key);
                 var data = pair.Value as IDictionary<string, object>;
                 if (data == null)
                 {
@@ -229,8 +231,8 @@ namespace Yato.Resources
                 {
                     Name = pair.Key,
                     Hash = MiniJson.GetString(data, "hash"),
-                    Crc = (uint)MiniJson.GetLong(data, "crc"),
-                    Size = MiniJson.GetLong(data, "size"),
+                    Crc = data.ContainsKey("crc") ? (uint)MiniJson.RequireInteger(data, "crc", uint.MaxValue) : 0,
+                    Size = data.ContainsKey("size") ? MiniJson.RequireInteger(data, "size", VersionManifest.MaxBundleBytes) : 0,
                     Compression = MiniJson.GetString(data, "compression"),
                     Dependencies = MiniJson.GetStringList(data, "deps"),
                     Assets = MiniJson.GetStringList(data, "assets")

@@ -9,15 +9,24 @@ namespace Yato.App
     /// <para>释放后范围视为失效：此时迟到的异步加载结果在 <see cref="Track{T}"/> 时立即释放。</para>
     /// <para>共享资源的引用计数由资源层负责，这里只保证「每个句柄恰好在范围内释放一次」。</para>
     /// </summary>
-    public sealed class ResourceScope : IDisposable
+    public sealed class ResourceScope : IDisposable, IDiagnosticSource
     {
         private readonly List<IDisposable> m_tracked = new List<IDisposable>();
         private bool m_released;
         private bool m_closing;
+        private readonly IDisposable m_diagnostics;
+        public DiagnosticSnapshot CaptureDiagnostics()
+        {
+            var items = new List<string>();
+            foreach (var item in m_tracked) items.Add(item is Yato.Resources.IAssetHandle handle ? handle.Key.ToString() : item.GetType().Name);
+            return new DiagnosticSnapshot("Scope", Name, m_released ? "Released" : m_closing ? "Closing" : "Active", values:
+                new Dictionary<string, string> { ["Owned count"] = Count.ToString(), ["Resources"] = string.Join(", ", items) });
+        }
 
         public ResourceScope(string name = "scope")
         {
             Name = string.IsNullOrEmpty(name) ? "scope" : name;
+            m_diagnostics = DiagnosticRegistry.Register(this);
         }
 
         /// <summary>诊断名（通常是场景名）。</summary>
@@ -69,6 +78,7 @@ namespace Yato.App
         /// <summary>按登记的反向顺序释放全部资源；可重复调用。</summary>
         public void ReleaseAll()
         {
+            m_diagnostics.Dispose();
             m_released = true;
             m_closing = false;
 

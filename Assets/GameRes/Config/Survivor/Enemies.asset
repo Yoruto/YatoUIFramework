@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a145e3782bd2cc4abec3194328ab274, type: 3}
+  m_Name: Enemies
+  m_EditorClassIdentifier: Yato.Survivor::Yato.Survivor.EnemyTable
+  m_records:
+  - Id: skeleton
+    Visual: skeleton
+    Health: 9
+    Speed: 1.25
+    Damage: 8
+    UnlockSeconds: 0
+    Scale: 1
+    Experience: 1
+    Elite: 0
+  - Id: guard
+    Visual: guard
+    Health: 22
+    Speed: 1.1
+    Damage: 12
+    UnlockSeconds: 45
+    Scale: 1
+    Experience: 2
+    Elite: 0
+  - Id: wisp
+    Visual: wisp
+    Health: 12
+    Speed: 2.45
+    Damage: 7
+    UnlockSeconds: 90
+    Scale: 1
+    Experience: 2
+    Elite: 0
+  - Id: vampire
+    Visual: vampire
+    Health: 150
+    Speed: 1.5
+    Damage: 20
+    UnlockSeconds: 0
+    Scale: 1.6
+    Experience: 15
+    Elite: 1

@@ -1,0 +1,14 @@
+{
+  "name": "com.yato.pooling",
+  "version": "0.2.0",
+  "displayName": "Yato Pooling",
+  "description": "Optional Unity 6 foundation module: pooling",
+  "unity": "6000.0",
+  "author": {
+    "name": "Yato"
+  },
+  "dependencies": {
+    "com.yato.core": "0.2.0",
+    "com.yato.resources": "0.3.0"
+  }
+}

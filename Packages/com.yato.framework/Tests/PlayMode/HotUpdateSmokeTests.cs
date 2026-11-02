@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -12,13 +13,14 @@ namespace Yato.Tests.PlayMode
     /// <summary>
     /// 热更链路冒烟（T-P5-01~04 实跑）：本地临时目录模拟远端（file://），验证
     /// version.json 拉取 → CRC 差量下载 → manifest 原子替换 → 二次运行全跳过 →
-    /// 热更后 manifest 驱动加载 → CRC 损坏 / 远端不可达时回退内置版本。
+    /// 热更后 manifest 驱动加载 → 首次 CRC 损坏 / 远端不可达不产生远程提交。
     /// 依赖 AB 冒烟同一份打包产物；缺失时整组 Skip。
     /// </summary>
     public sealed class HotUpdateSmokeTests
     {
         private static readonly AssetKey ExampleKey = new AssetKey("ui/example/example");
 
+        private string m_localRoot;
         private string m_remoteRoot;
         private string m_remoteUrl;
         private RemoteDownloader m_downloader;
@@ -32,10 +34,11 @@ namespace Yato.Tests.PlayMode
                 yield break;
             }
 
-            CleanDir(RuntimePaths.PersistentBundleDir);
+            m_localRoot = Path.Combine(Application.temporaryCachePath, "yato-smoke-local-" + Guid.NewGuid().ToString("N"));
+            CleanDir(m_localRoot);
 
             // 远端目录：拷贝打包产物（Application.temporaryCachePath 编辑器/真机通用）
-            m_remoteRoot = Path.Combine(Application.temporaryCachePath, "yato-hu-smoke");
+            m_remoteRoot = Path.Combine(Application.temporaryCachePath, "yato-hu-smoke-" + Guid.NewGuid().ToString("N"));
             CleanDir(m_remoteRoot);
 
             string remotePlatform = Path.Combine(m_remoteRoot, RuntimePaths.PlatformName);
@@ -43,7 +46,7 @@ namespace Yato.Tests.PlayMode
             CopyDir(RuntimePaths.StreamingAssetsBundleDir, remotePlatform);
 
             m_remoteUrl = new Uri(m_remoteRoot).AbsoluteUri;
-            m_downloader = new RemoteDownloader { MaxRetry = 1, RetryDelaySeconds = 0f };
+            m_downloader = new RemoteDownloader { MaxRetry = 1, RetryDelaySeconds = 0f, AllowFileUrls = true };
             yield return null;
         }
 
@@ -51,7 +54,7 @@ namespace Yato.Tests.PlayMode
         public IEnumerator TearDown()
         {
             ResourceServiceFactory.ForceBundleMode = false;
-            CleanDir(RuntimePaths.PersistentBundleDir);
+            if (!string.IsNullOrEmpty(m_localRoot) && Directory.Exists(m_localRoot)) Directory.Delete(m_localRoot, true);
 
             if (!string.IsNullOrEmpty(m_remoteRoot) && Directory.Exists(m_remoteRoot))
             {
@@ -65,7 +68,10 @@ namespace Yato.Tests.PlayMode
         [UnityTest]
         public IEnumerator FreshRun_DownloadsDiff_SecondRun_AllSkipped()
         {
-            var service = new HotUpdateService(m_downloader);
+            var expectedBundles = VersionManifest.Parse(File.ReadAllText(Path.Combine(
+                m_remoteRoot, RuntimePaths.PlatformName, RuntimePaths.VersionFileName))).Bundles.Count;
+            Assert.Greater(expectedBundles, 0, "冒烟产物必须包含 bundle");
+            var service = new HotUpdateService(m_downloader, m_localRoot);
 
             IAwaitable<HotUpdateResult> first = service.RunAsync(m_remoteUrl);
             yield return first.AsEnumerator();
@@ -73,13 +79,13 @@ namespace Yato.Tests.PlayMode
             HotUpdateResult result = first.GetResult();
             Assert.IsTrue(result.Success, "首次热更应成功：" + result);
             Assert.IsTrue(result.Updated, "首次热更应产生下载");
-            Assert.AreEqual(1, result.DownloadedBundles, "应恰好下载 1 个 bundle");
+            Assert.AreEqual(expectedBundles, result.DownloadedBundles, "应下载版本清单中的全部 bundle");
             Assert.IsFalse(string.IsNullOrEmpty(result.Version));
 
-            string persistentManifest = RuntimePaths.GetManifestPath(true);
+            string persistentManifest = Path.Combine(new HotUpdateStorage(m_localRoot).ActiveDirectory, RuntimePaths.ManifestFileName);
             Assert.IsTrue(File.Exists(persistentManifest), "持久化 manifest 应存在");
             Assert.IsTrue(
-                File.Exists(Path.Combine(RuntimePaths.PersistentBundleDir, "ui/example")),
+                File.Exists(BundleRelativePath.Resolve(new HotUpdateStorage(m_localRoot).ActiveDirectory, "ui/example")),
                 "持久化 bundle 应存在");
 
             IAwaitable<HotUpdateResult> second = service.RunAsync(m_remoteUrl);
@@ -88,7 +94,7 @@ namespace Yato.Tests.PlayMode
             HotUpdateResult again = second.GetResult();
             Assert.IsTrue(again.Success, "二次热更应成功：" + again);
             Assert.IsFalse(again.Updated, "无变化时不应产生下载");
-            Assert.AreEqual(1, again.SkippedBundles, "已校验通过的 bundle 应跳过");
+            Assert.AreEqual(expectedBundles, again.SkippedBundles, "已校验通过的全部 bundle 应跳过");
             Assert.AreEqual(0, again.DownloadedBundles);
         }
 
@@ -106,21 +112,24 @@ namespace Yato.Tests.PlayMode
             File.WriteAllText(remoteManifest, edited);
 
             string remoteVersion = Path.Combine(remotePlatform, RuntimePaths.VersionFileName);
-            WriteVersionJson(
-                remoteVersion,
-                "1.0.1",
-                Crc32Util.Compute(remoteManifest),
-                "ui/example",
-                Crc32Util.Compute(Path.Combine(remotePlatform, "ui/example")),
-                new FileInfo(Path.Combine(remotePlatform, "ui/example")).Length);
+            // 保留真实产物中的完整 bundle 集合，只更新本测试修改的版本和清单 CRC。
+            var editedVersion = Regex.Replace(File.ReadAllText(remoteVersion),
+                @"""appVersion""\s*:\s*""[^""]*""", "\"appVersion\":\"1.0.1\"");
+            editedVersion = Regex.Replace(editedVersion, @"""manifestCrc""\s*:\s*\d+",
+                "\"manifestCrc\":" + Crc32Util.Compute(remoteManifest));
+            File.WriteAllText(remoteVersion, editedVersion);
 
-            var service = new HotUpdateService(m_downloader);
+            var service = new HotUpdateService(m_downloader, m_localRoot);
             IAwaitable<HotUpdateResult> updating = service.RunAsync(m_remoteUrl);
             yield return updating.AsEnumerator();
             Assert.IsTrue(updating.GetResult().Success, "热更应成功");
 
             ResourceServiceFactory.ForceBundleMode = true;
-            var provider = ResourceServiceFactory.CreateProvider() as BundleProvider;
+            string active = new HotUpdateStorage(m_localRoot).ActiveDirectory;
+            BundleLoader loader = null;
+            var counter = new BundleRefCounter(name => loader.Unload(name));
+            loader = new BundleLoader(counter, active);
+            var provider = new BundleProvider(ResourceManifest.LoadFromFile(Path.Combine(active, "manifest.json")), loader, counter);
             Assert.IsNotNull(provider, "应选中 BundleProvider");
             Assert.AreEqual("1.0.1", provider.Manifest.Version, "应读取持久化目录的热更 manifest");
 
@@ -136,9 +145,9 @@ namespace Yato.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator CorruptedCrc_Fails_And_RollsBackToBuiltin()
+        public IEnumerator CorruptedCrc_Fails_WithoutCommittingRemote()
         {
-            // 远端 version.json 的 bundle CRC 写错 → 下载校验失败 → 回退（删除持久化 manifest）
+            // 远端 version.json 的 bundle CRC 写错 → 下载校验失败 → 失败且不提交活动版本
             string remotePlatform = Path.Combine(m_remoteRoot, RuntimePaths.PlatformName);
             WriteVersionJson(
                 Path.Combine(remotePlatform, RuntimePaths.VersionFileName),
@@ -148,7 +157,7 @@ namespace Yato.Tests.PlayMode
                 0xDEADBEEFu,
                 new FileInfo(Path.Combine(remotePlatform, "ui/example")).Length);
 
-            var service = new HotUpdateService(m_downloader);
+            var service = new HotUpdateService(m_downloader, m_localRoot);
             IAwaitable<HotUpdateResult> updating = service.RunAsync(m_remoteUrl);
             yield return updating.AsEnumerator();
 
@@ -156,24 +165,24 @@ namespace Yato.Tests.PlayMode
             Assert.IsFalse(result.Success, "CRC 损坏应失败");
             Assert.IsTrue(result.Error != null && result.Error.Contains("CRC"), "应报 CRC 校验失败：" + result.Error);
             Assert.IsFalse(
-                File.Exists(RuntimePaths.GetManifestPath(true)),
-                "回退后持久化 manifest 应被删除（运行时回到内置版本）");
+                File.Exists(Path.Combine(new HotUpdateStorage(m_localRoot).ActiveDirectory, RuntimePaths.ManifestFileName)),
+                "首次失败后不得创建远程活动 manifest");
         }
 
         [UnityTest]
-        public IEnumerator UnreachableRemote_Fails_And_RollsBack()
+        public IEnumerator UnreachableRemote_Fails_WithoutCommittingRemote()
         {
             string url = new Uri(Path.Combine(m_remoteRoot, "no-such-dir")).AbsoluteUri;
 
-            var service = new HotUpdateService(m_downloader);
+            var service = new HotUpdateService(m_downloader, m_localRoot);
             IAwaitable<HotUpdateResult> updating = service.RunAsync(url);
             yield return updating.AsEnumerator();
 
             HotUpdateResult result = updating.GetResult();
             Assert.IsFalse(result.Success, "远端不可达应失败");
             Assert.IsFalse(
-                File.Exists(RuntimePaths.GetManifestPath(true)),
-                "回退后持久化 manifest 应被删除");
+                File.Exists(Path.Combine(new HotUpdateStorage(m_localRoot).ActiveDirectory, RuntimePaths.ManifestFileName)),
+                "首次失败后不得创建远程活动 manifest");
         }
 
         // ------------------------------------------------------------------

@@ -1,0 +1,3 @@
+<linker>
+  <assembly fullname="Yato.Input" preserve="all" />
+</linker>

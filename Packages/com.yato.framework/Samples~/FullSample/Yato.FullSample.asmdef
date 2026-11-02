@@ -1,0 +1,19 @@
+{
+  "name": "Yato.FullSample",
+  "rootNamespace": "Yato.FullSample",
+  "references": [
+    "Yato.Core",
+    "Yato.Resources",
+    "Yato.Resources.Abstractions",
+    "Yato.UI",
+    "Yato.App",
+    "Yato.Persistence",
+    "Yato.Settings",
+    "Yato.Audio",
+    "Yato.Mvc",
+    "Yato.Flow",
+    "Yato.Config",
+    "Yato.Pooling"
+  ],
+  "autoReferenced": true
+}

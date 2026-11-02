@@ -1,0 +1,13 @@
+{
+  "name": "Yato.UI.Input",
+  "rootNamespace": "Yato.UI.Input",
+  "references": [
+    "Yato.Core",
+    "Yato.UI",
+    "Yato.Input",
+    "Yato.Resources.Abstractions",
+    "UnityEngine.UI",
+    "Unity.InputSystem"
+  ],
+  "autoReferenced": true
+}

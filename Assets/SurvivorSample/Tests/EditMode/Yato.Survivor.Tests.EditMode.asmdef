@@ -1,0 +1,7 @@
+{
+  "name": "Yato.Survivor.Tests.EditMode",
+  "references": ["Yato.Survivor.Domain", "Yato.Survivor", "Yato.Config", "Yato.Core"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false
+}

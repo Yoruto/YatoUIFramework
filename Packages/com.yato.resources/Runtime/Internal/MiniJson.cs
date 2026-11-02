@@ -53,6 +53,17 @@ namespace Yato.Resources.Internal
             return long.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), out parsed) ? parsed : fallback;
         }
 
+        internal static long RequireInteger(IDictionary<string, object> dict, string key, long maximum)
+        {
+            object raw;
+            if (!dict.TryGetValue(key, out raw) || !(raw is double))
+                throw new FormatException("Missing/invalid integer: " + key);
+            double value = (double)raw;
+            if (double.IsNaN(value) || double.IsInfinity(value) || value < 0 || value > maximum || Math.Truncate(value) != value)
+                throw new FormatException("Integer out of range: " + key);
+            return checked((long)value);
+        }
+
         internal static List<string> GetStringList(IDictionary<string, object> dict, string key)
         {
             var result = new List<string>();
@@ -63,18 +74,13 @@ namespace Yato.Resources.Internal
             }
 
             var list = value as List<object>;
-            if (list == null)
-            {
-                return result;
-            }
+            if (list == null) throw new FormatException("Expected string array: " + key);
 
             for (int i = 0; i < list.Count; i++)
             {
                 string item = list[i] as string;
-                if (!string.IsNullOrEmpty(item))
-                {
-                    result.Add(item);
-                }
+                if (string.IsNullOrEmpty(item)) throw new FormatException("Invalid string array item: " + key);
+                result.Add(item);
             }
 
             return result;
@@ -84,6 +90,7 @@ namespace Yato.Resources.Internal
         {
             private readonly string m_text;
             private int m_index;
+            private int m_depth;
 
             public Parser(string text)
             {
@@ -117,6 +124,13 @@ namespace Yato.Resources.Internal
             }
 
             public object ParseValue()
+            {
+                if (++m_depth > 64) throw new FormatException("JSON nesting limit exceeded");
+                try { return ParseValueCore(); }
+                finally { m_depth--; }
+            }
+
+            private object ParseValueCore()
             {
                 SkipWhitespace();
                 if (IsEnd)
@@ -169,7 +183,8 @@ namespace Yato.Resources.Internal
                     }
 
                     m_index++;
-                    dict[key] = ParseValue();
+                    if (dict.ContainsKey(key)) throw new FormatException("Duplicate JSON key: " + key);
+                    dict.Add(key, ParseValue());
                     SkipWhitespace();
                     if (IsEnd)
                     {
@@ -316,6 +331,8 @@ namespace Yato.Resources.Internal
                 }
 
                 string raw = m_text.Substring(start, m_index - start);
+                if (!System.Text.RegularExpressions.Regex.IsMatch(raw, @"^-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?$"))
+                    throw new FormatException("Invalid JSON number: " + raw);
                 double value;
                 if (!double.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
                 {

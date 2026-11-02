@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "verifiedOn": "2026-11-02",
+  "timezone": "Asia/Shanghai",
+  "unity": "6000.5.6f1",
+  "invocation": {
+    "editorArguments": [
+      "-batchmode",
+      "-nographics",
+      "-projectPath",
+      "<repository>",
+      "-runTests",
+      "-testPlatform",
+      "<EditMode|PlayMode>",
+      "-testResults",
+      "<results.xml>",
+      "-logFile",
+      "<editor.log>"
+    ],
+    "note": "On Windows, wait for the GUI process with Start-Process -Wait -PassThru; omit -quit for Unity Test Framework."
+  },
+  "finalResults": {
+    "editMode": {
+      "source": "Logs/Precommit-20261102-EditMode.xml",
+      "sha256": "8ee24411843da2dc98245ef117cb6ab89dc9abfc9782c3aa1d4be56514cf2761",
+      "summary": {
+        "result": "Passed",
+        "total": 150,
+        "passed": 150,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0,
+        "duration": 7.4948602
+      },
+      "failures": []
+    },
+    "playMode": {
+      "source": "Logs/Precommit-20261102-PlayMode-Passed.xml",
+      "sha256": "919fef6f95de91c4a87851ea6e4413fcf07e4b3243d5b4dfc5c454154958c37e",
+      "summary": {
+        "result": "Passed",
+        "total": 101,
+        "passed": 101,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0,
+        "duration": 14.3310509
+      },
+      "failures": []
+    },
+    "playModeProcessExitCode": 0
+  },
+  "earlierPlayModeAttempts": [
+    {
+      "source": "Logs/Precommit-20261102-PlayMode.xml",
+      "sha256": "88ac6374be6f76b37c08b35c0d383659067a9c95cbdeb756ee9cf2b843f4f036",
+      "summary": {
+        "result": "Failed(Child)",
+        "total": 101,
+        "passed": 98,
+        "failed": 3,
+        "skipped": 0,
+        "inconclusive": 0,
+        "duration": 14.068511
+      },
+      "failures": [
+        {
+          "test": "Yato.Survivor.Tests.SurvivorIntegrationTests.RoutedBattlePauseUpgradeAndRestartReleaseOwnedResources",
+          "message": "  Expected: greater than 0.899999976f\n  But was:  0.0f\n"
+        },
+        {
+          "test": "Yato.Tests.PlayMode.HotUpdateSmokeTests.FreshRun_DownloadsDiff_SecondRun_AllSkipped",
+          "message": "  应恰好下载 1 个 bundle\n  Expected: 1\n  But was:  5\n"
+        },
+        {
+          "test": "Yato.Tests.PlayMode.HotUpdateSmokeTests.HotUpdatedManifest_DrivesLoading",
+          "message": "  热更应成功\n  Expected: True\n  But was:  False\n"
+        }
+      ]
+    },
+    {
+      "source": "Logs/Precommit-20261102-PlayMode-Final.xml",
+      "sha256": "e2f39ae8ce36d3a80d7650e2da1496d737e4d2479f71e97cd4a79960f1fec3f9",
+      "summary": {
+        "result": "Failed(Child)",
+        "total": 101,
+        "passed": 100,
+        "failed": 1,
+        "skipped": 0,
+        "inconclusive": 0,
+        "duration": 14.1871156
+      },
+      "failures": [
+        {
+          "test": "Yato.Survivor.Tests.SurvivorIntegrationTests.RoutedBattlePauseUpgradeAndRestartReleaseOwnedResources",
+          "message": "  Keyboard movement did not reach the live game update\n  Expected: greater than 0.0f\n  But was:  0.0f\n"
+        }
+      ]
+    },
+    {
+      "source": "Logs/Precommit-20261102-PlayMode-Verified.xml",
+      "sha256": "9fecc974d7e9d803aa9ecf7b33a1dffdeedc3cfbeccd4b89b624b8619fe427c4",
+      "summary": {
+        "result": "Failed(Child)",
+        "total": 101,
+        "passed": 100,
+        "failed": 1,
+        "skipped": 0,
+        "inconclusive": 0,
+        "duration": 44.5143058
+      },
+      "failures": [
+        {
+          "test": "Yato.Survivor.Tests.SurvivorIntegrationTests.RoutedBattlePauseUpgradeAndRestartReleaseOwnedResources",
+          "message": "  Keyboard movement did not reach the live game update: \n  Expected: less than 34.6960564f\n  But was:  34.6963348f\n"
+        }
+      ]
+    }
+  ],
+  "corrections": [
+    "Save and restore Input System background/editor focus settings in the Survivor integration fixture.",
+    "Simulate application focus through ApplicationLifecycle and restore it after teardown; batch mode otherwise acquires the game focus-pause token.",
+    "Wait for the actual game Update to move the player rather than assuming two frames are sufficient.",
+    "Expect the actual version manifest bundle count for first download and second-run skips.",
+    "Keep all real bundle entries when updating the hot-update fixture app version and manifest CRC."
+  ],
+  "fixtureSources": [
+    {
+      "path": "Assets/SurvivorSample/Tests/PlayMode/SurvivorIntegrationTests.cs",
+      "sha256": "45c0a277f5bf5a39c08cf22a2374bb32c2c59608203716a27153a113e3ce20e7"
+    },
+    {
+      "path": "Packages/com.yato.framework/Tests/PlayMode/HotUpdateSmokeTests.cs",
+      "sha256": "10148790b064537aaae55183eecfd4000745fac1ac124884b079fa4a911f0785"
+    }
+  ],
+  "staticChecks": {
+    "parsedJsonAndAsmdefFiles": 9,
+    "uniqueUnityGuids": 656,
+    "duplicateUnityGuids": 0,
+    "missingSurvivorMeta": 0,
+    "verifiedArtSha256Count": 49,
+    "localMarkdownLinks": 66
+  },
+  "scope": "Current source-project EditMode/PlayMode and static documentation/resource checks. Windows builds, 100-cycle runs, full combat and pressure results are historical evidence from 2026-11-01, not rerun here."
+}

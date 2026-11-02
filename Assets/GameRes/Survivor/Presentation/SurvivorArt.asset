@@ -1,0 +1,165 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a9e32824abe39647841ab3a3974f68e, type: 3}
+  m_Name: SurvivorArt
+  m_EditorClassIdentifier: Yato.Survivor::Yato.Survivor.SurvivorSpriteSet
+  Sequences:
+  - Id: knight_idle
+    Frames:
+    - {fileID: -798880209, guid: ac705b8c6e4bec14a8947941f25c2995, type: 3}
+    - {fileID: -915375162, guid: ac705b8c6e4bec14a8947941f25c2995, type: 3}
+    - {fileID: 461722934, guid: ac705b8c6e4bec14a8947941f25c2995, type: 3}
+    - {fileID: -143180457, guid: ac705b8c6e4bec14a8947941f25c2995, type: 3}
+    - {fileID: 810565550, guid: ac705b8c6e4bec14a8947941f25c2995, type: 3}
+    - {fileID: -1383326918, guid: ac705b8c6e4bec14a8947941f25c2995, type: 3}
+    FramesPerSecond: 7
+  - Id: knight_run
+    Frames:
+    - {fileID: -446342204, guid: 626337b443203424dbefa3f9e6f0ff8b, type: 3}
+    - {fileID: -1556272015, guid: 626337b443203424dbefa3f9e6f0ff8b, type: 3}
+    - {fileID: -2114692750, guid: 626337b443203424dbefa3f9e6f0ff8b, type: 3}
+    - {fileID: -989101924, guid: 626337b443203424dbefa3f9e6f0ff8b, type: 3}
+    - {fileID: -926559816, guid: 626337b443203424dbefa3f9e6f0ff8b, type: 3}
+    - {fileID: 649254775, guid: 626337b443203424dbefa3f9e6f0ff8b, type: 3}
+    FramesPerSecond: 11
+  - Id: skeleton
+    Frames:
+    - {fileID: 21300000, guid: b8d43ff344221be44a688e6008a8e201, type: 3}
+    - {fileID: 21300000, guid: ac141f950472aae4792efcfc2e22ee6c, type: 3}
+    - {fileID: 21300000, guid: 38060c862f7c15e4391d6e8b3683228b, type: 3}
+    - {fileID: 21300000, guid: c6bd1d2bee1bac84aa2ba0c3162ae700, type: 3}
+    FramesPerSecond: 7
+  - Id: guard
+    Frames:
+    - {fileID: 21300000, guid: 5444cb7aae88ae144bbfcc7857af65e9, type: 3}
+    - {fileID: 21300000, guid: bedfc2cceb2760c458981d40cc7a94c9, type: 3}
+    - {fileID: 21300000, guid: 8fcde6e3bff8ea94aaaf16f18ea12abc, type: 3}
+    - {fileID: 21300000, guid: 0936a364b28c65d4a988df10bf50ebdb, type: 3}
+    FramesPerSecond: 7
+  - Id: wisp
+    Frames:
+    - {fileID: 21300000, guid: b43c8df74b6e4434f9061b80a7b39e62, type: 3}
+    - {fileID: 21300000, guid: 2f6eb3b2211c40b4dbb5c01b769f0604, type: 3}
+    - {fileID: 21300000, guid: 1ecdee23fab862646b8ab8fa68831f0c, type: 3}
+    - {fileID: 21300000, guid: 2fa9f90a731267d4aba40a8aaa33ddb5, type: 3}
+    FramesPerSecond: 7
+  - Id: vampire
+    Frames:
+    - {fileID: 21300000, guid: 48e498568f5f6344fa14429f6af002f6, type: 3}
+    - {fileID: 21300000, guid: b4f6deffb4c13e24380fd3a6ff053036, type: 3}
+    - {fileID: 21300000, guid: 90ec1de8d8c49aa44b8bd11974f46131, type: 3}
+    - {fileID: 21300000, guid: 0fe7921d91ef6c64e8cc1904950097d6, type: 3}
+    FramesPerSecond: 7
+  - Id: coin
+    Frames:
+    - {fileID: 21300000, guid: d907f7729ad07124c98107391780d4b6, type: 3}
+    - {fileID: 21300000, guid: 169db5f7f91c7c84d8abe97571681c36, type: 3}
+    - {fileID: 21300000, guid: 05fd3f5f17383ce4094ad0a1b6b57cec, type: 3}
+    - {fileID: 21300000, guid: 2a2b57536625bc84698ea00e23aec6c8, type: 3}
+    FramesPerSecond: 7
+  - Id: potion
+    Frames:
+    - {fileID: 21300000, guid: 48c7ea4e318568a4abf6b05aeb4bdc25, type: 3}
+    - {fileID: 21300000, guid: 353d28acb8149df43a7b38c8e538d4a9, type: 3}
+    - {fileID: 21300000, guid: e049c32580704f74fa7c08e2392ce6eb, type: 3}
+    - {fileID: 21300000, guid: 404374df2b80c7b4fad4c65611ef932b, type: 3}
+    FramesPerSecond: 7
+  - Id: chest
+    Frames:
+    - {fileID: 21300000, guid: b350eff7e87a91f499b27546006e11bb, type: 3}
+    - {fileID: 21300000, guid: 0766d94c3df2efe48a6628b215dd10f1, type: 3}
+    - {fileID: 21300000, guid: a17a142fef170d8438b0dace0763cb9d, type: 3}
+    - {fileID: 21300000, guid: c76a8bede0049c948a1f74c542b0e078, type: 3}
+    FramesPerSecond: 7
+  - Id: Axe
+    Frames:
+    - {fileID: 841934352, guid: 1fc1fb1c5b3c93f4e95082d9bb55245c, type: 3}
+    FramesPerSecond: 1
+  - Id: BlueStaff
+    Frames:
+    - {fileID: -444993227, guid: 1fc1fb1c5b3c93f4e95082d9bb55245c, type: 3}
+    FramesPerSecond: 1
+  - Id: Bow
+    Frames:
+    - {fileID: 133963414, guid: 1fc1fb1c5b3c93f4e95082d9bb55245c, type: 3}
+    FramesPerSecond: 1
+  - Id: DamageSkill
+    Frames:
+    - {fileID: 538144809, guid: 1fc1fb1c5b3c93f4e95082d9bb55245c, type: 3}
+    FramesPerSecond: 1
+  - Id: ExperienceGem
+    Frames:
+    - {fileID: 471945446, guid: 1fc1fb1c5b3c93f4e95082d9bb55245c, type: 3}
+    FramesPerSecond: 1
+  - Id: FireSkill
+    Frames:
+    - {fileID: 457988024, guid: 1fc1fb1c5b3c93f4e95082d9bb55245c, type: 3}
+    FramesPerSecond: 1
+  - Id: GreenStaff
+    Frames:
+    - {fileID: 775447409, guid: 1fc1fb1c5b3c93f4e95082d9bb55245c, type: 3}
+    FramesPerSecond: 1
+  - Id: HealthHeart
+    Frames:
+    - {fileID: 289076514, guid: 1fc1fb1c5b3c93f4e95082d9bb55245c, type: 3}
+    FramesPerSecond: 1
+  - Id: IceSkill
+    Frames:
+    - {fileID: 683490269, guid: 1fc1fb1c5b3c93f4e95082d9bb55245c, type: 3}
+    FramesPerSecond: 1
+  - Id: ShieldSkill
+    Frames:
+    - {fileID: -299077260, guid: 1fc1fb1c5b3c93f4e95082d9bb55245c, type: 3}
+    FramesPerSecond: 1
+  - Id: SpeedSkill
+    Frames:
+    - {fileID: -384892829, guid: 1fc1fb1c5b3c93f4e95082d9bb55245c, type: 3}
+    FramesPerSecond: 1
+  - Id: Sword
+    Frames:
+    - {fileID: -191974110, guid: 1fc1fb1c5b3c93f4e95082d9bb55245c, type: 3}
+    FramesPerSecond: 1
+  - Id: arrow
+    Frames:
+    - {fileID: 360134968, guid: a28b2ccb55e66134c861be3c9079d2f4, type: 3}
+    FramesPerSecond: 1
+  - Id: arcane
+    Frames:
+    - {fileID: 1295378638, guid: a28b2ccb55e66134c861be3c9079d2f4, type: 3}
+    FramesPerSecond: 1
+  - Id: slash
+    Frames:
+    - {fileID: -1751392159, guid: f65fbd3e9f6ab604f860d1f1be64b327, type: 3}
+    - {fileID: -538846150, guid: f65fbd3e9f6ab604f860d1f1be64b327, type: 3}
+    - {fileID: 197208730, guid: f65fbd3e9f6ab604f860d1f1be64b327, type: 3}
+    - {fileID: -972348793, guid: f65fbd3e9f6ab604f860d1f1be64b327, type: 3}
+    FramesPerSecond: 18
+  - Id: explosion
+    Frames:
+    - {fileID: -1479227675, guid: 9a3023aa37123f84295bfd7b30dd1c6b, type: 3}
+    - {fileID: -1069106840, guid: 9a3023aa37123f84295bfd7b30dd1c6b, type: 3}
+    - {fileID: -1361040113, guid: 9a3023aa37123f84295bfd7b30dd1c6b, type: 3}
+    - {fileID: -1975529378, guid: 9a3023aa37123f84295bfd7b30dd1c6b, type: 3}
+    - {fileID: -2027496747, guid: 9a3023aa37123f84295bfd7b30dd1c6b, type: 3}
+    FramesPerSecond: 18
+  Input: {fileID: 11400000, guid: 184a37242aff488458c75a4a92f4a92b, type: 2}
+  InputProfile: {fileID: 11400000, guid: 8606b02dd49e396418ce0a31a1a06387, type: 2}
+  Music: {fileID: 8300000, guid: 7230eba0d28ea2c429de924b4959e47f, type: 3}
+  HitSound: {fileID: 8300000, guid: 143907a9261224a46b170cbcd5b6387f, type: 3}
+  PickupSound: {fileID: 8300000, guid: 35bf97d9566d05e40a6c1ae4ea4ed772, type: 3}
+  UpgradeSound: {fileID: 8300000, guid: 97c26f0428360814b817c88697490f35, type: 3}
+  CatalogKey: config/survivor/survivorcatalog
+  PlayerKey: survivor/prefabs/player
+  EnemyKey: survivor/prefabs/enemy
+  ProjectileKey: survivor/prefabs/projectile
+  PickupKey: survivor/prefabs/pickup
+  EffectKey: survivor/prefabs/effect

@@ -14,8 +14,16 @@ namespace Yato.Resources
                 return 0u;
             }
 
-            byte[] bytes = File.ReadAllBytes(filePath);
-            return Compute(bytes, 0, bytes.Length);
+            uint[] table = GetTable();
+            uint crc = 0xFFFFFFFFu;
+            var buffer = new byte[64 * 1024];
+            using (var stream = File.OpenRead(filePath))
+            {
+                int count;
+                while ((count = stream.Read(buffer, 0, buffer.Length)) > 0)
+                    for (int i = 0; i < count; i++) crc = (crc >> 8) ^ table[(crc ^ buffer[i]) & 0xFF];
+            }
+            return ~crc;
         }
 
         public static uint Compute(byte[] buffer, int offset, int count)

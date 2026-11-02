@@ -1,0 +1,15 @@
+{
+  "name": "com.yato.flow",
+  "version": "0.2.0",
+  "displayName": "Yato Flow",
+  "description": "Optional Unity 6 foundation module: flow",
+  "unity": "6000.0",
+  "author": {
+    "name": "Yato"
+  },
+  "dependencies": {
+    "com.yato.core": "0.2.0",
+    "com.yato.app": "0.3.0",
+    "com.yato.resources": "0.3.0"
+  }
+}

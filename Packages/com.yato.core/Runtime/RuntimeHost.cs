@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading;
 using UnityEngine;
 
 namespace Yato.Core
@@ -15,6 +16,19 @@ namespace Yato.Core
         private const string HostObjectName = "[Yato.RuntimeHost]";
 
         private static RuntimeHost s_instance;
+        private static CancellationTokenSource s_lifetime;
+
+        /// <summary>Canceled on host destruction or the next Play session. Never cancels caller-owned Tasks.</summary>
+        public static CancellationToken LifetimeToken => s_lifetime?.Token ?? new CancellationToken(true);
+
+        private static void EndSession()
+        {
+            var lifetime = s_lifetime; s_lifetime = null;
+            if (lifetime == null) return;
+            try { lifetime.Cancel(); }
+            catch (Exception error) { Log.Error("RuntimeHost", "Lifetime cancellation observer failed", error); }
+            finally { lifetime.Dispose(); }
+        }
 
         /// <summary>宿主实例；首次访问时自动创建。</summary>
         public static RuntimeHost Instance
@@ -56,9 +70,11 @@ namespace Yato.Core
                 return;
             }
 
+            s_lifetime = new CancellationTokenSource();
             var host = new GameObject(HostObjectName);
             DontDestroyOnLoad(host);
             s_instance = host.AddComponent<RuntimeHost>();
+            MainThreadDispatcher.Initialize();
         }
 
         /// <summary>在宿主上启动协程；宿主不存在时自动创建。</summary>
@@ -131,6 +147,7 @@ namespace Yato.Core
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics()
         {
+            EndSession();
             s_instance = null;
             Updated = null;
             LateUpdated = null;
@@ -143,6 +160,8 @@ namespace Yato.Core
                 return;
             }
 
+            EndSession();
+            MainThreadDispatcher.Shutdown();
             // 宿主销毁后继续向旧订阅者派发只会访问已销毁对象，统一清空
             Updated = null;
             LateUpdated = null;

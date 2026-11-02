@@ -8,8 +8,14 @@ namespace Yato.Resources
     /// <summary>
     /// 运行时 Provider 选择（文档 3.5）：
     /// 编辑器默认 AssetDatabase；强制 Bundle 或 Player 下按 manifest 选择 BundleProvider，
-    /// manifest 缺失时降级 ResourcesProvider 并告警。
+    /// Bundle 模式默认失败即报错；显式 AllowResourcesFallback 才降级。
     /// </summary>
+    public enum ResourceFailurePolicy
+    {
+        BundleRequired,
+        AllowResourcesFallback
+    }
+
     public static class ResourceServiceFactory
     {
         /// <summary>编辑器下强制走 AssetBundle（用于验证打包结果）。</summary>
@@ -38,7 +44,7 @@ namespace Yato.Resources
         }
 
         /// <summary>按当前平台/配置选择 Provider。</summary>
-        public static IResourceProvider CreateProvider()
+        public static IResourceProvider CreateProvider(ResourceFailurePolicy policy = ResourceFailurePolicy.BundleRequired, string manifestPath = null)
         {
 #if UNITY_EDITOR
             if (!ForceBundleMode)
@@ -49,15 +55,18 @@ namespace Yato.Resources
 
             Log.Info("[Yato.Resources] ForceBundleMode 已开启，编辑器将读取 AssetBundle");
 #endif
-            return CreateBundleOrFallback();
+            return CreateBundleOrFallback(policy, manifestPath);
         }
 
-        private static IResourceProvider CreateBundleOrFallback()
+        private static IResourceProvider CreateBundleOrFallback(ResourceFailurePolicy policy, string manifestPath)
         {
             try
             {
-                string manifestPath = ResolveManifestPath();
+                manifestPath = manifestPath ?? ResolveManifestPath();
                 ResourceManifest manifest = ResourceManifest.LoadFromFile(manifestPath);
+                if (manifest.Platform != RuntimePaths.PlatformName)
+                    throw new FormatException("Manifest platform mismatch: " + manifest.Platform);
+                foreach (var bundle in manifest.Bundles) manifest.ResolveLoadOrder(bundle.Key);
 
                 BundleLoader loader = null;
                 var refCounter = new BundleRefCounter(delegate(string bundleName)
@@ -68,7 +77,7 @@ namespace Yato.Resources
                     }
                 });
 
-                loader = new BundleLoader(refCounter);
+                loader = new BundleLoader(refCounter, Path.GetDirectoryName(manifestPath));
 
                 Log.Info(string.Format(
                     "[Yato.Resources] 使用 BundleProvider：version={0} bundles={1} assets={2}",
@@ -78,9 +87,11 @@ namespace Yato.Resources
             }
             catch (Exception e)
             {
-                Log.Warn(string.Format(
-                    "[Yato.Resources] manifest 不可用，降级为 ResourcesProvider：{0}",
-                    e.Message));
+                var error = new ResourceException(null, null, ResourceStage.ManifestLoad,
+                    string.Format("Provider=BundleProvider stage=ManifestLoad platform={0} manifest={1}: {2}",
+                        RuntimePaths.PlatformName, manifestPath, e.Message), e);
+                if (policy != ResourceFailurePolicy.AllowResourcesFallback) throw error;
+                Log.Warn("[Yato.Resources] Explicit Resources fallback: " + error);
                 return new ResourcesProvider();
             }
         }

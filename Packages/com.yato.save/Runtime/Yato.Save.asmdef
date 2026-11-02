@@ -1,0 +1,9 @@
+{
+  "name": "Yato.Save",
+  "rootNamespace": "Yato.Save",
+  "references": [
+    "Yato.Core",
+    "Yato.Persistence"
+  ],
+  "autoReferenced": true
+}

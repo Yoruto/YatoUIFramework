@@ -1,0 +1,10 @@
+{
+  "name": "Yato.Flow",
+  "rootNamespace": "Yato.Flow",
+  "references": [
+    "Yato.Core",
+    "Yato.App",
+    "Yato.Resources.Abstractions"
+  ],
+  "autoReferenced": true
+}

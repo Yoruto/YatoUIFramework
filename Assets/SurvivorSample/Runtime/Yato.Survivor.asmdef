@@ -1,0 +1,10 @@
+{
+  "name": "Yato.Survivor",
+  "rootNamespace": "Yato.Survivor",
+  "references": [
+    "Yato.Survivor.Domain", "Yato.Core", "Yato.App", "Yato.Resources", "Yato.Resources.Abstractions",
+    "Yato.Config", "Yato.Flow", "Yato.Pooling", "Yato.UI", "Yato.Mvc", "Yato.Input", "Yato.UI.Input",
+    "Yato.Settings", "Yato.Persistence", "Yato.Save", "Yato.Audio", "Unity.InputSystem", "UnityEngine.UI"
+  ],
+  "autoReferenced": true
+}

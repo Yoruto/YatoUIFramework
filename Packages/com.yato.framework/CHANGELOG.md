@@ -3,7 +3,67 @@
 所有对本包的改动都记录在此文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.6.0] - 2026-11-01
+
+- 新增 Task/IAwaitable 互操作及直接 await，补齐主线程投递、会话生命周期和异常隔离。
+- 新增弱引用诊断快照和统一面板，接入 Flow、ResourceScope、UI、Pooling、Pause 与可选 Save。
+- 新增 UIPageCatalog、资源服务注入、无覆盖项目向导与统一构建预检。
+- 可选 UI/Input 新增配置资产和动作路径校验；FullSample 使用 await 演示资源范围。
+- 增加百轮生命周期回归与独立工程 Domain/Scene Reload 验证工具；IL2CPP 支持模块下载 404，单列待验收。
+- 修复资源活跃计数与旧统计快照受后续加载影响的问题，保留 Resources 共享资源释放策略。
+
+## [0.5.0] - 2026-11-01
+
+- 新增资源实例池和值类型代次句柄，支持预热、容量和重复归还保护。
+- App 新增暂停令牌、生命周期信号和等待异步保存的显式退出协调器。
+- UI 新增无 Facade 事件、焦点策略、可选非缩放时间过渡和 CloseAsync；同步 Close 保持原行为。
+- 新增可选 UI/Input 适配，接管及恢复事件模块、输入上下文和嵌套焦点。
+- Flow/Config/Pooling 加入聚合包；Save/Input/UI.Input 仍可选。Yato Survivor 整体延期。
+- FullSample 增加真实配置、通用流程和实例池演示；可选包附计数器存档及键鼠/手柄焦点场景。
+- 规范化启动缓存路径并保守处理丢失指针；Windows 快照目录暂时占用支持有界异步重试，活动指针提交仍失败即返回。
+- 完成独立包集安装/卸载、Windows Mono、资源和性能验证；IL2CPP 缺少本地模块，单独记录待验收。
+
+## [0.4.0] - 2026-11-01
+
+- 新增独立 Flow/Config 模块和可选 Save 包，保持同步 Bootstrap 与基础 Persistence 契约。
+- 配置目录复制运行数据，统一校验 ID/数值/引用并接入 Player/Bundle 构建前检查。
+- 存档支持槽位、备份、显式恢复与内存迁移，损坏时禁止静默覆盖；附计数器示例。
+
+## [0.3.1] - 2026-11-01
+
+- 检查 BundleBuildResult，批处理失败返回非零；自检失败不复制产物。
+- 显式启动缓存维护：保留当前/上一版本，资源已使用时拒绝清理，返回数量/字节/原因。
+
+## [0.3.0] - 2026-10-31
+
+### Added
+
+- 热更新统一 BundleRelativePath 校验、清单字段范围/数量/平台/重复与路径碰撞检查、链接路径拒绝、受限流式下载、超时与生产 HTTPS 默认策略。
+- 版本暂存、完整资源/依赖校验、D04 FileStore 原子活动指针提交、跨实例 Busy 和取消结果；失败保留最后成功版本，旧平铺缓存只读兼容。
+- BasicSample / FullSample 自带场景与预制体，无原工程 Assets/GameRes 或 TMP 字体依赖；不使用全局自动示例注册。
+- 可选 Input 包 0.1.0：游戏提供 action asset，运行时副本、上下文、对称订阅、交互重绑定与 Binding Override JSON。
+- 独立消费工程准备/验证工具、故障回归用例、安装/升级说明与 UI/MVC 可行性结论。无 CI 配置。
+
+### Changed
+
+- **支持范围变化**：仅支持 Unity 6，全部 Yato 包的 `unity` 字段统一为 `6000.0`，移除旧 `unityRelease: 13f1`；取消旧 Unity 大版本的兼容验收要求，当前开发与实测版本为 `6000.5.6f1`。
+- Resources 升为 0.2.0，依赖 Persistence 0.1.0 以复用安全提交；其余包的对应依赖同步。
+- **兼容性变化**：Bundle 模式默认 BundleRequired，初始化失败抛包含 Provider/平台/路径/阶段/原始异常的错误；显式 AllowResourcesFallback 才降级。编辑器默认 AssetDatabase 不变。
+- **兼容性变化**：远程默认只接受 HTTPS，file:// 与 loopback HTTP 需要显式测试开关；不接受跨平台、非规范 Bundle 名或不合法的 CRC/大小值。
+- Provider 固定创建时的快照，缺包不跨目录混用；已提交版本保守保留，当前不自动清理，避免破坏旧句柄。升级见安装指南。
+- Package Manager 推荐样例改为 BasicSample / FullSample；旧 YatoFrameworkDemo 源码保留供迁移，AppBootstrapSample 改为显式注册。
+
+### Fixed
+
+- 下载先删除目标导致最后可用文件丢失；更新失败删除活动 manifest；清单提交前覆盖活动 Bundle。
+- AppBootstrapSample 保存并对称移除场景委托，重复 Initialize/Shutdown 与初始化失败清理不叠加订阅。
+- CRC 从整文件读取改为 64 KiB 缓冲流式计算。
+
 ## [Unreleased]
+
+### Tests
+
+- 热更冒烟测试兼容宿主工程的多个 Bundle：按真实版本清单校验首次下载与再次跳过的数量，升级测试版本时保留完整 Bundle 集合。
 
 ### Fixed
 

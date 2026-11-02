@@ -12,7 +12,8 @@
         "Yato.App",
         "Yato.Persistence",
         "Yato.Settings",
-        "Yato.Audio"
+        "Yato.Audio",
+        "Yato.Editor"
     ],
     "includePlatforms": [
         "Editor"

@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4c518da5915e1c4c9689445eda82380, type: 3}
+  m_Name: SpawnWaves
+  m_EditorClassIdentifier: Yato.Survivor::Yato.Survivor.SpawnWaveTable
+  m_records:
+  - Id: wake
+    StartSeconds: 0
+    EndSeconds: 90
+    Interval: 0.65
+    MaximumAlive: 90
+    Enemies:
+    - skeleton
+    - guard
+  - Id: gather
+    StartSeconds: 90
+    EndSeconds: 240
+    Interval: 0.4
+    MaximumAlive: 130
+    Enemies:
+    - skeleton
+    - guard
+    - wisp
+  - Id: horde
+    StartSeconds: 240
+    EndSeconds: 420
+    Interval: 0.2
+    MaximumAlive: 180
+    Enemies:
+    - skeleton
+    - guard
+    - wisp
+  - Id: dawn
+    StartSeconds: 420
+    EndSeconds: 600
+    Interval: 0.1
+    MaximumAlive: 220
+    Enemies:
+    - skeleton
+    - guard
+    - wisp

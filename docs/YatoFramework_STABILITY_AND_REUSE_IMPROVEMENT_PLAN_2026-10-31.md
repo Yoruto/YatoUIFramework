@@ -6,6 +6,8 @@
 > 代码基线：`main`，聚合包 `com.yato.framework` 0.2.0（D01–D06 已实现，D07 占位，D08 部分完成）  
 > 状态：计划已整理，**不代表问题已修复或通过 Unity 实测**。具体实施以开始开发时的最新代码为准。
 
+> 实施进度补记（2026-10-31）：本计划原文保留。对应 0.3.0 实现、实测证据与尚未满足的发布门槛见 [实施验证记录](OPTIMIZATION_VERIFICATION_2026-10-31.md) 和 [安装升级指南](EMBEDDED_INSTALL_AND_UPGRADE.md)。
+
 ## 1. 目标、范围和原则
 
 ### 1.1 目标
@@ -42,7 +44,7 @@
 | IMP-05 | P1 | 生命周期与资源错误策略 | `AppBootstrapSample`、`ResourceServiceFactory` | 重启无重复回调；正式模式错误可定位 |
 | IMP-06 | P2 | D07 Input 可选适配 | `com.yato.input` | 上下文、重绑定与清理可独立使用 |
 | IMP-07 | P2 | UI/MVC 解耦可行性验证 | 小型适配层原型/结论记录 | 得到明确保留或解耦决策，不强行重构 |
-| IMP-08 | P1 | 端到端人工回归与发布整理 | 测试、记录、文档、版本 | 两个 Unity 版本与 Windows Player 有可复查记录 |
+| IMP-08 | P1 | 端到端人工回归与发布整理 | 测试、记录、文档、版本 | Unity 6 与 Windows Player 有可复查记录 |
 
 推荐实施顺序：**阶段 A（IMP-01、02）→ 阶段 B（IMP-03、04）→ 阶段 C（IMP-05）→ 阶段 D（IMP-06、07）→ 阶段 E（IMP-08）**。IMP-08 中的测试用例补充应随每个阶段持续进行，最终集中验收。
 
@@ -163,7 +165,7 @@
 
 ## 7. 阶段 E：独立工程集成、人工验证与发布（不含 CI）
 
-1. 在一个干净的 Unity 2022.3 LTS 工程和一个 Unity 6 工程分别导入框架，检查包解析、asmdef、样例和公开 API。
+1. 在干净的 Unity 6 工程中导入框架（当前开发与实测版本为 `6000.5.6f1`），检查包解析、asmdef、样例和公开 API。
 2. 在 Unity Test Runner **手动**执行 EditMode/PlayMode 全量测试；需要真实 AB 的测试先生成产物再运行，记录 PASS/FAIL/SKIP 数和原因。
 3. 在 Windows Player 完成 Bootstrap → Settings → Audio → Single/Additive Scene → UI → HotUpdate → 退出清理端到端验证。热更可使用本地测试服务器，但生产 HTTPS 约束必须单独验证。
 4. 在另一个小型 Unity 游戏工程里接入 Core、Resources、UI、App、Settings、Audio，记录“不得不绕过框架”的调用以及可删去的重复封装，作为下一轮改进依据。
@@ -177,7 +179,7 @@
 |---|---|
 | 热更安全 | 所有路径越界与清单异常用例被拒绝；无资源目录外写入 |
 | 热更恢复 | 任意未完成更新不破坏上一成功版本；提交结果与取消状态一致 |
-| 安装复用 | 两种 Unity 版本的空工程安装成功；基础样例不依赖原工程 Assets |
+| 安装复用 | Unity 6 空工程的完整/精简包集安装成功；基础样例不依赖原工程 Assets |
 | 资源/事件生命周期 | 重复启停、取消、卸载和迟到结果不产生可观察泄漏或重复回调 |
 | 错误与降级 | 正式模式缺 manifest 有明确错误；主动启用时才降级 |
 | Input | 可选安装、上下文与重绑定正常，卸载后其他模块照常编译 |
@@ -195,7 +197,7 @@
 6. `feat(resources): make fallback policy explicit`（IMP-05B）
 7. `feat(input): optional Unity Input System adapter`（IMP-06）
 8. `docs(ui): evaluate optional PureMVC adapter boundary`（IMP-07）
-9. `test(release): record manual cross-version and Windows Player verification`（IMP-08）
+9. `test(release): record manual Unity 6 and Windows Player verification`（IMP-08）
 
 执行时可以拆小 PR；其中 IMP-02 涉及旧缓存布局和公开行为，建议单独审核，不与 Input 开发混在一起。
 
@@ -203,7 +205,7 @@
 
 - [既有架构与路线图](YatoFramework_ARCHITECTURE_AND_ROADMAP_2026-10-30.md)：D01–D04 冻结边界、D05–D08 默认方案。
 - [既有手动验证清单](YatoFramework_ManualVerification_2026-10-31.md)：后续按本计划增加热更恢复、独立安装和 Input 条目。
-- [Unity 2022.3：Git dependencies](https://docs.unity3d.com/2022.3/Documentation/Manual/upm-git.html)：Git 子目录安装与多包依赖限制。
-- [Unity 2022.3：AssetBundle Download Integrity and Security](https://docs.unity3d.com/2022.3/Documentation/Manual/AssetBundles-Integrity.html)：远程资源的完整性与安全边界。
+- [Unity 6：Git dependencies](https://docs.unity3d.com/6000.0/Documentation/Manual/upm-git.html)：Git 子目录安装与多包依赖限制。
+- [Unity 6：AssetBundle Download Integrity and Security](https://docs.unity3d.com/6000.0/Documentation/Manual/AssetBundles-Integrity.html)：远程资源的完整性与安全边界。
 
 **范围确认**：本文包含前次审核提出的全部非 CI 改进；CI/自动化工作流建设不在本计划内，也不作为以上阶段的阻塞条件。

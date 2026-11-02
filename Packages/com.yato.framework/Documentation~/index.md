@@ -1,11 +1,17 @@
+最新 0.6 API 与接入工具见 [0.6 指南](foundation06.md)。
+
+0.5.0 模块与通用演示见 [基础模块指南](foundation.md)。
+
 # Yato Framework 快速上手
+
+0.3.0 起的新手路径：Package Manager 导入 BasicSample / FullSample；详细安装、快照布局与兼容变化见 [嵌入式安装与升级](installation.md)。
 
 ## 1. 30 分钟接入
 
 自 `0.2.0` 起框架由多个 UPM 包组成，`com.yato.framework` 是聚合元包：
 
 1. 把 `Packages/` 下的 `com.yato.*` 目录整体放入工程（内嵌包，Unity 自动识别，无需写 manifest 依赖）；
-   只想用部分能力时，也可以只放对应子包（例如 `core` + `resources` + `ui`）；
+   只想用部分能力时，也可以只放对应子包（例如 `core` + `persistence` + `resources` + `mvc` + `ui`）；
 2. 预制体放到 `Assets/GameRes/UI/{Module}/{Page}.prefab`，资源 key 规则：`ui/{module}/{page}`（全小写、无扩展名）；
 3. 选中预制体 → 菜单 `Yato/CodeGen/Generate Page Code (Selection)` 生成 `View/Mediator/Proxy/Bindings`；
 4. 菜单 `Yato/CodeGen/Generate Asset Keys && Pages` 生成 `Assets/YatoGenerated/{AssetKeys,UIPages}.g.cs`；
@@ -46,9 +52,9 @@ Close:     OnClose(destroy) → 出栈(新栈顶 OnReveal) → 注销 → 销毁
 |---|---|
 | 编辑器开发 | `EditorAssetProvider`（AssetDatabase，零打包） |
 | 正式包 | `BundleProvider`（manifest v2 + 引用计数 + 5s 延迟卸载） |
-| 无 manifest | `ResourcesProvider`（降级并告警） |
+| Bundle manifest 失败 | 默认抛错；显式 `AllowResourcesFallback` 才改用 `ResourcesProvider` |
 
-打包：菜单 `Yato/Build/Bundles (Active Platform)` 或 CI：
+打包：菜单 `Yato/Build/Bundles (Active Platform)` 或本机手动命令：
 
 ```
 Unity.exe -batchmode -quit -projectPath <path> \
@@ -121,7 +127,7 @@ run.Completed += () => {
 };
 ```
 
-失败会自动删除 `persistentDataPath` 中的 manifest，回退到 StreamingAssets 内置版本。
+失败/提交前取消仅清理本次暂存，保持上一成功远程快照；首次失败才继续使用 StreamingAssets。新 Provider 固定活动快照，旧 Provider 保持旧快照。生产默认 HTTPS；本地测试显式设置 RemoteDownloader.AllowFileUrls / AllowInsecureLocalhost。已提交快照暂不自动删除，见 installation.md 的容量限制。
 
 ## 7. 诊断
 
@@ -138,16 +144,16 @@ run.Completed += () => {
 
 - EditMode：`AssetKey` / manifest / bundle 引用计数 / 页面栈 / 页面缓存 / 资源引用计数 / 资源范围 / 文件存储 / 设置；
 - PlayMode：UI 生命周期与并发、App/Scene 集成、音频池与渐变；
-- 运行：Unity Test Runner（EditMode / PlayMode），或在 CI 用 `-runTests -testPlatform EditMode`；
+- 运行：Unity Test Runner（EditMode / PlayMode），或本机手动用 `-runTests -testPlatform EditMode`；
 - 包内测试要求宿主工程 `Packages/manifest.json` 含：
 
 ```json
-"testables": ["com.yato.framework"]
+"testables": ["com.yato.framework", "com.yato.input"]
 ```
 
 ## 9. 发布流程
 
 1. 更新各包 `package.json` 版本与 `CHANGELOG.md`；
-2. `git tag v0.2.0`；
+2. 完成 verification.md 中的发布门槛后再创建版本标签（本轮未创建）；
 3. 打包四平台 bundles 并校验 manifest；
 4. 外部工程导入包并跑通示例与手动验证清单（`docs/YatoFramework_ManualVerification_2026-10-31.md`）。

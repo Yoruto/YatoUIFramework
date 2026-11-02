@@ -1,0 +1,21 @@
+{
+  "name": "Yato.Save.Tests",
+  "references": [
+    "Yato.Save",
+    "Yato.Persistence",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner",
+    "Yato.Core"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ]
+}

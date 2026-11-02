@@ -1,0 +1,20 @@
+{
+  "name": "Yato.Flow.Tests",
+  "references": [
+    "Yato.Flow",
+    "Yato.App",
+    "Yato.Core",
+    "Yato.Resources.Abstractions",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ]
+}

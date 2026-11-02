@@ -3,7 +3,7 @@
 > 文档类型：架构设计与实施规划草案  
 > 整理日期：2026-10-30  
 > 目标仓库：[Yoruto/YatoUIFramework](https://github.com/Yoruto/YatoUIFramework)  
-> 目标环境：Unity 2022.3 LTS 起，优先验证 Windows Player；兼容 Unity 6 作为验证目标  
+> 目标环境：仅支持 Unity 6（包最低版本 `6000.0`，当前开发与实测版本 `6000.5.6f1`），优先验证 Windows Player
 > **状态说明：D01–D04 为已确认并冻结的设计；D05–D08 为参考成熟实践形成的推荐默认方案，尚待整体审核。本文不代表代码已实现或通过测试。**
 
 ## 1. 目标与非目标
@@ -185,7 +185,7 @@ YatoFramework 是可在多个独立 Unity 游戏中复用的轻量基础框架�
 1. 补齐各模块 asmdef、UPM `package.json`、可选依赖说明及公共 API XML/Markdown 文档。
 2. 使用 EditMode 测试验证纯逻辑与异常；PlayMode 测试验证 Bootstrap、Scene、UI、资源释放和 Audio 生命周期。
 3. 提供 `BasicSample`（Bootstrap、资源、UI、场景）与 `FullSample`（Settings、Audio、Input 协作）。
-4. 验证完整 UPM 安装、缺失可选包时的编译隔离、Windows Player 构建、Unity 2022.3 与 Unity 6 兼容性。
+4. 验证完整 UPM 安装、缺失可选包时的编译隔离、Windows Player 构建、Unity 6 当前开发版本的安装与运行。
 5. 维护版本变更记录；在发布前检查新增 API、破坏性变更和模块依赖方向。
 
 ## 5. 实施顺序与里程碑建议
@@ -261,7 +261,7 @@ YatoFramework 是可在多个独立 Unity 游戏中复用的轻量基础框架�
 - [Unity Input System：运行时重绑定](https://github.com/Unity-Technologies/InputSystem/blob/develop/Packages/com.unity.inputsystem/Documentation~/user-rebinding-runtime.md)：使用官方重绑定及 Binding Override 保存机制。
 - [Unity Input System 1.6：Action Bindings](https://docs.unity.cn/Packages/com.unity.inputsystem@1.6/manual/ActionBindings.html)：官方按键覆盖、重绑定和恢复方式。
 - [Unity Settings Modifier](https://github.com/muhammadIdhamMaarif/Unity-Settings-Modifier)：设置数据、运行时状态、应用器和 UI 的分层实践；其完整依赖不属于本框架要求。
-- [Unity AudioMixer 文档](https://docs.unity3d.com/2022.3/Documentation/Manual/AudioMixer.html)：Unity 原生分组混音和参数管理。
+- [Unity AudioMixer 文档](https://docs.unity3d.com/6000.0/Documentation/Manual/AudioMixer.html)：Unity 原生分组混音和参数管理。
 
 ## 9. 实施进展（2026-10-31）
 

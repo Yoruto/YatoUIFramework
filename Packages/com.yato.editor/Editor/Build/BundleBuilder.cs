@@ -76,6 +76,7 @@ namespace Yato.Editor
 
             try
             {
+                ConfigCatalogValidator.ValidateAll();
                 string warning = PlatformResolver.ValidateTarget(target);
                 if (!string.IsNullOrEmpty(warning))
                 {
@@ -164,7 +165,7 @@ namespace Yato.Editor
 
                 Validate(outputDir, manifestPath, assetRoot, result);
 
-                if (copyToStreamingAssets)
+                if (copyToStreamingAssets && result.Success)
                 {
                     CopyToStreamingAssets(outputDir, target);
                 }
