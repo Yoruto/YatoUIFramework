@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 092c92ef61809ad4ab4a020e5c29f4f2, type: 3}
+  m_Name: Upgrades
+  m_EditorClassIdentifier: Yato.Survivor::Yato.Survivor.UpgradeTable
+  m_records:
+  - Id: sword
+    Title: TEMPERED STEEL
+    Description: 'Unlock or improve your sword.
+
+      +25% damage and greater reach.'
+    Icon: Sword
+    WeaponId: sword
+    Maximum: 5
+    Weight: 14
+  - Id: bow
+    Title: THE RANGER
+    Description: 'Unlock or improve your bow.
+
+      Arrows pierce through two enemies.'
+    Icon: Bow
+    WeaponId: bow
+    Maximum: 5
+    Weight: 14
+  - Id: staff
+    Title: ARCANE MEMORY
+    Description: 'Unlock or improve your staff.
+
+      Seeking bolts find nearby
+      enemies.'
+    Icon: BlueStaff
+    WeaponId: staff
+    Maximum: 5
+    Weight: 14
+  - Id: might
+    Title: BLOOD OATH
+    Description: 'All weapons deal +20% damage.
+
+      Let every strike count.'
+    Icon: DamageSkill
+    WeaponId: 
+    Maximum: 5
+    Weight: 12
+  - Id: haste
+    Title: QUICKENING
+    Description: 'Weapons attack 12% faster.
+
+      A moment can save your life.'
+    Icon: FireSkill
+    WeaponId: 
+    Maximum: 5
+    Weight: 12
+  - Id: swift
+    Title: LIGHT FOOTED
+    Description: 'Move 12% faster.
+
+      Keep a step ahead of the horde.'
+    Icon: SpeedSkill
+    WeaponId: 
+    Maximum: 5
+    Weight: 9
+  - Id: vitality
+    Title: SECOND WIND
+    Description: '+20 maximum health.
+
+      Recover 20 health immediately.'
+    Icon: HealthHeart
+    WeaponId: 
+    Maximum: 5
+    Weight: 10
+  - Id: magnet
+    Title: SOULKEEPER
+    Description: '+0.65 pickup radius.
+
+      Gather the spoils from afar.'
+    Icon: ExperienceGem
+    WeaponId: 
+    Maximum: 4
+    Weight: 8
+  - Id: multishot
+    Title: MANY AS ONE
+    Description: '+1 projectile for bow and staff.
+
+      Fill the dark with light.'
+    Icon: GreenStaff
+    WeaponId: 
+    Maximum: 3
+    Weight: 8
+  - Id: ward
+    Title: IRON RESOLVE
+    Description: 'Take 8% less contact damage.
+
+      The watch does not break.'
+    Icon: ShieldSkill
+    WeaponId: 
+    Maximum: 5
+    Weight: 9

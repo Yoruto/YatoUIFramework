@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 310cfa9f7af962546a8bd5f67e973566, type: 3}
+  m_Name: SurvivorCatalog
+  m_EditorClassIdentifier: Yato.Config::Yato.Config.ConfigCatalog
+  Tables:
+  - {fileID: 11400000, guid: 4b6ff9c66ae4e7c43bf7d64dbdd22814, type: 2}
+  - {fileID: 11400000, guid: 219ab48293458644babc4b50bf30848c, type: 2}
+  - {fileID: 11400000, guid: a1b49653e5fb6574a9b09d3ac7b29167, type: 2}
+  - {fileID: 11400000, guid: 108592fa996e88a41bce651f0c7a4fad, type: 2}
+  - {fileID: 11400000, guid: 5762b75b170af4e459caf901b89e7b6d, type: 2}
+  - {fileID: 11400000, guid: e954d4c803429c54ab3294202c78da29, type: 2}
+  - {fileID: 11400000, guid: 6f72e192b7c169e4c8444f314c41767e, type: 2}
+  - {fileID: 11400000, guid: 1484166d3fd11a54ead4d2135a5c37a8, type: 2}

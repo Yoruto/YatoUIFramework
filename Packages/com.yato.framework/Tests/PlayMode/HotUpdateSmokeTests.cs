@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -67,6 +68,9 @@ namespace Yato.Tests.PlayMode
         [UnityTest]
         public IEnumerator FreshRun_DownloadsDiff_SecondRun_AllSkipped()
         {
+            var expectedBundles = VersionManifest.Parse(File.ReadAllText(Path.Combine(
+                m_remoteRoot, RuntimePaths.PlatformName, RuntimePaths.VersionFileName))).Bundles.Count;
+            Assert.Greater(expectedBundles, 0, "冒烟产物必须包含 bundle");
             var service = new HotUpdateService(m_downloader, m_localRoot);
 
             IAwaitable<HotUpdateResult> first = service.RunAsync(m_remoteUrl);
@@ -75,7 +79,7 @@ namespace Yato.Tests.PlayMode
             HotUpdateResult result = first.GetResult();
             Assert.IsTrue(result.Success, "首次热更应成功：" + result);
             Assert.IsTrue(result.Updated, "首次热更应产生下载");
-            Assert.AreEqual(1, result.DownloadedBundles, "应恰好下载 1 个 bundle");
+            Assert.AreEqual(expectedBundles, result.DownloadedBundles, "应下载版本清单中的全部 bundle");
             Assert.IsFalse(string.IsNullOrEmpty(result.Version));
 
             string persistentManifest = Path.Combine(new HotUpdateStorage(m_localRoot).ActiveDirectory, RuntimePaths.ManifestFileName);
@@ -90,7 +94,7 @@ namespace Yato.Tests.PlayMode
             HotUpdateResult again = second.GetResult();
             Assert.IsTrue(again.Success, "二次热更应成功：" + again);
             Assert.IsFalse(again.Updated, "无变化时不应产生下载");
-            Assert.AreEqual(1, again.SkippedBundles, "已校验通过的 bundle 应跳过");
+            Assert.AreEqual(expectedBundles, again.SkippedBundles, "已校验通过的全部 bundle 应跳过");
             Assert.AreEqual(0, again.DownloadedBundles);
         }
 
@@ -108,13 +112,12 @@ namespace Yato.Tests.PlayMode
             File.WriteAllText(remoteManifest, edited);
 
             string remoteVersion = Path.Combine(remotePlatform, RuntimePaths.VersionFileName);
-            WriteVersionJson(
-                remoteVersion,
-                "1.0.1",
-                Crc32Util.Compute(remoteManifest),
-                "ui/example",
-                Crc32Util.Compute(Path.Combine(remotePlatform, "ui/example")),
-                new FileInfo(Path.Combine(remotePlatform, "ui/example")).Length);
+            // 保留真实产物中的完整 bundle 集合，只更新本测试修改的版本和清单 CRC。
+            var editedVersion = Regex.Replace(File.ReadAllText(remoteVersion),
+                @"""appVersion""\s*:\s*""[^""]*""", "\"appVersion\":\"1.0.1\"");
+            editedVersion = Regex.Replace(editedVersion, @"""manifestCrc""\s*:\s*\d+",
+                "\"manifestCrc\":" + Crc32Util.Compute(remoteManifest));
+            File.WriteAllText(remoteVersion, editedVersion);
 
             var service = new HotUpdateService(m_downloader, m_localRoot);
             IAwaitable<HotUpdateResult> updating = service.RunAsync(m_remoteUrl);

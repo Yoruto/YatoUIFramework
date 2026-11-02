@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1bccb1a6ac432f247b5822feba1cdc34, type: 3}
+  m_Name: Stages
+  m_EditorClassIdentifier: Yato.Survivor::Yato.Survivor.StageTable
+  m_records:
+  - Id: dungeon
+    Duration: 600
+    HalfWidth: 19
+    HalfHeight: 15
+    EliteInterval: 45
+    EnemyCapacity: 256
+    ProjectileCapacity: 160
+    PickupCapacity: 400
+    EffectCapacity: 96
+    Enemies:
+    - skeleton
+    - guard
+    - wisp
+    - vampire
+    Upgrades:
+    - sword
+    - bow
+    - staff
+    - might
+    - haste
+    - swift
+    - vitality
+    - magnet
+    - multishot
+    - ward
+    Waves:
+    - wake
+    - gather
+    - horde
+    - dawn

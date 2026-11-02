@@ -1,0 +1,7 @@
+{
+  "name": "Yato.Survivor.Domain",
+  "rootNamespace": "Yato.Survivor.Domain",
+  "references": [],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

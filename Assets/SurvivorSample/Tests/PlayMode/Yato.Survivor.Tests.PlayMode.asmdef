@@ -1,0 +1,6 @@
+{
+  "name": "Yato.Survivor.Tests.PlayMode",
+  "references": ["Yato.Survivor", "Yato.Survivor.Domain", "Yato.Core", "Yato.App", "Yato.Resources", "Yato.Resources.Abstractions", "Yato.UI", "Yato.Input", "Yato.UI.Input", "Unity.InputSystem", "UnityEngine.UI"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false
+}

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fdecffc06403aa408263b6fc7d5969b, type: 3}
+  m_Name: Rewards
+  m_EditorClassIdentifier: Yato.Survivor::Yato.Survivor.RewardTable
+  m_records:
+  - Id: standard
+    BaseExperience: 8
+    ExperienceGrowth: 5
+    ChestCoins: 20
+    CoinChance: 0.18
+    PotionChance: 0.035
+    PotionHealing: 20
