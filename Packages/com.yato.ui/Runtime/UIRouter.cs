@@ -370,6 +370,24 @@ namespace Yato.UI
         /// <summary>关闭全部页面；指定层级时只关闭该层。</summary>
         public static void CloseAll(UILayer? layer = null)
         {
+            // An opening page is not on the stack yet. Without cancellation it can activate
+            // after CloseAll and resurrect a UI that the caller intended to dismiss.
+            if (!layer.HasValue)
+            {
+                InvalidatePendingOpens();
+            }
+            else
+            {
+                var openings = new List<PendingOpen>(s_pendingOpens.Values);
+                foreach (var opening in openings)
+                {
+                    if (opening.Layer != layer.Value) continue;
+                    RemovePending(opening);
+                    EndLoadingWatch(opening);
+                    opening.Cancel();
+                }
+            }
+
             List<UIPageHandle> handles = layer.HasValue
                 ? StackInstance.GetHandles(layer.Value)
                 : StackInstance.GetAllHandles();

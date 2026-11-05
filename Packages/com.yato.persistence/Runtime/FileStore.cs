@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 using Yato.Core;
 
 namespace Yato.Persistence
@@ -26,13 +27,24 @@ namespace Yato.Persistence
 
         private readonly PersistencePaths m_paths;
 
-        /// <summary>正在进行操作的绝对路径集合（同一路径互斥）。</summary>
-        private readonly HashSet<string> m_active = new HashSet<string>(PathComparer);
+        // A path is a filesystem resource, not a FileStore-instance resource. Two services
+        // constructed with the same root (or overlapping roots) must observe the same lease.
+        private static readonly Dictionary<string, long> s_active = new Dictionary<string, long>(PathComparer);
+        private static readonly Dictionary<string, long> s_cleaningRoots = new Dictionary<string, long>(PathComparer);
+        private static readonly object s_gate = new object();
+        private static long s_nextLease;
 
-        private readonly object m_gate = new object();
-
-        /// <summary>清理期间的独占标记：新操作必须被拒绝，否则刚创建的临时文件会被清理掉。</summary>
-        private bool m_cleaningUp;
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            lock (s_gate)
+            {
+                // Old async continuations must not be able to release a lease from the next Play session.
+                s_active.Clear();
+                s_cleaningRoots.Clear();
+                s_nextLease++;
+            }
+        }
 
         public FileStore(string rootPath = null)
             : this(new PersistencePaths(rootPath))
@@ -269,20 +281,19 @@ namespace Yato.Persistence
         /// </summary>
         public int CleanupTemporaryFiles(string relativeDirectory = null, bool recursive = true)
         {
-            lock (m_gate)
+            long cleanupLease;
+            lock (s_gate)
             {
-                if (m_active.Count > 0)
-                {
-                    throw new InvalidOperationException("存在进行中的文件操作，不能清理临时文件");
-                }
+                foreach (string active in s_active.Keys)
+                    if (IsWithin(active, m_paths.RootPath))
+                        throw new InvalidOperationException("存在进行中的文件操作，不能清理临时文件");
+                foreach (string root in s_cleaningRoots.Keys)
+                    if (IsWithin(root, m_paths.RootPath) || IsWithin(m_paths.RootPath, root))
+                        throw new InvalidOperationException("已有清理操作在进行中");
 
-                if (m_cleaningUp)
-                {
-                    throw new InvalidOperationException("已有清理操作在进行中");
-                }
-
-                // 与 AcquireResolved 共用同一把锁：判定「没有活动操作」与取得独占权之间没有窗口
-                m_cleaningUp = true;
+                // Reserve the whole root, including other FileStore instances and nested roots.
+                cleanupLease = ++s_nextLease;
+                s_cleaningRoots.Add(m_paths.RootPath, cleanupLease);
             }
 
             try
@@ -319,38 +330,48 @@ namespace Yato.Persistence
             }
             finally
             {
-                lock (m_gate)
+                lock (s_gate)
                 {
-                    m_cleaningUp = false;
+                    if (s_cleaningRoots.TryGetValue(m_paths.RootPath, out long activeLease) &&
+                        activeLease == cleanupLease) s_cleaningRoots.Remove(m_paths.RootPath);
                 }
             }
         }
 
         private IDisposable AcquireResolved(string fullPath)
         {
-            lock (m_gate)
+            long lease;
+            lock (s_gate)
             {
-                if (m_cleaningUp)
-                {
-                    // 清理持有独占权：此时新建的临时文件可能被正在扫描的清理任务误删
-                    throw new FileBusyException(fullPath);
-                }
+                foreach (string root in s_cleaningRoots.Keys)
+                    if (IsWithin(fullPath, root)) throw new FileBusyException(fullPath);
 
-                if (!m_active.Add(fullPath))
+                if (s_active.ContainsKey(fullPath))
                 {
                     throw new FileBusyException(fullPath);
                 }
+                lease = ++s_nextLease;
+                s_active.Add(fullPath, lease);
             }
 
-            return new PathLease(this, fullPath);
+            return new PathLease(this, fullPath, lease);
         }
 
-        private void ReleaseResolved(string fullPath)
+        private void ReleaseResolved(string fullPath, long lease)
         {
-            lock (m_gate)
+            lock (s_gate)
             {
-                m_active.Remove(fullPath);
+                if (s_active.TryGetValue(fullPath, out long activeLease) && activeLease == lease)
+                    s_active.Remove(fullPath);
             }
+        }
+
+        private static bool IsWithin(string path, string root)
+        {
+            if (PathComparer.Equals(path, root)) return true;
+            string prefix = root.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal)
+                ? root : root + Path.DirectorySeparatorChar;
+            return path.StartsWith(prefix, PersistencePaths.PathComparison);
         }
 
         private static void WriteBytesCore(string fullPath, byte[] data, CancellationToken cancellationToken)
@@ -473,11 +494,13 @@ namespace Yato.Persistence
         {
             private FileStore m_owner;
             private readonly string m_path;
+            private readonly long m_lease;
 
-            public PathLease(FileStore owner, string path)
+            public PathLease(FileStore owner, string path, long lease)
             {
                 m_owner = owner;
                 m_path = path;
+                m_lease = lease;
             }
 
             public void Dispose()
@@ -485,7 +508,7 @@ namespace Yato.Persistence
                 FileStore owner = Interlocked.Exchange(ref m_owner, null);
                 if (owner != null)
                 {
-                    owner.ReleaseResolved(m_path);
+                    owner.ReleaseResolved(m_path, m_lease);
                 }
             }
         }

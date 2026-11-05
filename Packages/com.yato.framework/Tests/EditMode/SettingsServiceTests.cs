@@ -342,7 +342,7 @@ namespace Yato.Tests.EditMode
         }
 
         [Test]
-        public async Task LoadAsync_QueuedLoadsReadSeriallyAndOnlyNewestPublishes()
+        public async Task LoadAsync_QueuedLoadsReadSeriallyWithoutInvalidatingEarlierReads()
         {
             WriteSettings(new TestSettings { Volume = 30 });
             var store = new HeldStore(m_store);
@@ -356,14 +356,33 @@ namespace Yato.Tests.EditMode
             Assert.AreEqual(1, store.ReadCalls, "旧读取释放前不得发起第二次文件读取");
             store.Read.SetResult(m_serializer.Serialize(new TestSettings { Volume = 10 }));
 
-            Assert.AreEqual(SettingsLoadStatus.Superseded, (await first).Status);
-            Assert.AreEqual(SettingsLoadStatus.Superseded, (await second).Status);
+            Assert.AreEqual(SettingsLoadStatus.Loaded, (await first).Status);
+            Assert.AreEqual(SettingsLoadStatus.Loaded, (await second).Status);
             SettingsLoadResult latest = await third;
             Assert.AreEqual(SettingsLoadStatus.Loaded, latest.Status);
-            Assert.AreEqual(2, store.ReadCalls, "已经过期的排队请求不应再次读取文件");
+            Assert.AreEqual(3, store.ReadCalls, "未取消的排队请求按序读取");
             Assert.AreEqual(30, service.Current.Volume);
-            Assert.AreEqual(1, changes);
+            Assert.AreEqual(3, changes);
             Assert.AreSame(latest, service.LastLoadResult);
+        }
+
+        [Test]
+        public async Task LoadAsync_CancelledQueuedRequestDoesNotInvalidateActiveRead()
+        {
+            WriteSettings(new TestSettings { Volume = 30 });
+            var store = new HeldStore(m_store);
+            var service = new SettingsService<TestSettings>(new TestSettings(), store, "settings/game.json", m_serializer);
+            Task<SettingsLoadResult> active = service.LoadAsync();
+            using (var cts = new CancellationTokenSource())
+            {
+                Task<SettingsLoadResult> queued = service.LoadAsync(cts.Token);
+                cts.Cancel();
+                Assert.ThrowsAsync<OperationCanceledException>(async () => { await queued; });
+            }
+            store.Read.SetResult(m_serializer.Serialize(new TestSettings { Volume = 15 }));
+            Assert.AreEqual(SettingsLoadStatus.Loaded, (await active).Status);
+            Assert.AreEqual(15, service.Current.Volume);
+            Assert.AreEqual(1, store.ReadCalls);
         }
 
         [Test]

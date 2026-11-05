@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using PureMVC.Patterns.Facade;
 using UnityEngine;
 using Yato.Resources;
@@ -14,17 +15,36 @@ namespace Yato.FrameworkDemo
     {
         private DemoFacade m_facade;
         private IResourceService m_resources;
+        private bool m_destroyed;
+        private CancellationTokenSource m_setupCancellation;
 
         private void Awake()
         {
             m_facade = (DemoFacade)Facade.GetInstance(() => new DemoFacade());
 
-            // 编辑器下默认走 AssetDatabase；打包后按 manifest 走 BundleProvider，缺失时按显式失败策略处理
-            m_resources = ResourceServiceFactory.Create();
-            UIRouter.Configure(m_resources, m_facade);
         }
 
         private void Start()
+        {
+            // Android/WebGL StreamingAssets are URLs; the async factory reads the manifest
+            // with UnityWebRequest while desktop/Editor initialization still completes inline.
+            m_setupCancellation = new CancellationTokenSource();
+            var setup = ResourceServiceFactory.CreateAsync(ct: m_setupCancellation.Token);
+            setup.Completed += () =>
+            {
+                try
+                {
+                    var resources = setup.GetResult();
+                    if (m_destroyed) { (resources as IDisposable)?.Dispose(); return; }
+                    m_resources = resources;
+                    UIRouter.Configure(m_resources, m_facade);
+                    OpenExample();
+                }
+                catch (Exception e) { if (!m_destroyed) Debug.LogException(e); }
+            };
+        }
+
+        private void OpenExample()
         {
             IAwaitable<UIPageHandle> opening = UIRouter.OpenAsync(DemoPages.Example, "Hello Yato");
             opening.Completed += delegate
@@ -53,6 +73,10 @@ namespace Yato.FrameworkDemo
 
         private void OnDestroy()
         {
+            m_destroyed = true;
+            m_setupCancellation?.Cancel();
+            m_setupCancellation?.Dispose();
+            m_setupCancellation = null;
             UIRouter.CancelOpen(DemoPages.Example.PageId);
             UIRouter.CloseAll();
             (m_resources as IDisposable)?.Dispose();

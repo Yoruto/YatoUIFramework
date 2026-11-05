@@ -85,6 +85,28 @@ namespace Yato.Tests.EditMode
         }
 
         [Test]
+        public void SeparateStores_SameAbsolutePathShareTheBusyGate()
+        {
+            var other = new FileStore(m_root);
+            using (m_store.AcquireLock("settings/game.json"))
+            {
+                Assert.Throws<FileBusyException>(() => other.WriteAllText("settings/game.json", "other"));
+                Assert.Throws<FileBusyException>(() => other.ReadAllText("settings/game.json"));
+                other.WriteAllText("settings/independent.json", "allowed");
+            }
+            other.WriteAllText("settings/game.json", "released");
+            Assert.AreEqual("released", m_store.ReadAllText("settings/game.json"));
+        }
+
+        [Test]
+        public void Cleanup_RejectsActivePathsFromOtherStoreInstances()
+        {
+            var other = new FileStore(m_root);
+            using (other.AcquireLock("settings/game.json"))
+                Assert.Throws<InvalidOperationException>(() => m_store.CleanupTemporaryFiles());
+        }
+
+        [Test]
         public void Read_MissingFile_ThrowsAndDoesNotCreate()
         {
             Assert.Throws<FileNotFoundException>(delegate { m_store.ReadAllText("missing.json"); });

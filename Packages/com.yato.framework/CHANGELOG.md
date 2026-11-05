@@ -7,6 +7,10 @@
 
 ### Fixed
 
+- 后续审核修复：Android/WebGL 内置 Manifest 支持 `CreateAsync`/`CreateProviderAsync` 经 UnityWebRequest 初始化；同步工厂在 URL 场景给出明确错误。
+- Bundle 资源按完整 AssetKey 匹配，同名资源的歧义兜底明确报错；`UIRouter.CloseAll` 同时取消目标层的在途打开请求。
+- FileStore 路径互斥覆盖同一进程中的不同实例与嵌套数据根目录，清理操作使用进程级独占并隔离跨 Play 会话的迟到释放。
+- Settings 排队加载在实际取得读取锁时才创建修订版本；取消的排队任务不再令当前读取失效；API 扫描器排除字符串内容并按规则精确豁免。
 - 异步完成源同步保护完成与订阅，后台取消的观察者回到主线程；宿主清理保留已排队的完成通知。
 - 资源服务支持显式 `IDisposable` 关闭；默认创建的 Provider 随服务释放，注入 Provider 仅在转移所有权时级联释放。关闭会取消在途等待并回收迟到结果。
 - 共享 Bundle 使用独立取消源和逐调用方等待者；全部取消后的新加载先等待旧原生请求退出，关闭后拒绝迟到注册。
@@ -18,6 +22,8 @@
 
 ### Compatibility
 
+- 新增异步资源工厂，不移除同步 `Create`/`CreateProvider`。同步依赖资源服务的 Android/WebGL 启动代码需迁移到异步入口或预先完成资源准备。
+- Settings 多个有效排队 LoadAsync 现在会依次读取并发布，而不是在排队时直接使较早的读取失效；运行时 `Apply/Reset` 对迟到结果的保护不变。
 - `IResourceService`/`IResourceProvider` 不增加必实现成员；现有自定义实现继续兼容。拥有服务的调用方可通过 `IDisposable` 关闭内置服务。
 - `PreloadAsync` 从忽略单项失败改为失败即结束；调用方需要观察加载异常。Settings 调用方需要处理 `FileBusyException`，并可识别未发布状态的 `Superseded`。
 
