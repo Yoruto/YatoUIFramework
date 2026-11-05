@@ -8,6 +8,7 @@ using UnityEngine.TestTools;
 using Yato.Core;
 using Yato.Resources;
 using Yato.UI;
+using PureMVC.Patterns.Facade;
 
 namespace Yato.Tests.PlayMode
 {
@@ -150,6 +151,187 @@ namespace Yato.Tests.PlayMode
             yield return null;
         }
 
+        [UnityTest]
+        public IEnumerator Configure_CancelsOldOpenAndPreservesNewPendingAndLoadingMask()
+        {
+            yield return VerifyNewGeneration(false);
+        }
+
+        [UnityTest]
+        public IEnumerator Reset_CancelsOldOpenAndPreservesNewPendingAndLoadingMask()
+        {
+            yield return VerifyNewGeneration(true);
+        }
+
+        private IEnumerator VerifyNewGeneration(bool reset)
+        {
+            float threshold = UIRouter.LoadingThresholdSeconds;
+            UIRouter.LoadingThresholdSeconds = 0;
+            try
+            {
+                var oldResources = new FakeResourceService(CreatePrefab("Old")) { AutoComplete = false, HonorCancellation = false };
+                UIRouter.Configure(oldResources);
+                var def = new UIPageDef("GenerationPage", null, new AssetKey("ui/generation"));
+                var old = UIRouter.OpenAsync(def);
+                Assert.IsTrue(UILoading.IsVisible);
+
+                if (reset)
+                    typeof(UIRouter).GetMethod("ResetOnPlayMode", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
+                        .Invoke(null, null);
+                else
+                    UIRouter.Configure(NullResourceService.Instance);
+                Assert.IsTrue(old.IsDone);
+                Assert.Throws<OperationCanceledException>(() => old.GetResult());
+                Assert.IsFalse(UILoading.IsVisible);
+
+                var newResources = new FakeResourceService(CreatePrefab("New")) { AutoComplete = false };
+                UIRouter.Configure(newResources);
+                var current = UIRouter.OpenAsync(def);
+                oldResources.CompleteAll(); // 忽略 token 的 Provider 仍可能迟到返回句柄。
+                Assert.AreEqual(1, oldResources.DisposedHandles);
+                Assert.IsFalse(current.IsDone);
+                Assert.AreSame(current, UIRouter.OpenAsync(def), "旧回调不能删除新代次的同 key pending");
+                Assert.IsTrue(UILoading.IsVisible, "旧回调不能减少新代次的 loading 计数");
+                Assert.IsFalse(UIRouter.IsOpen(def.PageId));
+
+                newResources.CompleteAll();
+                Assert.IsTrue(current.GetResult().IsValid);
+                Assert.AreEqual(1, newResources.LoadCalls);
+                Assert.AreEqual(1, UIRouter.Stack.GetAllHandles().Count);
+                Assert.IsFalse(UILoading.IsVisible);
+                yield return null;
+            }
+            finally { UIRouter.LoadingThresholdSeconds = threshold; }
+        }
+
+        [UnityTest]
+        public IEnumerator OnCreate_RunsAfterRegistrationAndOnceAcrossReopenAndCache()
+        {
+            var resources = new FakeResourceService(CreatePrefab("Ordered"));
+            var facade = Facade.GetInstance(() => new Facade());
+            UIRouter.Configure(resources, facade);
+            var def = new UIPageDef("Ordered", typeof(LifecycleMediator), new AssetKey("ui/ordered"), UILayer.Normal, true, true);
+            var first = Await(UIRouter.OpenAsync(def));
+            var mediator = (LifecycleMediator)first.Context.Mediator;
+            Assert.IsTrue(mediator.WasRegisteredOnCreate);
+            Assert.AreEqual(1, mediator.Creates);
+            Assert.AreEqual(1, mediator.Opens);
+            Assert.AreSame(first, Await(UIRouter.OpenAsync(def)));
+            Assert.AreEqual(1, mediator.Creates);
+            Assert.AreEqual(2, mediator.Opens);
+            UIRouter.Close(first);
+            var restored = Await(UIRouter.OpenAsync(def));
+            Assert.AreSame(mediator, restored.Context.Mediator);
+            Assert.AreEqual(1, mediator.Creates);
+            Assert.AreEqual(3, mediator.Opens);
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator OnCreate_ReconfigurationFailsAndReleasesRegisteredPage()
+        {
+            var resources = new FakeResourceService(CreatePrefab("Reconfiguring"));
+            var facade = Facade.GetInstance(() => new Facade());
+            UIRouter.Configure(resources, facade);
+            var def = new UIPageDef("Reconfiguring", typeof(ReconfiguringMediator), new AssetKey("ui/reconfiguring"));
+            var opening = UIRouter.OpenAsync(def);
+            Assert.Throws<OperationCanceledException>(() => opening.GetResult());
+            Assert.IsFalse(facade.HasMediator(def.PageId));
+            Assert.IsFalse(facade.HasProxy(def.PageId + "Proxy"));
+            Assert.IsFalse(UIRouter.IsOpen(def.PageId));
+            Assert.AreEqual(1, resources.DisposedHandles);
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator OnRegisterAndOnCreate_ReopeningSingletonSharesPendingResult()
+        {
+            var resources = new FakeResourceService(CreatePrefab("Reentrant"));
+            UIRouter.Configure(resources, Facade.GetInstance(() => new Facade()));
+            var def = new UIPageDef("Reentrant", typeof(ReopeningMediator), new AssetKey("ui/reentrant"));
+            var opening = UIRouter.OpenAsync(def);
+            var page = opening.GetResult();
+            var mediator = (ReopeningMediator)page.Context.Mediator;
+            Assert.AreSame(opening, mediator.ReopenedOnRegister);
+            Assert.AreSame(opening, mediator.ReopenedOnCreate);
+            Assert.AreSame(page, mediator.ReopenedOnCreate.GetResult());
+            Assert.AreEqual(1, resources.LoadCalls);
+            Assert.AreEqual(1, mediator.Creates);
+            Assert.AreEqual(1, UIRouter.Stack.GetAllHandles().Count);
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator OnCreate_ClosingPageCannotActivateDestroyedContext()
+        {
+            var resources = new FakeResourceService(CreatePrefab("SelfClosing"));
+            var facade = Facade.GetInstance(() => new Facade());
+            UIRouter.Configure(resources, facade);
+            var def = new UIPageDef("SelfClosing", typeof(SelfClosingMediator), new AssetKey("ui/selfclosing"));
+            var opening = UIRouter.OpenAsync(def);
+            Assert.Throws<OperationCanceledException>(() => opening.GetResult());
+            Assert.IsFalse(UIRouter.IsOpen(def.PageId));
+            Assert.IsFalse(facade.HasMediator(def.PageId));
+            Assert.IsFalse(facade.HasProxy(def.PageId + "Proxy"));
+            Assert.AreEqual(1, resources.DisposedHandles);
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator PublicFactory_PreservesStandaloneOnCreateContract()
+        {
+            var resources = new FakeResourceService(CreatePrefab("Standalone"));
+            var factory = new UIPageFactory(resources);
+            var creation = factory.CreateAsync(new UIPageDef("Standalone", typeof(LifecycleMediator), new AssetKey("ui/standalone")),
+                null, UILayer.Normal, null);
+            var context = creation.GetResult();
+            m_objects.Add(context.Instance);
+            try
+            {
+                Assert.AreEqual(1, ((LifecycleMediator)context.Mediator).Creates);
+                Assert.AreEqual(0, ((LifecycleMediator)context.Mediator).Opens);
+            }
+            finally { context.PrefabHandle.Dispose(); }
+            yield return null;
+        }
+
+        public class LifecycleMediator : UIPageMediator
+        {
+            public int Creates, Opens;
+            public bool WasRegisteredOnCreate;
+            public LifecycleMediator(string name) : base(name) { }
+            protected override UIPageProxy CreateProxy() => new UIPageProxy(Context.InstanceName + "Proxy");
+            public override void OnCreate()
+            {
+                Creates++;
+                var facade = UIRouter.Facade;
+                WasRegisteredOnCreate = facade != null && ReferenceEquals(facade.RetrieveMediator(MediatorName), this) &&
+                    ReferenceEquals(facade.RetrieveProxy(Context.Proxy.ProxyName), Context.Proxy);
+                base.OnCreate();
+            }
+            public override void OnOpen(object args) { Opens++; base.OnOpen(args); }
+        }
+
+        public sealed class ReconfiguringMediator : LifecycleMediator
+        {
+            public ReconfiguringMediator(string name) : base(name) { }
+            public override void OnCreate() { base.OnCreate(); UIRouter.Configure(NullResourceService.Instance); }
+        }
+
+        public sealed class ReopeningMediator : LifecycleMediator
+        {
+            public IAwaitable<UIPageHandle> ReopenedOnRegister, ReopenedOnCreate;
+            public ReopeningMediator(string name) : base(name) { }
+            public override void OnRegister() { base.OnRegister(); ReopenedOnRegister = UIRouter.OpenAsync(Context.Def); }
+            public override void OnCreate() { base.OnCreate(); ReopenedOnCreate = UIRouter.OpenAsync(Context.Def); }
+        }
+
+        public sealed class SelfClosingMediator : LifecycleMediator
+        {
+            public SelfClosingMediator(string name) : base(name) { }
+            public override void OnCreate() { base.OnCreate(); View.Close(); }
+        }
+
         private GameObject CreatePrefab(string name)
         {
             var prefab = new GameObject("~prefab-" + name);
@@ -171,6 +353,7 @@ namespace Yato.Tests.PlayMode
             private readonly List<Action> m_deferred = new List<Action>();
 
             public bool AutoComplete = true;
+            public bool HonorCancellation = true;
             public int LoadCalls;
             public int DisposedHandles;
 
@@ -199,7 +382,7 @@ namespace Yato.Tests.PlayMode
                 var source = new Yato.Resources.AwaitableCompletionSource<IAssetHandle<T>>();
                 Action complete = delegate
                 {
-                    if (ct.IsCancellationRequested)
+                    if (HonorCancellation && ct.IsCancellationRequested)
                     {
                         source.SetException(new OperationCanceledException());
                         return;

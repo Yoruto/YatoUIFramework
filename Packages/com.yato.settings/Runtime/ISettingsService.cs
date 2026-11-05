@@ -20,7 +20,7 @@ namespace Yato.Settings
         /// <summary>是否至少完成过一次加载（或加载失败后回退默认值）。</summary>
         bool IsLoaded { get; }
 
-        /// <summary>最近一次加载结果。</summary>
+        /// <summary>最近一次实际发布的加载结果；被更新操作取代或取消的加载不会覆盖它。</summary>
         SettingsLoadResult LastLoadResult { get; }
 
         /// <summary>游戏提供的数据相对路径（如 <c>settings/game.json</c>），由框架校验。</summary>
@@ -29,9 +29,16 @@ namespace Yato.Settings
         /// <summary>设置被发布（加载、受控修改、恢复默认）后触发。</summary>
         event Action<T> Changed;
 
-        /// <summary>同步加载：缺文件用默认值，损坏/非法保留原文件并报告。</summary>
+        /// <summary>
+        /// 同步加载：缺文件用默认值，损坏/非法保留原文件并报告。
+        /// 已有加载或文件被占用时抛 FileBusyException，保留当前状态。
+        /// </summary>
         SettingsLoadResult Load();
 
+        /// <summary>
+        /// 异步读取串行执行；更新的 Load、Apply 或 ResetToDefaults 使旧结果返回 Superseded，
+        /// 不修改当前状态、不发送 Changed。文件被占用时传播 FileBusyException。
+        /// </summary>
         Task<SettingsLoadResult> LoadAsync(CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>同步保存当前设置；校验不通过时抛 <see cref="SettingsValidationException"/> 且不写盘。</summary>

@@ -317,6 +317,178 @@ namespace Yato.Tests.EditMode
             cts.Dispose();
         }
 
+        [TestCase(false)]
+        [TestCase(true)]
+        public async Task LoadAsync_LateReadCannotOverwriteRuntimeChange(bool reset)
+        {
+            WriteSettings(new TestSettings { Volume = 10 });
+            var store = new HeldStore(m_store);
+            var service = new SettingsService<TestSettings>(new TestSettings(), store, "settings/game.json", m_serializer);
+            SettingsLoadResult initial = service.Load();
+            int changes = 0;
+            service.Changed += _ => changes++;
+
+            Task<SettingsLoadResult> loading = service.LoadAsync();
+            if (reset) service.ResetToDefaults();
+            else service.Apply(settings => settings.Volume = 42);
+            store.Read.SetResult(m_serializer.Serialize(new TestSettings { Volume = 15 }));
+
+            SettingsLoadResult result = await loading;
+            Assert.AreEqual(SettingsLoadStatus.Superseded, result.Status);
+            Assert.IsFalse(result.UsedDefaults, "过期结果没有发布默认值");
+            Assert.AreEqual(reset ? 80 : 42, service.Current.Volume);
+            Assert.AreEqual(1, changes, "迟到读取不能再次发布设置");
+            Assert.AreSame(initial, service.LastLoadResult);
+        }
+
+        [Test]
+        public async Task LoadAsync_QueuedLoadsReadSeriallyAndOnlyNewestPublishes()
+        {
+            WriteSettings(new TestSettings { Volume = 30 });
+            var store = new HeldStore(m_store);
+            var service = new SettingsService<TestSettings>(new TestSettings(), store, "settings/game.json", m_serializer);
+            int changes = 0;
+            service.Changed += _ => changes++;
+
+            Task<SettingsLoadResult> first = service.LoadAsync();
+            Task<SettingsLoadResult> second = service.LoadAsync();
+            Task<SettingsLoadResult> third = service.LoadAsync();
+            Assert.AreEqual(1, store.ReadCalls, "旧读取释放前不得发起第二次文件读取");
+            store.Read.SetResult(m_serializer.Serialize(new TestSettings { Volume = 10 }));
+
+            Assert.AreEqual(SettingsLoadStatus.Superseded, (await first).Status);
+            Assert.AreEqual(SettingsLoadStatus.Superseded, (await second).Status);
+            SettingsLoadResult latest = await third;
+            Assert.AreEqual(SettingsLoadStatus.Loaded, latest.Status);
+            Assert.AreEqual(2, store.ReadCalls, "已经过期的排队请求不应再次读取文件");
+            Assert.AreEqual(30, service.Current.Volume);
+            Assert.AreEqual(1, changes);
+            Assert.AreSame(latest, service.LastLoadResult);
+        }
+
+        [Test]
+        public async Task Load_WhileAsyncReadPendingFailsWithoutBlockingOrInvalidatingIt()
+        {
+            WriteSettings(new TestSettings { Volume = 10 });
+            var store = new HeldStore(m_store);
+            var service = new SettingsService<TestSettings>(new TestSettings(), store, "settings/game.json", m_serializer);
+            Task<SettingsLoadResult> loading = service.LoadAsync();
+
+            Assert.Throws<FileBusyException>(() => service.Load());
+            Assert.AreEqual(80, service.Current.Volume);
+            Assert.IsFalse(service.IsLoaded);
+            store.Read.SetResult(m_serializer.Serialize(new TestSettings { Volume = 10 }));
+            Assert.AreEqual(SettingsLoadStatus.Loaded, (await loading).Status);
+            Assert.AreEqual(10, service.Current.Volume);
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public async Task Load_BusyFileDoesNotReplaceCurrentStateWithDefaults(bool asynchronous)
+        {
+            WriteSettings(new TestSettings { Volume = 10 });
+            SettingsService<TestSettings> service = CreateService();
+            SettingsLoadResult initial = service.Load();
+            service.Apply(settings => settings.Volume = 42);
+            int changes = 0;
+            service.Changed += _ => changes++;
+
+            using (m_store.AcquireLock("settings/game.json"))
+            {
+                if (asynchronous)
+                {
+                    Exception failure = null;
+                    try { await service.LoadAsync(); }
+                    catch (Exception error) { failure = error; }
+                    Assert.IsInstanceOf<FileBusyException>(failure);
+                }
+                else Assert.Throws<FileBusyException>(() => service.Load());
+            }
+
+            Assert.AreEqual(42, service.Current.Volume);
+            Assert.AreEqual(0, changes);
+            Assert.AreSame(initial, service.LastLoadResult);
+        }
+
+        [Test]
+        public async Task LoadAsync_CancellationAfterNonCooperativeReadDoesNotPublish()
+        {
+            WriteSettings(new TestSettings { Volume = 10 });
+            var store = new HeldStore(m_store);
+            var service = new SettingsService<TestSettings>(new TestSettings(), store, "settings/game.json", m_serializer);
+            using (var cts = new CancellationTokenSource())
+            {
+                Task<SettingsLoadResult> loading = service.LoadAsync(cts.Token);
+                cts.Cancel();
+                store.Read.SetResult(m_serializer.Serialize(new TestSettings { Volume = 10 }));
+                Exception failure = null;
+                try { await loading; }
+                catch (Exception error) { failure = error; }
+                Assert.IsInstanceOf<OperationCanceledException>(failure);
+                Assert.AreEqual(80, service.Current.Volume);
+                Assert.IsFalse(service.IsLoaded);
+                Assert.IsNull(service.LastLoadResult);
+            }
+        }
+
+        [Test]
+        public void Load_ValidatorReentryCannotOverwriteNewerApply()
+        {
+            WriteSettings(new TestSettings { Volume = 10 });
+            SettingsService<TestSettings> service = null;
+            service = CreateService(_ => service.Apply(settings => settings.Volume = 42));
+
+            SettingsLoadResult result = service.Load();
+
+            Assert.AreEqual(SettingsLoadStatus.Superseded, result.Status);
+            Assert.AreEqual(42, service.Current.Volume);
+            Assert.IsFalse(service.IsLoaded);
+            Assert.IsNull(service.LastLoadResult);
+        }
+
+        [Test]
+        public void Changed_ReentrantApplyDoesNotDeliverAnOlderSnapshotAfterNewerState()
+        {
+            SettingsService<TestSettings> service = CreateService();
+            service.Changed += settings =>
+            {
+                if (settings.Volume == 10) service.Apply(value => value.Volume = 42);
+            };
+            var observed = new System.Collections.Generic.List<int>();
+            service.Changed += settings => observed.Add(settings.Volume);
+
+            service.Apply(settings => settings.Volume = 10);
+
+            CollectionAssert.AreEqual(new[] { 42 }, observed);
+            Assert.AreEqual(42, service.Current.Volume);
+        }
+
+        private sealed class HeldStore : IFileStore
+        {
+            private readonly IFileStore m_inner;
+            public readonly TaskCompletionSource<string> Read = new TaskCompletionSource<string>();
+            public int ReadCalls;
+            public HeldStore(IFileStore inner) { m_inner = inner; }
+            public string RootPath => m_inner.RootPath;
+            public bool Exists(string path) => m_inner.Exists(path);
+            public long GetFileSize(string path) => m_inner.GetFileSize(path);
+            public DateTime GetLastWriteTimeUtc(string path) => m_inner.GetLastWriteTimeUtc(path);
+            public byte[] ReadAllBytes(string path) => m_inner.ReadAllBytes(path);
+            public string ReadAllText(string path) => m_inner.ReadAllText(path);
+            public void WriteAllBytes(string path, byte[] data, CancellationToken ct = default) => m_inner.WriteAllBytes(path, data, ct);
+            public void WriteAllText(string path, string text, CancellationToken ct = default) => m_inner.WriteAllText(path, text, ct);
+            public Task<byte[]> ReadAllBytesAsync(string path, CancellationToken ct = default) => m_inner.ReadAllBytesAsync(path, ct);
+            public Task<string> ReadAllTextAsync(string path, CancellationToken ct = default) =>
+                ++ReadCalls == 1 ? Read.Task : m_inner.ReadAllTextAsync(path, ct);
+            public Task WriteAllBytesAsync(string path, byte[] data, CancellationToken ct = default) => m_inner.WriteAllBytesAsync(path, data, ct);
+            public Task WriteAllTextAsync(string path, string text, CancellationToken ct = default) => m_inner.WriteAllTextAsync(path, text, ct);
+            public bool Delete(string path) => m_inner.Delete(path);
+            public void EnsureDirectory(string path) => m_inner.EnsureDirectory(path);
+            public System.Collections.Generic.IReadOnlyList<string> EnumerateFiles(string path, string pattern, bool recursive = false) =>
+                m_inner.EnumerateFiles(path, pattern, recursive);
+            public IDisposable AcquireLock(string path) => m_inner.AcquireLock(path);
+        }
+
         private void WriteSettings(TestSettings settings)
         {
             m_store.WriteAllText("settings/game.json", m_serializer.Serialize(settings));

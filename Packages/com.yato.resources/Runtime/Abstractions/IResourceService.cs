@@ -5,7 +5,10 @@ using UnityEngine;
 
 namespace Yato.Resources
 {
-    /// <summary>UI 与业务唯一依赖的资源入口（文档 3.2）。</summary>
+    /// <summary>
+    /// UI 与业务唯一依赖的资源入口（文档 3.2）。拥有服务的调用方应在主线程结束使用后，
+    /// 对实现 IDisposable 的服务调用 Dispose；该可选契约不要求既有自定义实现新增成员。
+    /// </summary>
     public interface IResourceService
     {
         /// <summary>
@@ -26,6 +29,7 @@ namespace Yato.Resources
             Transform parent,
             CancellationToken ct = default(CancellationToken));
 
+        /// <summary>Load and release each item in order. Stops and propagates the first failure or cancellation; successful items retain no handles.</summary>
         IAwaitable PreloadAsync(
             IReadOnlyList<AssetKey> keys,
             IProgress<float> progress = null,

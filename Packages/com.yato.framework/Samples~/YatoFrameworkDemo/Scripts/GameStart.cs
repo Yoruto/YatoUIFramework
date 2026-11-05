@@ -13,13 +13,15 @@ namespace Yato.FrameworkDemo
     public class GameStart : MonoBehaviour
     {
         private DemoFacade m_facade;
+        private IResourceService m_resources;
 
         private void Awake()
         {
             m_facade = (DemoFacade)Facade.GetInstance(() => new DemoFacade());
 
             // 编辑器下默认走 AssetDatabase；打包后按 manifest 走 BundleProvider，缺失时按显式失败策略处理
-            UIRouter.Configure(ResourceServiceFactory.Create(), m_facade);
+            m_resources = ResourceServiceFactory.Create();
+            UIRouter.Configure(m_resources, m_facade);
         }
 
         private void Start()
@@ -32,6 +34,7 @@ namespace Yato.FrameworkDemo
                     UIPageHandle handle = opening.GetResult();
                     Debug.LogFormat("[Demo] 页面已打开：{0}", handle.PageId);
                 }
+                catch (OperationCanceledException) { }
                 catch (Exception e)
                 {
                     Debug.LogException(e);
@@ -46,6 +49,14 @@ namespace Yato.FrameworkDemo
             {
                 UIRouter.Back();
             }
+        }
+
+        private void OnDestroy()
+        {
+            UIRouter.CancelOpen(DemoPages.Example.PageId);
+            UIRouter.CloseAll();
+            (m_resources as IDisposable)?.Dispose();
+            m_resources = null;
         }
     }
 

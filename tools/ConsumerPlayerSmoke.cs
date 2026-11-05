@@ -62,7 +62,7 @@ namespace Yato
             while (!additive.IsDone) yield return null;
             Check(additive.GetResult().Status == SceneLoadStatus.Success, "Additive scene");
             GameBootstrap.Shutdown();
-            var full = SceneManager.LoadSceneAsync("YatoFull", LoadSceneMode.Single);
+            var full = SceneManager.LoadSceneAsync("YatoFull", LoadSceneMode.Single); // yato:allow scene-load-direct -- test starts a fresh bootstrap after shutdown
             while (!full.isDone) yield return null;
             yield return null;
             Check(GameBootstrap.IsInitialized, "Full Bootstrap");
@@ -118,7 +118,7 @@ namespace Yato
             var oldBootstrap = GameBootstrap.Instance;
             if (oldBootstrap != null) UnityEngine.Object.Destroy(oldBootstrap.gameObject);
             yield return null;
-            yield return SceneManager.LoadSceneAsync("Bootstrap");
+            yield return SceneManager.LoadSceneAsync("Bootstrap"); // yato:allow scene-load-direct -- test creates the starter bootstrap after destroying the old host
             deadline = Time.realtimeSinceStartup + 5;
             while (UIRouter.Stack.Find("Main") == null && Time.realtimeSinceStartup < deadline) yield return null;
             Check(GameBootstrap.IsInitialized && UIRouter.Stack.Find("Main") != null, "Generated starter catalog");

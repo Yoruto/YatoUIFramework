@@ -17,7 +17,7 @@ namespace Yato.ConsumerTests
     {
         [UnityTest] public IEnumerator StandaloneSamples_OpenPagesAndReleaseOnSceneSwitch()
         {
-            yield return SceneManager.LoadSceneAsync("YatoBasic");
+            yield return SceneManager.LoadSceneAsync("YatoBasic"); // yato:allow scene-load-direct -- test fixture selects its initial scene
             Assert.IsNotNull(Object.FindObjectOfType<BasicSampleEntry>());
             Assert.IsTrue(GameBootstrap.IsInitialized);
             var page = UIRouter.OpenAsync(new UIPageDef("ConsumerBasic", null, new AssetKey("yato/basic/page")));
@@ -28,7 +28,7 @@ namespace Yato.ConsumerTests
             Assert.IsFalse(handle.IsValid);
             Assert.IsTrue(GameBootstrap.IsInitialized);
             GameBootstrap.Shutdown();
-            yield return SceneManager.LoadSceneAsync("YatoFull");
+            yield return SceneManager.LoadSceneAsync("YatoFull"); // yato:allow scene-load-direct -- test restarts the sample after shutdown
             Assert.IsNotNull(Object.FindObjectOfType<FullSampleEntry>());
             Assert.IsTrue(GameBootstrap.IsInitialized);
             var full = UIRouter.OpenAsync(new UIPageDef("ConsumerFull", null, new AssetKey("yato/full/page")));

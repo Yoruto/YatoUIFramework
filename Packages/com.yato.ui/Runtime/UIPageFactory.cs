@@ -31,6 +31,19 @@ namespace Yato.UI
             Transform parent,
             CancellationToken ct = default(CancellationToken))
         {
+            return CreateAsync(def, args, layer, parent, ct, true);
+        }
+
+        // 路由需要先注册 Mediator/Proxy，再发 OnCreate；公开工厂仍保留原有独立使用契约。
+        internal IAwaitable<UIPageContext> CreateForRouterAsync(
+            UIPageDef def, object args, UILayer layer, Transform parent, CancellationToken ct)
+        {
+            return CreateAsync(def, args, layer, parent, ct, false);
+        }
+
+        private IAwaitable<UIPageContext> CreateAsync(
+            UIPageDef def, object args, UILayer layer, Transform parent, CancellationToken ct, bool invokeOnCreate)
+        {
             // Unity 6 也有 UnityEngine.AwaitableCompletionSource<T>，此处必须全限定
             var source = new Yato.Resources.AwaitableCompletionSource<UIPageContext>();
 
@@ -64,6 +77,7 @@ namespace Yato.UI
                 try
                 {
                     prefabHandle = load.GetResult();
+                    ct.ThrowIfCancellationRequested();
                     if (prefabHandle == null || prefabHandle.Asset == null)
                     {
                         throw new ResourceException(
@@ -79,6 +93,7 @@ namespace Yato.UI
 
                     UIPageContext context = BuildContext(def, args, container, prefabHandle, instance);
                     context.Layer = layer;
+                    if (invokeOnCreate) context.Page.OnCreate();
                     source.SetResult(context);
                 }
                 catch (Exception e)
@@ -93,8 +108,10 @@ namespace Yato.UI
                         prefabHandle.Dispose();
                     }
 
-                    Log.Error("UIPageFactory", string.Format("创建页面失败：{0}", def.PageId), e);
-                    source.SetException(e);
+                    Exception failure = ct.IsCancellationRequested ? new OperationCanceledException(ct) : e;
+                    if (!(failure is OperationCanceledException))
+                        Log.Error("UIPageFactory", string.Format("创建页面失败：{0}", def.PageId), failure);
+                    source.SetException(failure);
                 }
             };
 
@@ -155,7 +172,6 @@ namespace Yato.UI
                     "页面既没有挂 UIPageView，也没有配置 Mediator，无法驱动生命周期");
             }
 
-            context.Page.OnCreate();
             return context;
         }
 

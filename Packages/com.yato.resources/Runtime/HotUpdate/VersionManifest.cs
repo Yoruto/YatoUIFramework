@@ -41,6 +41,29 @@ namespace Yato.Resources
             public string Hash;
             public uint Crc;
             public long Size;
+
+            /// <summary>
+            /// True when the publisher supplied a usable SHA-256 digest (64 hexadecimal characters).
+            /// Shorter legacy placeholders are ignored so existing manifests keep working; a real
+            /// digest is verified by the downloader and by snapshot revalidation.
+            /// </summary>
+            public bool HasSha256
+            {
+                get { return IsSha256(Hash); }
+            }
+
+            public static bool IsSha256(string value)
+            {
+                if (string.IsNullOrEmpty(value) || value.Length != 64) return false;
+                for (int i = 0; i < value.Length; i++)
+                {
+                    char c = value[i];
+                    bool hex = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+                    if (!hex) return false;
+                }
+
+                return true;
+            }
         }
 
         public static VersionManifest Parse(string json, string source = null)
@@ -103,9 +126,12 @@ namespace Yato.Resources
                             throw new FormatException("Invalid bundle entry: " + pair.Key);
                         }
 
+                        string hash = MiniJson.GetString(data, "hash");
+                        if (!string.IsNullOrEmpty(hash) && hash.Length > 128)
+                            throw new FormatException("Invalid bundle hash: " + pair.Key);
                         manifest.m_bundles[pair.Key] = new BundleHash
                         {
-                            Hash = MiniJson.GetString(data, "hash"),
+                            Hash = hash,
                             Crc = (uint)MiniJson.RequireInteger(data, "crc", uint.MaxValue),
                             Size = MiniJson.RequireInteger(data, "size", MaxBundleBytes)
                         };

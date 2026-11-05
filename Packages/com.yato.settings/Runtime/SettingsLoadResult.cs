@@ -20,7 +20,11 @@ namespace Yato.Settings
         /// <summary>是否使用了默认值而非用户配置。</summary>
         public bool UsedDefaults
         {
-            get { return Status != SettingsLoadStatus.Loaded; }
+            get
+            {
+                return Status == SettingsLoadStatus.DefaultsUsed || Status == SettingsLoadStatus.Corrupted ||
+                    Status == SettingsLoadStatus.Invalid || Status == SettingsLoadStatus.Failed;
+            }
         }
 
         public static SettingsLoadResult Create(SettingsLoadStatus status, Exception error, string message)

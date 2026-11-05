@@ -2,7 +2,7 @@
 
 Unity 通用框架（UPM 多包）。`com.yato.framework` 自 `0.2.0` 起是**聚合元包**：自身不含运行时代码，只依赖各子包并附带示例、测试与文档。
 
-当前聚合版本 **0.6.0**。Flow / Config / Pooling 为默认依赖；Save / Input / UI.Input 独立可选。新增异步桥接、统一诊断和项目接入工具见 [0.6 指南](Documentation~/foundation06.md)。既有模块见 [基础指南](Documentation~/foundation.md)。
+当前聚合版本 **0.6.1**。Flow / Config / Pooling 为默认依赖；Save / Input / UI.Input 独立可选。新增异步桥接、统一诊断和项目接入工具见 [0.6 指南](Documentation~/foundation06.md)。既有模块见 [基础指南](Documentation~/foundation.md)。
 
 ## 包结构
 

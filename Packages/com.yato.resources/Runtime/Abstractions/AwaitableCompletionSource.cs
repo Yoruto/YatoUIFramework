@@ -1,186 +1,104 @@
 using System;
 using System.Runtime.ExceptionServices;
+using System.Threading;
+using Yato.Core;
 
 namespace Yato.Resources
 {
-    /// <summary>
-    /// <see cref="IAwaitable"/> 的默认实现：由资源层在加载完成/失败时写入结果。
-    /// 回调与读取一律在主线程进行。
-    /// 注意：Unity 6 起引擎自带 <c>UnityEngine.AwaitableCompletionSource&lt;T&gt;</c>，
-    /// 在 <c>Yato.Resources</c> 命名空间之外的代码里引用时请写全限定名。
-    /// </summary>
+    /// <summary>Thread-safe completion; observers run on the Unity main thread, outside the state lock.</summary>
     public sealed class AwaitableCompletionSource : IAwaitable
     {
-        private Exception m_error;
-        private bool m_done;
-        private Action m_completed;
-
-        public bool IsDone
-        {
-            get { return m_done; }
-        }
-
-        public bool IsFaulted
-        {
-            get { return m_error != null; }
-        }
-
-        public event Action Completed
-        {
-            add
-            {
-                if (m_done)
-                {
-                    InvokeSafely(value);
-                    return;
-                }
-
-                m_completed += value;
-            }
-            remove { m_completed -= value; }
-        }
-
-        public void SetResult()
-        {
-            Complete(null);
-        }
-
-        public void SetException(Exception error)
-        {
-            Complete(error ?? new InvalidOperationException("awaitable 以未知错误结束"));
-        }
-
-        public void GetResult()
-        {
-            if (!m_done)
-            {
-                throw new InvalidOperationException("awaitable 尚未完成，不能读取结果");
-            }
-
-            if (m_error != null)
-            {
-                ExceptionDispatchInfo.Capture(m_error).Throw();
-            }
-        }
-
-        private void Complete(Exception error)
-        {
-            if (m_done)
-            {
-                return;
-            }
-
-            m_error = error;
-            m_done = true;
-
-            Action handler = m_completed;
-            m_completed = null;
-            InvokeSafely(handler);
-        }
-
-        private static void InvokeSafely(Action handler)
-        {
-            if (handler == null)
-            {
-                return;
-            }
-
-            foreach (Action callback in handler.GetInvocationList())
-                try { callback(); }
-                catch (Exception e) { Yato.Core.Log.Error("Awaitable", "完成回调异常", e); }
-        }
+        private readonly AwaitableCompletionSource<bool> m_inner = new AwaitableCompletionSource<bool>();
+        public bool IsDone => m_inner.IsDone;
+        public bool IsFaulted => m_inner.IsFaulted;
+        public event Action Completed { add { m_inner.Completed += value; } remove { m_inner.Completed -= value; } }
+        public void SetResult() => m_inner.SetResult(true);
+        public void SetException(Exception error) => m_inner.SetException(error);
+        public void GetResult() { m_inner.GetResult(); }
     }
 
-    /// <summary>带返回值的 <see cref="IAwaitable{T}"/> 默认实现。</summary>
+    /// <summary>
+    /// Create on the Unity main thread. Before a RuntimeHost exists (for example, EditMode tests),
+    /// the creating thread is used for inline callbacks; other threads still queue through the dispatcher.
+    /// </summary>
     public sealed class AwaitableCompletionSource<T> : IAwaitable<T>
     {
+        private readonly object m_gate = new object();
+        private readonly int m_creationThread = Thread.CurrentThread.ManagedThreadId;
         private T m_result;
         private Exception m_error;
         private bool m_done;
         private Action m_completed;
 
-        public bool IsDone
-        {
-            get { return m_done; }
-        }
-
-        public bool IsFaulted
-        {
-            get { return m_error != null; }
-        }
+        public bool IsDone { get { lock (m_gate) return m_done; } }
+        public bool IsFaulted { get { lock (m_gate) return m_error != null; } }
 
         public event Action Completed
         {
             add
             {
-                if (m_done)
+                lock (m_gate)
                 {
-                    InvokeSafely(value);
-                    return;
+                    if (!m_done) { m_completed += value; return; }
                 }
-
-                m_completed += value;
+                Dispatch(value);
             }
-            remove { m_completed -= value; }
+            remove { lock (m_gate) m_completed -= value; }
         }
 
-        public void SetResult(T result)
-        {
-            if (m_done) return;
-            m_result = result;
-            Complete(null);
-        }
-
-        public void SetException(Exception error)
-        {
-            Complete(error ?? new InvalidOperationException("awaitable 以未知错误结束"));
-        }
+        public void SetResult(T result) => Complete(result, null);
+        public void SetException(Exception error) => Complete(default(T), error ?? new InvalidOperationException("awaitable 以未知错误结束"));
 
         public T GetResult()
         {
-            if (!m_done)
+            T result;
+            Exception error;
+            lock (m_gate)
             {
-                throw new InvalidOperationException("awaitable 尚未完成，不能读取结果");
+                if (!m_done) throw new InvalidOperationException("awaitable 尚未完成，不能读取结果");
+                result = m_result;
+                error = m_error;
             }
-
-            if (m_error != null)
-            {
-                ExceptionDispatchInfo.Capture(m_error).Throw();
-            }
-
-            return m_result;
+            if (error != null) ExceptionDispatchInfo.Capture(error).Throw();
+            return result;
         }
 
-        void IAwaitable.GetResult()
+        void IAwaitable.GetResult() { GetResult(); }
+
+        private void Complete(T result, Exception error)
         {
-            GetResult();
+            Action handler;
+            lock (m_gate)
+            {
+                if (m_done) return;
+                m_result = result;
+                m_error = error;
+                m_done = true;
+                handler = m_completed;
+                m_completed = null;
+            }
+            Dispatch(handler);
         }
 
-        private void Complete(Exception error)
+        private void Dispatch(Action handler)
         {
-            if (m_done)
+            if (handler == null) return;
+            if (MainThreadDispatcher.IsMainThread ||
+                (!MainThreadDispatcher.IsInitialized && Thread.CurrentThread.ManagedThreadId == m_creationThread))
             {
+                InvokeSafely(handler);
                 return;
             }
-
-            m_error = error;
-            m_done = true;
-
-            Action handler = m_completed;
-            m_completed = null;
-            InvokeSafely(handler);
+            // Completion belongs to the original operation, including after host shutdown.
+            // Resource/UI owners apply their own lifetime checks before accepting late results.
+            MainThreadDispatcher.PostCompletion(() => InvokeSafely(handler));
         }
 
         private static void InvokeSafely(Action handler)
         {
-            if (handler == null)
-            {
-                return;
-            }
-
             foreach (Action callback in handler.GetInvocationList())
                 try { callback(); }
-                catch (Exception e) { Yato.Core.Log.Error("Awaitable", "完成回调异常", e); }
+                catch (Exception e) { Log.Error("Awaitable", "完成回调异常", e); }
         }
     }
 }

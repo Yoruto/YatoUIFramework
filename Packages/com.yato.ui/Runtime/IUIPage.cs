@@ -3,10 +3,10 @@ namespace Yato.UI
     /// <summary>页面生命周期（文档 3.6/7.2）。</summary>
     public interface IUIPage
     {
-        /// <summary>实例化完成后调用，只执行一次。</summary>
+        /// <summary>实例化完成后调用，只执行一次。由 UIRouter 打开时，Mediator/Proxy 已注册。</summary>
         void OnCreate();
 
-        /// <summary>每次显示时调用。</summary>
+        /// <summary>每次显示时调用，包含已打开单例的再次 Open；订阅与控件绑定应保持幂等。</summary>
         void OnOpen(object args);
 
         /// <summary>被上层页面遮挡。</summary>

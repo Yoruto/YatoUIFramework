@@ -19,7 +19,7 @@ namespace Yato.ConsumerTests
             GameBootstrap.Shutdown();
             if (old != null) Object.Destroy(old.gameObject);
             yield return null;
-            yield return SceneManager.LoadSceneAsync("Bootstrap");
+            yield return SceneManager.LoadSceneAsync("Bootstrap"); // yato:allow scene-load-direct -- test starts the generated bootstrap after destroying the old host
             float deadline = Time.realtimeSinceStartup + 5;
             while (UIRouter.Stack.Find("Main") == null && Time.realtimeSinceStartup < deadline) yield return null;
             Assert.IsTrue(GameBootstrap.IsInitialized);

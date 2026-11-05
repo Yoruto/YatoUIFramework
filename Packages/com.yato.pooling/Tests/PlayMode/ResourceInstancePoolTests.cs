@@ -84,5 +84,35 @@ namespace Yato.Pooling.Tests
             Assert.AreEqual(4, m_pool.CreatedCount);
             Debug.Log("[Yato.Pooling] 1000 warm rent/return operations: " + allocated + " managed bytes");
         }
+
+        [UnityTest] public IEnumerator Prewarm_DoesNotNotifyRentalCallbacksOrReturnIdleObjectsTwice()
+        {
+            PoolCallbackProbe.Rents = 0; PoolCallbackProbe.Returns = 0; PoolCallbackProbe.UnpairedReturns = 0;
+            m_prefab.AddComponent<PoolCallbackProbe>();
+            var creating = ResourceInstancePool.CreateAsync(new ResourceService(new Provider { Prefab = m_prefab }), new AssetKey("pool/callbacks"), 4);
+            yield return creating.AsEnumerator(); m_pool = creating.GetResult();
+
+            m_pool.Prewarm(2);
+            Assert.AreEqual(0, PoolCallbackProbe.Rents);
+            Assert.AreEqual(0, PoolCallbackProbe.Returns);
+            Assert.AreEqual(0, m_pool.ActiveCount);
+            Assert.IsTrue(m_pool.TryRent(out var first));
+            first.Dispose(); first.Dispose();
+            Assert.AreEqual(1, PoolCallbackProbe.Rents);
+            Assert.AreEqual(1, PoolCallbackProbe.Returns);
+
+            m_pool.Prewarm(4);
+            Assert.AreEqual(4, m_pool.CreatedCount);
+            Assert.AreEqual(1, PoolCallbackProbe.Returns, "扩容时取还闲置对象也不能触发 OnReturn");
+            var leases = new PooledInstance[4];
+            for (int i = 0; i < leases.Length; i++) Assert.IsTrue(m_pool.TryRent(out leases[i]));
+            Assert.IsFalse(m_pool.TryRent(out _));
+            foreach (var lease in leases) lease.Dispose();
+            Assert.AreEqual(5, PoolCallbackProbe.Rents);
+            Assert.AreEqual(5, PoolCallbackProbe.Returns);
+            Assert.AreEqual(0, PoolCallbackProbe.UnpairedReturns);
+            Assert.AreEqual(0, m_pool.ActiveCount);
+        }
     }
+
 }

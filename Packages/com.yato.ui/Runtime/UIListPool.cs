@@ -53,7 +53,7 @@ namespace Yato.UI
             get { return m_items.Count; }
         }
 
-        /// <summary>取第 index 个 Cell（自动扩容并激活）。</summary>
+        /// <summary>取第 index 个 Cell（自动扩容，并保证从 0 到 index 的活动前缀）。</summary>
         public T Get(int index)
         {
             if (index < 0)
@@ -61,7 +61,10 @@ namespace Yato.UI
                 throw new ArgumentOutOfRangeException("index");
             }
 
-            EnsureCapacity(index + 1);
+            if (index >= m_activeCount)
+            {
+                SetCount(index + 1);
+            }
 
             T item = m_items[index];
             if (!item.gameObject.activeSelf)
@@ -91,7 +94,7 @@ namespace Yato.UI
                 }
             }
 
-            m_activeCount = count;
+            m_activeCount = Math.Min(count, m_items.Count);
         }
 
         /// <summary>遍历当前激活的 Cell。</summary>

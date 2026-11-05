@@ -185,7 +185,7 @@ namespace Yato.FullSample
             m_audio?.Dispose(); m_audio = null;
             if (m_tone != null) UnityEngine.Object.Destroy(m_tone);
             m_tone = null;
-            Resources?.ReleaseUnused(); Resources = null;
+            (Resources as IDisposable)?.Dispose(); Resources = null;
         }
     }
 }

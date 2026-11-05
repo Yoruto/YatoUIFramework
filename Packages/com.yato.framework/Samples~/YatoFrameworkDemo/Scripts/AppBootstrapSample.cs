@@ -64,7 +64,7 @@ namespace Yato.FrameworkDemo
             if (m_settings != null) { m_settings.Changed -= ApplyVolumes; m_settings = null; }
             m_audio?.Dispose();
             m_audio = null;
-            m_resources?.ReleaseUnused();
+            (m_resources as IDisposable)?.Dispose();
             m_resources = null;
         }
 

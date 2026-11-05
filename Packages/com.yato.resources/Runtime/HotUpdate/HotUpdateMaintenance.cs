@@ -1,16 +1,82 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using UnityEngine;
+using Yato.Core;
 
 namespace Yato.Resources
 {
+    /// <summary>
+    /// Process-wide single-writer gate for update transactions and cache maintenance.
+    /// A coroutine stopped by host destruction may never reach its finally block, so the
+    /// gate exposes a bounded lease that can be reclaimed without restarting the process.
+    /// Tokens make sure a late Exit from an abandoned owner cannot release a newer lease.
+    /// </summary>
     internal static class HotUpdateGate
     {
-        private static int s_busy;
-        internal static bool TryEnter() => Interlocked.CompareExchange(ref s_busy, 1, 0) == 0;
-        internal static void Exit() => Interlocked.Exchange(ref s_busy, 0);
+        private static readonly object Gate = new object();
+        private static bool s_busy;
+        private static int s_token;
+        private static long s_acquired;
+
+        internal static bool TryEnter(int leaseSeconds, out int token)
+        {
+            lock (Gate)
+            {
+                token = 0;
+                if (!s_busy)
+                {
+                    s_busy = true;
+                    token = ++s_token;
+                    s_acquired = Stopwatch.GetTimestamp();
+                    return true;
+                }
+
+                if (leaseSeconds <= 0 || s_acquired == 0) return false;
+                double elapsed = (Stopwatch.GetTimestamp() - s_acquired) / (double)Stopwatch.Frequency;
+                if (elapsed < leaseSeconds) return false;
+
+                // The previous owner is presumed abandoned. Its late Exit is ignored by token.
+                token = ++s_token;
+                s_acquired = Stopwatch.GetTimestamp();
+                Log.Warn(string.Format(
+                    "[HotUpdate] Reclaimed an update lease held for {0:F1}s (limit {1}s); the previous async operation did not complete.",
+                    elapsed, leaseSeconds));
+                return true;
+            }
+        }
+
+        internal static void Exit(int token)
+        {
+            lock (Gate)
+            {
+                if (token == 0 || token != s_token) return;
+                s_busy = false;
+                s_acquired = 0;
+            }
+        }
+
+        /// <summary>Refreshes the lease of the current owner. Called as work actually progresses.</summary>
+        internal static void Touch(int token)
+        {
+            lock (Gate)
+            {
+                if (token == 0 || token != s_token) return;
+                s_acquired = Stopwatch.GetTimestamp();
+            }
+        }
+
+        internal static void Reset()
+        {
+            lock (Gate)
+            {
+                s_busy = false;
+                s_acquired = 0;
+                s_token++;
+            }
+        }
     }
 
     public sealed class CacheCleanupResult
@@ -42,12 +108,17 @@ namespace Yato.Resources
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Reset() { lock (Gate) Used.Clear(); }
+        private static void ResetStatics()
+        {
+            lock (Gate) Used.Clear();
+            HotUpdateGate.Reset();
+        }
 
         public static CacheCleanupResult PrepareStartup(string root = null)
         {
             var result = new CacheCleanupResult();
-            if (!HotUpdateGate.TryEnter()) { result.Busy = true; return result; }
+            int token;
+            if (!HotUpdateGate.TryEnter(0, out token)) { result.Busy = true; return result; }
             try
             {
                 var storage = new HotUpdateStorage(root ?? RuntimePaths.PersistentBundleDir);
@@ -62,7 +133,7 @@ namespace Yato.Resources
                 result.Success = true;
             }
             catch (Exception error) { result.Error = error.ToString(); }
-            finally { HotUpdateGate.Exit(); }
+            finally { HotUpdateGate.Exit(token); }
             return result;
         }
 

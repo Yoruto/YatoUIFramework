@@ -33,6 +33,13 @@ namespace Yato.Resources
         private readonly string m_storageRoot;
         private const long MetadataLimit = 4 * 1024 * 1024;
 
+        /// <summary>
+        /// Maximum time a single update may hold the process-wide gate. A coroutine stopped by host
+        /// destruction can never run its finally block; this lease lets the next update recover
+        /// instead of returning Busy until the process restarts. Set to 0 to disable reclamation.
+        /// </summary>
+        public int LockLeaseSeconds = 900;
+
         public HotUpdateService(RemoteDownloader downloader = null, string storageRoot = null)
         {
             m_downloader = downloader ?? new RemoteDownloader();
@@ -43,22 +50,23 @@ namespace Yato.Resources
             CancellationToken ct = default(CancellationToken))
         {
             var source = new AwaitableCompletionSource<HotUpdateResult>();
-            if (!HotUpdateGate.TryEnter())
+            int token;
+            if (!HotUpdateGate.TryEnter(LockLeaseSeconds, out token))
             {
                 source.SetResult(new HotUpdateResult { Busy = true, Error = "An update is already running" });
                 return source;
             }
-            try { RuntimeHost.RunCoroutine(Guard(remoteRootUrl, progress, ct, source)); }
+            try { RuntimeHost.RunCoroutine(Guard(remoteRootUrl, progress, ct, source, token)); }
             catch (Exception e)
             {
-                HotUpdateGate.Exit();
+                HotUpdateGate.Exit(token);
                 source.SetResult(new HotUpdateResult { Error = e.ToString() });
             }
             return source;
         }
 
         private IEnumerator Guard(string url, IProgress<float> progress, CancellationToken ct,
-            AwaitableCompletionSource<HotUpdateResult> source)
+            AwaitableCompletionSource<HotUpdateResult> source, int gateToken)
         {
             var result = new HotUpdateResult();
             HotUpdateStorage storage = null;
@@ -83,6 +91,8 @@ namespace Yato.Resources
                         try { more = routine.MoveNext(); }
                         catch (Exception e) { Fail(result, e); break; }
                         if (!more) break;
+                        // Progress refreshes the lease; only a stalled operation can be reclaimed.
+                        HotUpdateGate.Touch(gateToken);
                         yield return routine.Current;
                     }
             }
@@ -91,7 +101,7 @@ namespace Yato.Resources
                 (routine as IDisposable)?.Dispose();
                 try { storage?.Discard(stage); }
                 catch (Exception e) { Log.Warn("[HotUpdate] Staging cleanup failed: " + e.Message); }
-                HotUpdateGate.Exit();
+                HotUpdateGate.Exit(gateToken);
                 source.SetResult(result);
             }
         }
@@ -123,7 +133,12 @@ namespace Yato.Resources
             var manifest = ResourceManifest.LoadFromFile(manifestFile);
             ValidateManifests(version, manifest);
 
-            string previous = storage.ActiveDirectory;
+            string previous;
+            string pointerError;
+            if (!storage.TryGetActiveDirectory(out previous, out pointerError))
+                throw new IOException(pointerError);
+            // A repaired pointer must be committed even when the payload equals the fallback snapshot.
+            bool pointerDamaged = !string.IsNullOrEmpty(pointerError);
             bool sameMetadata = File.Exists(BundleRelativePath.Resolve(previous, RuntimePaths.ManifestFileName)) &&
                 File.ReadAllText(BundleRelativePath.Resolve(previous, RuntimePaths.ManifestFileName)) == File.ReadAllText(manifestFile);
             long done = 0;
@@ -142,7 +157,8 @@ namespace Yato.Resources
                 else
                 {
                     download = m_downloader.DownloadAsync(m_downloader.FileUrl(root, platform + pair.Key), destination,
-                        hash.Crc, ct: ct, expectedSize: hash.Size, verifyCrc: true);
+                        hash.Crc, ct: ct, expectedSize: hash.Size, verifyCrc: true,
+                        expectedSha256: hash.HasSha256 ? hash.Hash : null);
                     while (!download.IsDone) yield return null;
                     result.DownloadedBytes += download.GetResult();
                     result.DownloadedBundles++;
@@ -158,7 +174,7 @@ namespace Yato.Resources
                     throw new IOException("Snapshot validation failed: " + pair.Key);
             }
             ct.ThrowIfCancellationRequested();
-            bool changed = !sameMetadata || result.DownloadedBundles > 0 ||
+            bool changed = pointerDamaged || !sameMetadata || result.DownloadedBundles > 0 ||
                 !File.Exists(BundleRelativePath.Resolve(previous, RuntimePaths.VersionFileName));
             if (changed)
             {
@@ -184,8 +200,7 @@ namespace Yato.Resources
 
         private static bool Verified(string path, VersionManifest.BundleHash hash)
         {
-            BundleRelativePath.EnsureNoLinks(path);
-            return File.Exists(path) && new FileInfo(path).Length == hash.Size && Crc32Util.Compute(path) == hash.Crc;
+            return IntegrityUtil.Matches(path, hash.Size, hash.Crc, hash.HasSha256 ? hash.Hash : null);
         }
 
         public static void ValidateManifests(VersionManifest version, ResourceManifest manifest)

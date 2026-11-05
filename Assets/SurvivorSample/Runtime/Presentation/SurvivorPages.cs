@@ -37,6 +37,7 @@ namespace Yato.Survivor
         protected override UIPageProxy CreateProxy() => new SurvivorPageProxy(Context.InstanceName + "Proxy");
         public override void OnOpen(object args)
         {
+            DetachSubscriptions();
             base.OnOpen(args); Context.Proxy.BindModel(args);
             var game = ((SurvivorPageArgs)args).Game;
             m_game = game;
@@ -49,9 +50,13 @@ namespace Yato.Survivor
         private void OnVolume(string field, float value) { m_game.ChangeVolume(field, value); }
         public override void OnClose(bool destroy)
         {
+            DetachSubscriptions();
+            base.OnClose(destroy);
+        }
+        private void DetachSubscriptions()
+        {
             View.ActionRequested -= OnAction; View.VolumeChanged -= OnVolume;
             m_subscription?.Dispose(); m_subscription = null; m_game = null;
-            base.OnClose(destroy);
         }
     }
 }

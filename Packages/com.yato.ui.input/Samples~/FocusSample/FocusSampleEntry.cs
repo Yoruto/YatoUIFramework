@@ -14,6 +14,7 @@ namespace Yato.UI.Input.FocusSample
         private InputActionAsset m_source;
         private InputContextService m_input;
         private UIInputCoordinator m_ui;
+        private ResourceService m_resources;
         private GameObject m_template, m_ownedEvents;
         private readonly UIPageDef m_main = new UIPageDef("FocusMain", null, new AssetKey("focus/main"));
         private readonly UIPageDef m_popup = new UIPageDef("FocusPopup", null, new AssetKey("focus/popup"), UILayer.Popup);
@@ -35,7 +36,8 @@ namespace Yato.UI.Input.FocusSample
             var events = EventSystem.current;
             if (events == null) { m_ownedEvents = new GameObject("Focus sample EventSystem", typeof(EventSystem)); events = m_ownedEvents.GetComponent<EventSystem>(); }
             m_template = BuildTemplate();
-            UIRouter.Configure(new ResourceService(new TemplateProvider(m_template)));
+            m_resources = new ResourceService(new TemplateProvider(m_template));
+            UIRouter.Configure(m_resources);
             m_ui = new UIInputCoordinator(m_input, events, "Gameplay", "UI");
             Open(false);
         }
@@ -80,6 +82,7 @@ namespace Yato.UI.Input.FocusSample
         {
             UIRouter.CancelOpen(m_main.PageId); UIRouter.CancelOpen(m_popup.PageId); UIRouter.CloseAll();
             m_ui?.Dispose(); m_input?.Dispose();
+            m_resources?.Dispose(); m_resources = null;
             if (m_template != null) Destroy(m_template);
             if (m_source != null) Destroy(m_source);
             if (m_ownedEvents != null) Destroy(m_ownedEvents);

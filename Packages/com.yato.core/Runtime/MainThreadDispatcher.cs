@@ -12,6 +12,7 @@ namespace Yato.Core
     public static class MainThreadDispatcher
     {
         private static readonly Queue<Action> s_pending = new Queue<Action>(64);
+        private static readonly Queue<Action> s_completions = new Queue<Action>(32);
         private static readonly object s_gate = new object();
 
         private static int s_mainThreadId = -1;
@@ -57,6 +58,16 @@ namespace Yato.Core
             }
         }
 
+        /// <summary>
+        /// Queue a terminal notification that must survive Clear/host shutdown. Lifecycle owners
+        /// must reject stale results themselves; observers are still owed their completion signal.
+        /// </summary>
+        public static void PostCompletion(Action action)
+        {
+            if (action == null) return;
+            lock (s_gate) s_completions.Enqueue(action);
+        }
+
         /// <summary>已在主线程则立即执行，否则入队。</summary>
         public static void Send(Action action)
         {
@@ -74,7 +85,7 @@ namespace Yato.Core
             Post(action);
         }
 
-        /// <summary>清空未执行的投递（场景切换 / 关闭应用时使用）。</summary>
+        /// <summary>清空一般投递；已经承诺的完成通知仍会派发。</summary>
         public static void Clear()
         {
             lock (s_gate)
@@ -89,6 +100,9 @@ namespace Yato.Core
 
         internal static void Shutdown()
         {
+            // Called on the Unity main thread. Use one snapshot so reentrant callbacks cannot
+            // turn shutdown into an unbounded drain. Newly queued completions await the next host.
+            InvokeBatch(TakeCompletions());
             s_initialized = false;
             s_mainThreadId = -1;
             Clear();
@@ -96,6 +110,7 @@ namespace Yato.Core
 
         private static void Pump(float deltaTime)
         {
+            InvokeBatch(TakeCompletions());
             Action[] batch;
             lock (s_gate)
             {
@@ -108,6 +123,21 @@ namespace Yato.Core
                 s_pending.Clear();
             }
 
+            InvokeBatch(batch);
+        }
+
+        private static Action[] TakeCompletions()
+        {
+            lock (s_gate)
+            {
+                var batch = s_completions.ToArray();
+                s_completions.Clear();
+                return batch;
+            }
+        }
+
+        private static void InvokeBatch(Action[] batch)
+        {
             for (int i = 0; i < batch.Length; i++)
             {
                 try

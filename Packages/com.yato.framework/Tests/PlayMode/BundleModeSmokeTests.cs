@@ -139,6 +139,67 @@ namespace Yato.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator Dispose_DuringBundleLoad_DoesNotRegisterLateNativeResult()
+        {
+            var service = (ResourceService)m_service;
+            var provider = (BundleProvider)service.Provider;
+            var loading = service.LoadAsync<GameObject>(ExampleKey);
+            service.Dispose();
+            Assert.Throws<System.OperationCanceledException>(() => loading.GetResult());
+            for (var frame = 0; frame < 120; frame++) yield return null;
+            Assert.AreEqual(0, service.ActiveAssetCount);
+            Assert.AreEqual(0, provider.Stats.LoadedBundleCount);
+            Assert.Throws<System.ObjectDisposedException>(() => service.LoadAsync<GameObject>(ExampleKey).GetResult());
+        }
+
+        [UnityTest]
+        public IEnumerator Dispose_AbortsWebRequestWithoutResumingItsCoroutine()
+        {
+            var provider = (BundleProvider)((ResourceService)m_service).Provider;
+            ResourceManifest.BundleInfo bundle;
+            Assert.IsTrue(provider.Manifest.TryGetBundleOfAsset(ExampleKey.ToString(), out bundle));
+            var path = RuntimePaths.ResolveBundlePath(bundle.Name, System.IO.Path.GetDirectoryName(RuntimePaths.GetManifestPath(false)));
+            var loader = new BundleLoader(new BundleRefCounter(_ => { }));
+            var source = new Yato.Resources.AwaitableCompletionSource();
+            IEnumerator routine = null;
+            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            var requests = (System.Collections.Generic.HashSet<UnityEngine.Networking.UnityWebRequest>)
+                typeof(BundleLoader).GetField("m_webRequests", flags).GetValue(loader);
+            try
+            {
+                loader.LoadOverride = (name, ct) =>
+                {
+                    routine = (IEnumerator)typeof(BundleLoader).GetMethod("LoadByWebRequest", flags)
+                        .Invoke(loader, new object[] { name, new System.Uri(path).AbsoluteUri, source, ct });
+                    Assert.IsTrue(routine.MoveNext(), "A real bundle request must reach its first asynchronous wait");
+                    return source;
+                };
+                var waiting = loader.LoadAsync(bundle.Name, default(System.Threading.CancellationToken));
+                Assert.AreEqual(1, requests.Count);
+                UnityEngine.Networking.UnityWebRequest request = null;
+                foreach (var active in requests) request = active;
+                Assert.IsFalse(source.IsDone);
+                loader.Dispose();
+                Assert.Throws<System.OperationCanceledException>(() => waiting.GetResult());
+                // Native Abort may finish on a later engine tick. The iterator is deliberately
+                // never resumed while observing it, so cancellation cannot come from its polling loop.
+                for (var frame = 0; frame < 120 && !request.isDone; frame++) yield return null;
+                Assert.IsTrue(request.isDone);
+                StringAssert.Contains("abort", (request.error ?? string.Empty).ToLowerInvariant());
+                Assert.IsFalse(source.IsDone);
+                Assert.IsFalse(routine.MoveNext());
+                Assert.Throws<System.OperationCanceledException>(() => source.GetResult());
+                Assert.AreEqual(0, requests.Count);
+                Assert.IsNull(loader.GetBundle(bundle.Name));
+            }
+            finally
+            {
+                loader.Dispose();
+                (routine as System.IDisposable)?.Dispose();
+            }
+        }
+
+        [UnityTest]
         public IEnumerator UIRouter_10OpenCloseCycles_WithMediator()
         {
             UIRouter.Configure(m_service, null);

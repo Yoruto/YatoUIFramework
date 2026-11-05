@@ -75,7 +75,7 @@ namespace Yato.Survivor
             Audio?.Dispose(); Audio = null;
             Pause?.Dispose(); Pause = null;
             Events.Clear(); Scope.Dispose(); Config = null; Art = null;
-            Resources?.ReleaseUnused(); Resources = null; Settings = null; Saves = null;
+            (Resources as IDisposable)?.Dispose(); Resources = null; Settings = null; Saves = null;
         }
     }
     public readonly struct SurvivorUiChanged

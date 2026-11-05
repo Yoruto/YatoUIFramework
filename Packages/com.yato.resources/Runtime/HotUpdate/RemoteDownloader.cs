@@ -40,7 +40,7 @@ namespace Yato.Resources
 
         public IAwaitable<long> DownloadAsync(string url, string savePath, uint expectedCrc = 0u,
             IProgress<float> progress = null, CancellationToken ct = default(CancellationToken),
-            long expectedSize = -1, long maxBytes = -1, bool verifyCrc = false)
+            long expectedSize = -1, long maxBytes = -1, bool verifyCrc = false, string expectedSha256 = null)
         {
             var source = new AwaitableCompletionSource<long>();
             try
@@ -48,12 +48,14 @@ namespace Yato.Resources
                 url = ValidateUrl(url);
                 savePath = Path.GetFullPath(savePath);
                 BundleRelativePath.EnsureNoLinks(savePath);
+                if (!string.IsNullOrEmpty(expectedSha256) && !VersionManifest.BundleHash.IsSha256(expectedSha256))
+                    throw new ArgumentException("Expected SHA-256 must be 64 hexadecimal characters");
                 long limit = maxBytes < 0 ? MaxFileBytes : Math.Min(maxBytes, MaxFileBytes);
                 if (limit <= 0 || expectedSize < -1 || expectedSize > limit || TimeoutSeconds <= 0 ||
                     MaxRetry < 1 || MaxRetry > 10 || RetryDelaySeconds < 0 || RetryDelaySeconds > 60)
                     throw new ArgumentException("Invalid download limits");
                 RuntimeHost.RunCoroutine(Guard(DownloadRoutine(url, savePath, expectedCrc, progress, ct,
-                    expectedSize, limit, verifyCrc || expectedCrc != 0, source), source));
+                    expectedSize, limit, verifyCrc || expectedCrc != 0, expectedSha256, source), source));
             }
             catch (Exception e) { source.SetException(e); }
             return source;
@@ -76,14 +78,16 @@ namespace Yato.Resources
         }
 
         private IEnumerator DownloadRoutine(string url, string savePath, uint crc, IProgress<float> progress,
-            CancellationToken ct, long expectedSize, long limit, bool verifyCrc, AwaitableCompletionSource<long> source)
+            CancellationToken ct, long expectedSize, long limit, bool verifyCrc, string expectedSha256,
+            AwaitableCompletionSource<long> source)
         {
             Exception last = null;
             for (int attempt = 0; attempt < MaxRetry; attempt++)
             {
                 ct.ThrowIfCancellationRequested();
                 BundleRelativePath.EnsureNoLinks(savePath);
-                Directory.CreateDirectory(Path.GetDirectoryName(savePath));
+                string directory = Path.GetDirectoryName(savePath);
+                if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
                 string temporary = savePath + "." + Guid.NewGuid().ToString("N") + ".part";
                 try
                 {
@@ -111,8 +115,18 @@ namespace Yato.Resources
                             long size = new FileInfo(temporary).Length;
                             if (size > limit || (expectedSize >= 0 && size != expectedSize))
                                 throw new IOException("Downloaded length mismatch or size limit exceeded: " + url);
-                            if (verifyCrc && Crc32Util.Compute(temporary) != crc)
-                                throw new IOException("CRC verification failed: " + url);
+                            if (verifyCrc || !string.IsNullOrEmpty(expectedSha256))
+                            {
+                                uint actualCrc;
+                                string actualSha256;
+                                IntegrityUtil.Compute(temporary, !string.IsNullOrEmpty(expectedSha256),
+                                    out actualCrc, out actualSha256);
+                                if (verifyCrc && actualCrc != crc)
+                                    throw new IOException("CRC verification failed: " + url);
+                                if (!string.IsNullOrEmpty(expectedSha256) &&
+                                    !string.Equals(actualSha256, expectedSha256, StringComparison.OrdinalIgnoreCase))
+                                    throw new IOException("SHA-256 verification failed: " + url);
+                            }
                             ct.ThrowIfCancellationRequested();
                             BundleRelativePath.EnsureNoLinks(savePath);
                             if (File.Exists(savePath)) File.Replace(temporary, savePath, null);

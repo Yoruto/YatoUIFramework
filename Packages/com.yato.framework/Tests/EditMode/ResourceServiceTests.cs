@@ -33,6 +33,7 @@ namespace Yato.Tests.EditMode
         [TearDown]
         public void TearDown()
         {
+            m_service.Dispose();
             Log.SetLogger(null);
 
             if (m_asset != null)
@@ -102,6 +103,21 @@ namespace Yato.Tests.EditMode
             handleB.Dispose();
 
             Assert.AreEqual(1, m_provider.ReleaseCalls, "两个持有者都释放后只归还一次 Provider 引用");
+        }
+
+        [Test]
+        public void LoadAsync_FirstObserverDisposesImmediately_KeepsProviderReferenceForSecondConsumer()
+        {
+            m_provider.AutoComplete = false;
+            var first = m_service.LoadAsync<ScriptableObject>(Key);
+            var second = m_service.LoadAsync<ScriptableObject>(Key);
+            first.Completed += () => first.GetResult().Dispose();
+            m_provider.CompleteAll();
+            Assert.IsTrue(second.GetResult().IsValid);
+            Assert.AreEqual(0, m_provider.ReleaseCalls);
+            Assert.AreEqual(1, second.GetResult().RefCount);
+            second.GetResult().Dispose();
+            Assert.AreEqual(1, m_provider.ReleaseCalls);
         }
 
         [Test]
@@ -292,6 +308,98 @@ namespace Yato.Tests.EditMode
             Assert.AreEqual(1, m_provider.ReleaseCalls);
         }
 
+        [Test]
+        public void Dispose_ReleasesHeldReferencesOnce_WithoutDisposingInjectedProvider()
+        {
+            var first = Await(m_service.LoadAsync<ScriptableObject>(Key));
+            var second = Await(m_service.LoadAsync<ScriptableObject>(Key));
+            m_service.Dispose();
+            m_service.Dispose();
+            Assert.AreEqual(1, m_provider.ReleaseCalls);
+            Assert.AreEqual(0, m_provider.DisposeCalls);
+            Assert.AreEqual(0, m_service.ActiveAssetCount);
+            Assert.IsFalse(first.IsValid);
+            Assert.IsFalse(second.IsValid);
+            first.Dispose(); second.Dispose();
+            Assert.AreEqual(1, m_provider.ReleaseCalls);
+            Assert.Throws<ObjectDisposedException>(() => m_service.Load<ScriptableObject>(Key));
+            Assert.Throws<ObjectDisposedException>(() => m_service.LoadAsync<ScriptableObject>(Key).GetResult());
+        }
+
+        [Test]
+        public void Dispose_CancelsPending_AndReturnsIgnoredCancellationLateResult()
+        {
+            m_provider.AutoComplete = false;
+            var pending = m_service.LoadAsync<ScriptableObject>(Key);
+            m_service.Dispose();
+            Assert.IsTrue(m_provider.LastToken.IsCancellationRequested);
+            Assert.Throws<OperationCanceledException>(() => pending.GetResult());
+            m_provider.CompleteAll();
+            Assert.AreEqual(1, m_provider.ReleaseCalls);
+            Assert.AreEqual(0, m_service.ActiveAssetCount);
+        }
+
+        [Test]
+        public void Factory_DisposesExplicitlyOwnedProvider_AndForgetsCurrent()
+        {
+            var service = (ResourceService)ResourceServiceFactory.Create(m_provider, ownsProvider: true);
+            service.Dispose(); service.Dispose();
+            Assert.AreEqual(1, m_provider.DisposeCalls);
+            Assert.IsNull(ResourceServiceFactory.Current);
+        }
+
+        [Test]
+        public void LoadAsync_WorkerCancellation_ObservesCancellationOnMainThread()
+        {
+            m_provider.AutoComplete = false;
+            using (var cancellation = new CancellationTokenSource())
+            {
+                var loading = m_service.LoadAsync<ScriptableObject>(Key, cancellation.Token);
+                var callbackThread = -1;
+                var mainThread = Thread.CurrentThread.ManagedThreadId;
+                loading.Completed += () => callbackThread = Thread.CurrentThread.ManagedThreadId;
+                var worker = new Thread(cancellation.Cancel);
+                worker.Start(); Assert.IsTrue(worker.Join(5000));
+                Assert.IsTrue(loading.IsDone);
+                Assert.AreEqual(-1, callbackThread);
+                // Completion races cancellation here: the canceled consumer cannot acquire a handle.
+                m_provider.CompleteAll();
+                typeof(MainThreadDispatcher).GetMethod("Pump", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
+                    .Invoke(null, new object[] { 0f });
+                Assert.AreEqual(mainThread, callbackThread);
+                Assert.Throws<OperationCanceledException>(() => loading.GetResult());
+                Assert.AreEqual(1, m_provider.ReleaseCalls);
+                Assert.AreEqual(0, m_service.ActiveAssetCount);
+            }
+        }
+
+        [Test]
+        public void Preload_FirstFailurePropagates_AndReleasesEarlierSuccessfulItems()
+        {
+            var failure = new AssetKey("ui/test/failing");
+            m_provider.FailKey = failure;
+            var preload = m_service.PreloadAsync(new[] { Key, failure, new AssetKey("ui/test/never") });
+            Assert.Throws<ResourceException>(() => preload.GetResult());
+            Assert.AreEqual(2, m_provider.LoadCalls);
+            Assert.AreEqual(1, m_provider.ReleaseCalls);
+            Assert.AreEqual(0, m_service.ActiveAssetCount);
+        }
+
+        [Test]
+        public void Preload_CancellationPropagates_AndReleasesLateSuccessfulResult()
+        {
+            m_provider.AutoComplete = false;
+            using (var cancellation = new CancellationTokenSource())
+            {
+                var preload = m_service.PreloadAsync(new[] { Key }, ct: cancellation.Token);
+                cancellation.Cancel();
+                Assert.Throws<OperationCanceledException>(() => preload.GetResult());
+                m_provider.CompleteAll();
+                Assert.AreEqual(1, m_provider.ReleaseCalls);
+                Assert.AreEqual(0, m_service.ActiveAssetCount);
+            }
+        }
+
         private static T Await<T>(IAwaitable<T> awaitable)
         {
             Assert.IsTrue(awaitable.IsDone, "FakeProvider 应同步完成");
@@ -299,7 +407,7 @@ namespace Yato.Tests.EditMode
         }
 
         /// <summary>可控制完成时机、记录调用次数的 Provider 存根。</summary>
-        private sealed class FakeProvider : IResourceProvider
+        private sealed class FakeProvider : IResourceProvider, IDisposable
         {
             private readonly UnityEngine.Object m_asset;
             private readonly List<Yato.Resources.AwaitableCompletionSource<UnityEngine.Object>> m_pending =
@@ -308,6 +416,8 @@ namespace Yato.Tests.EditMode
             public bool AutoComplete = true;
             public int LoadCalls;
             public int ReleaseCalls;
+            public int DisposeCalls;
+            public AssetKey FailKey;
 
             /// <summary>最近一次传给 Provider 的取消令牌（用于验证 Provider 级取消语义）。</summary>
             public CancellationToken LastToken;
@@ -328,7 +438,11 @@ namespace Yato.Tests.EditMode
                 LastToken = ct;
 
                 var source = new Yato.Resources.AwaitableCompletionSource<UnityEngine.Object>();
-                if (AutoComplete)
+                if (FailKey.IsValid && key.Equals(FailKey))
+                {
+                    source.SetException(new ResourceException(key.ToString(), null, ResourceStage.AssetLoad, "expected failure"));
+                }
+                else if (AutoComplete)
                 {
                     source.SetResult(m_asset);
                 }
@@ -375,6 +489,7 @@ namespace Yato.Tests.EditMode
             public void ReleaseUnused()
             {
             }
+            public void Dispose() { DisposeCalls++; }
         }
 
         /// <summary>测试期静默日志，避免预期内的失败路径污染控制台断言。</summary>

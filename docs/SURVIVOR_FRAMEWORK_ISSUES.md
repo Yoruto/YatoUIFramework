@@ -1,6 +1,8 @@
 # Survivor 接入中的框架问题记录
 
-建立日期：2026-11-01（Asia/Shanghai）。本记录随示例开发持续更新。条目分别标明静态检查与游戏运行验证状态；未修改框架运行时与编辑器实现。2026-11-02 提交前调整了框架热更冒烟测试的多 Bundle 夹具兼容性，见提交前验证摘要。
+建立日期：2026-11-01（Asia/Shanghai）。本记录随示例开发持续更新。条目分别标明静态检查与游戏运行验证状态；首版示例接入未修改框架运行时与编辑器实现。2026-11-02 提交前调整了框架热更冒烟测试的多 Bundle 夹具兼容性，见提交前验证摘要。
+
+2026-11-05 增量修复了后续审查确认的资源、UI、设置和对象池生命周期问题，并修复 Survivor 重开监听及结算取消；本轮包含框架实现修改。最终语义见[框架版本记录](../Packages/com.yato.framework/CHANGELOG.md)，实测范围与原始日志哈希见[生命周期与异步修复验证](verification/ASYNC_LIFECYCLE_2026-11-05.json)。下列首版接入限制保留原有分类，不将接口限制自动改写为缺陷。
 
 文档核对：2026-11-02。已将最终规则、集成、完整战斗、设置 / 输入、独立构建与压力日志整理到[实施记录](SURVIVOR_IMPLEMENTATION_2026-11-01.md)和[验证摘要](verification/SURVIVOR_2026-11-01.json)。示例适配通过不代表框架 API 限制已被统一修补。
 
@@ -18,9 +20,9 @@
 |---|---|---|---|
 | F-001 | 已确认接口限制：按名称加载 Sprite 子资源 | 资源与表现接入；优先验证 | 示例 ScriptableObject 引用帧，通过资源服务加载该对象 |
 | F-002 | 已确认接口限制：Flow 退出同步 | 退出 / 重开时序；优先验证 | 业务协调器先 await 停止与卸载，再切换 Flow |
-| F-003 | 已确认工具覆盖限制：禁用 API 检查 | 框架约束验收；一般 | 现有检查加示例范围调用审查 |
-| F-004 | 静态风险待复现：Editor 按叶子名兜底 | 开发 / Player 一致性；优先验证 | 使用完整 key，增加同叶子名和错误 key 的一致性验收 |
-| F-005 | 已确认工具覆盖限制：AssetKeys 仅生成 Prefab key | 配置 / 表现资源制作；一般 | 示例 Editor 通过现有 BundleNaming 填充非 Prefab key |
+| F-003 | 已修复待验证：结构化扫描与构建门禁 | 框架约束验收；一般 | 四类规则、豁免注释、Logs 报告、批处理入口与构建前门禁 |
+| F-004 | 已修复待验证：歧义报错与严格 key | 开发 / Player 一致性；优先验证 | 兜底多命中即报错，StrictKeys 关闭兜底；待补同叶子名夹具 |
+| F-005 | 已修复：资源收集与 UI 页面过滤 | 配置 / 表现资源制作；一般 | 收集范围与 BuildableExtensions 一致，UIPages 仅收集 ui/ |
 | F-006 | 已复现接入限制：Gameplay 与可点击 HUD 的输入动作共存 | 原生暂停按钮；已做示例适配 | 在 Gameplay 上下文仅额外启用 UI/Point 与 UI/Click |
 | I-001 | 已验证关闭：原启用的构建场景不存在 | 已通过 Doctor 与首次 Player 构建 | 有效 Bootstrap / Arena 已加入构建列表 |
 | I-002 | 已验证关闭：审计 JSON 已移出打包目录 | 已验证不在 Bundle 收集中 | docs/SurvivorArtManifest.json，原 PNG / meta 保留 |
@@ -47,8 +49,8 @@
 
 ## F-003：现有禁用 API 检查不足以证明严格接入
 
-- 发现阶段：M0；状态：已确认工具覆盖限制。
-- 证据：[ApiUsageValidator.cs:15](../Packages/com.yato.editor/Editor/Tools/ApiUsageValidator.cs#L15) 的正则只匹配 Resources.Load / LoadAsync / LoadAll；第 23 行仅扫描 Assets；第 51 行起输出 Warning。类注释提到 AssetDatabase，但正则未检查该 API，也不覆盖场景直切或 timeScale 写入。
+- 发现阶段：M0；状态：已修复待验证（2026-11-03）。结构化规则、注释/字符串感知、`// yato:allow` 豁免、Logs JSON 报告、批处理入口与构建前门禁已实现；故意违规/合法调用的对照夹具仍待补。
+- 证据：原实现只匹配 Resources.Load / LoadAsync / LoadAll，仅扫描 Assets 并输出 Warning。现规则覆盖 Resources、SceneManager.LoadScene、Time.timeScale 与 AssetDatabase 加载，默认排除 Editor/Samples~/Tests/YatoGenerated，并对当前工程扫描 51 个文件得到 0 命中。
 - 触发场景：示例要求资源、场景、暂停和对象池严格使用框架；菜单显示无 Resources.Load 不足以证明这些约束均满足。
 - 当前处理：运行原有检查，同时对 Survivor Runtime 做有范围的源码 / 调用审查，验证程序集边界、运行时 UnityEditor、场景加载、时间倍率和实体生成路径。Editor 资产制作与测试夹具属于合法不同上下文，不能简单全局封禁名称。
 - 统一评估候选：可配置的规则、明确允许范围和可供构建门禁使用的结构化结果；不在示例里复制一套通用扫描框架。
@@ -56,8 +58,8 @@
 
 ## F-004：Editor 兜底搜索可能掩盖错误 key
 
-- 发现阶段：M0；状态：静态风险待复现，尚未登记为已复现缺陷。
-- 证据：[EditorAssetProvider.cs:132](../Packages/com.yato.resources/Runtime/Providers/EditorAssetProvider.cs#L132) 使用叶子名和类型搜索；第 139 行返回首个文件名匹配的 path，该分支没有验证完整相对 key，也没有对多个同叶子结果报告歧义。
+- 发现阶段：M0；状态：已修复待验证（2026-11-03）。兜底命中多个同名资源时抛出包含全部候选的歧义错误；`EditorAssetProvider.StrictKeys` 可完全关闭兜底用于与 Player 对齐。同叶子名夹具仍待补。
+- 证据：原实现使用叶子名和类型搜索并返回首个文件名匹配的 path，未验证完整相对 key。现改为收集全部候选、排序后按 0/1/多分别返回、告警或报错。
 - 计划复现：创建两个目录下的同名 Prefab，传入错误目录的完整 key，比较 Editor 默认 Provider 与 BundleProvider 的结果；测试夹具放在测试目录并及时清理。
 - 期望 / 静态观察：错误或有歧义的资源映射应有可解释的失败；当前分支可能让 Editor 加载成功而 Player 按 manifest 失败，或取到非预期资源。
 - 当前处理：示例使用生成或序列化的完整 key；M1 就验证真实 Bundle，制作工具依据 BundleNaming 检查 key 与路径一致，不能以 Editor 兜底成功作为资源验收。
@@ -66,8 +68,8 @@
 
 ## F-005：AssetKeyGenerator 当前只覆盖 Prefab
 
-- 发现阶段：M0；状态：已确认工具覆盖限制。
-- 证据：[AssetKeyGenerator.cs:27](../Packages/com.yato.editor/Editor/CodeGen/AssetKeyGenerator.cs#L27) 起从 CollectPrefabs 构建 AssetKeys；该收集方法使用 `*.prefab`。ConfigCatalog、SpriteSet、音频等资产不进入这份 key 常量表。
+- 发现阶段：M0；状态：已修复（2026-11-03）。资源收集范围与 `BundleNaming.BuildableExtensions` 一致；UIPages 只收集 `ui/` 目录下的预制体；标识符冲突改为告警。
+- 证据：原实现从 `*.prefab` 构建 AssetKeys，ConfigCatalog、SpriteSet、音频等资产不进入常量表。现生成验证为 87 个可打包资源、9 个 UI 预制体，Enemy/Projectile 等非 UI Prefab 不再产生页面定义。
 - 触发场景：本示例既需要 UI / 实体 Prefab，也需要配置目录、表现集合和音频 key；不能假设所有资源常量都已生成。
 - 当前处理：Prefab 继续走原生成器；其他资产由示例 Editor 制作入口调用现有 BundleNaming.GetAssetKey 填入启动配置 / 数据资产，并在构建前检查。运行时使用这份明确配置，不建立新的路径规则。
 - 统一评估候选：AssetKeys 收集范围与 BuildableExtensions 一致，UIPages 单独筛选 UI Prefab；评估命名冲突、生成兼容性和输出目录后统一修改。

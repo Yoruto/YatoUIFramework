@@ -19,7 +19,7 @@ namespace Yato.OptionalConsumerTests
     {
         [UnityTest] public IEnumerator OptionalSamples_RealUGUIFocusAndCounterStorage()
         {
-            yield return SceneManager.LoadSceneAsync("FocusSample");
+            yield return SceneManager.LoadSceneAsync("FocusSample"); // yato:allow scene-load-direct -- test fixture selects its initial scene
             float deadline = Time.realtimeSinceStartup + 5;
             while (EventSystem.current?.currentSelectedGameObject == null && Time.realtimeSinceStartup < deadline) yield return null;
             Assert.IsNotNull(EventSystem.current);
@@ -33,7 +33,7 @@ namespace Yato.OptionalConsumerTests
             yield return new WaitForSecondsRealtime(0.3f);
             Assert.AreEqual("FocusMain", UIRouter.TopPage.PageId);
             Assert.AreSame(original, EventSystem.current.currentSelectedGameObject);
-            yield return SceneManager.LoadSceneAsync("CounterSample");
+            yield return SceneManager.LoadSceneAsync("CounterSample"); // yato:allow scene-load-direct -- test selects the independent counter sample
             Assert.IsNotNull(UnityEngine.Object.FindObjectOfType<SaveCounterSample>());
             string root = Path.Combine(Application.temporaryCachePath, "optional-counter-" + Guid.NewGuid().ToString("N"));
             try

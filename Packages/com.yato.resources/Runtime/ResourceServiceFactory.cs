@@ -21,8 +21,22 @@ namespace Yato.Resources
         /// <summary>编辑器下强制走 AssetBundle（用于验证打包结果）。</summary>
         public static bool ForceBundleMode;
 
+        /// <summary>
+        /// Run startup-only persistent cache maintenance before the first bundle provider is
+        /// created. This trims previously committed snapshots that no loader uses yet and clears
+        /// abandoned staging directories. Editor play mode and players both use it.
+        /// </summary>
+        public static bool AutoCleanupPersistentCache = true;
+
+        private static bool s_cachePrepared;
+
         /// <summary>最近一次创建的服务实例（供诊断窗口读取统计）。</summary>
         public static IResourceService Current { get; private set; }
+
+        internal static void Forget(IResourceService service)
+        {
+            if (ReferenceEquals(Current, service)) Current = null;
+        }
 
         /// <summary>
         /// 关闭 Domain Reload 时静态状态不会自动清空，必须显式重置，
@@ -31,14 +45,19 @@ namespace Yato.Resources
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics()
         {
+            (Current as IDisposable)?.Dispose();
             Current = null;
             ForceBundleMode = false;
+            AutoCleanupPersistentCache = true;
+            s_cachePrepared = false;
         }
 
-        /// <summary>创建默认资源服务。</summary>
-        public static IResourceService Create(IResourceProvider provider = null)
+        /// <summary>Default providers are service-owned; injected providers remain caller-owned unless ownsProvider is true.</summary>
+        public static IResourceService Create(IResourceProvider provider = null) => Create(provider, false);
+
+        public static IResourceService Create(IResourceProvider provider, bool ownsProvider)
         {
-            var service = new ResourceService(provider ?? CreateProvider());
+            var service = new ResourceService(provider ?? CreateProvider(), provider == null || ownsProvider);
             Current = service;
             return service;
         }
@@ -62,6 +81,7 @@ namespace Yato.Resources
         {
             try
             {
+                PreparePersistentCache();
                 manifestPath = manifestPath ?? ResolveManifestPath();
                 ResourceManifest manifest = ResourceManifest.LoadFromFile(manifestPath);
                 if (manifest.Platform != RuntimePaths.PlatformName)
@@ -93,6 +113,35 @@ namespace Yato.Resources
                 if (policy != ResourceFailurePolicy.AllowResourcesFallback) throw error;
                 Log.Warn("[Yato.Resources] Explicit Resources fallback: " + error);
                 return new ResourcesProvider();
+            }
+        }
+
+        /// <summary>
+        /// One attempt per session. Failed maintenance never blocks provider creation: the
+        /// previous snapshot is still protected by the strict reader in HotUpdateStorage.
+        /// </summary>
+        private static void PreparePersistentCache()
+        {
+            if (!AutoCleanupPersistentCache || s_cachePrepared) return;
+            if (!Application.isPlaying) return; // Edit-mode tooling must not delete a developer's cache.
+            s_cachePrepared = true;
+            try
+            {
+                CacheCleanupResult result = HotUpdateMaintenance.PrepareStartup();
+                if (result.Success)
+                {
+                    Log.Info(string.Format(
+                        "[Yato.Resources] 启动缓存维护：删除 {0} 个旧快照（{1} 字节），保留 {2} 个",
+                        result.DeletedDirectories, result.DeletedBytes, result.RetainedDirectories));
+                }
+                else if (!result.Busy && !result.InUse)
+                {
+                    Log.Warn("[Yato.Resources] 启动缓存维护未完成（保留全部快照）：" + result.Error);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Warn("[Yato.Resources] 启动缓存维护失败（保留全部快照）：" + e.Message);
             }
         }
 

@@ -88,5 +88,23 @@ namespace Yato.Tests.PlayMode
             Assert.AreEqual(11, task.GetAwaiter().GetResult());
             yield return null;
         }
+
+        [UnityTest] public IEnumerator OriginalOperation_WorkerCompletesAfterHostDestruction_StillNotifiesTaskConsumer()
+        {
+            var source = new Yato.Resources.AwaitableCompletionSource<int>();
+            var task = source.AsTask();
+            var mainThread = Thread.CurrentThread.ManagedThreadId;
+            var callbackThread = -1;
+            source.Completed += () => callbackThread = Thread.CurrentThread.ManagedThreadId;
+            UnityEngine.Object.Destroy(RuntimeHost.Instance.gameObject);
+            yield return null;
+            var worker = new Thread(() => source.SetResult(73));
+            worker.Start(); Assert.IsTrue(worker.Join(5000));
+            var newHost = RuntimeHost.Instance;
+            for (var frame = 0; frame < 120 && !task.IsCompleted; frame++) yield return null;
+            Assert.IsTrue(task.IsCompleted);
+            Assert.AreEqual(73, task.GetAwaiter().GetResult());
+            Assert.AreEqual(mainThread, callbackThread);
+        }
     }
 }

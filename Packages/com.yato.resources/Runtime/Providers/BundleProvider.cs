@@ -11,11 +11,13 @@ namespace Yato.Resources
     /// 正式包资源后端：按 manifest 索引，依赖链递归加载，引用计数归零后延迟卸载。
     /// 取代 Bang- 的 ABManager / AssetBundleManager（RES-01~09）。
     /// </summary>
-    public sealed class BundleProvider : IResourceProvider
+    public sealed class BundleProvider : IResourceProvider, IDisposable
     {
         private readonly ResourceManifest m_manifest;
         private readonly BundleLoader m_loader;
         private readonly BundleRefCounter m_refCounter;
+        private readonly HashSet<AwaitableCompletionSource<UnityEngine.Object>> m_pending = new HashSet<AwaitableCompletionSource<UnityEngine.Object>>();
+        private bool m_disposed;
 
         public BundleProvider(ResourceManifest manifest, BundleLoader loader, BundleRefCounter refCounter)
         {
@@ -53,6 +55,13 @@ namespace Yato.Resources
         public IAwaitable<UnityEngine.Object> LoadAsync(AssetKey key, Type type, CancellationToken ct)
         {
             var source = new AwaitableCompletionSource<UnityEngine.Object>();
+            if (m_disposed)
+            {
+                source.SetException(new ObjectDisposedException(nameof(BundleProvider)));
+                return source;
+            }
+            m_pending.Add(source);
+            source.Completed += () => m_pending.Remove(source);
 
             ResourceManifest.BundleInfo bundle;
             if (!m_manifest.TryGetBundleOfAsset(key.ToString(), out bundle))
@@ -84,6 +93,7 @@ namespace Yato.Resources
         /// <summary>资源释放：其所属 bundle 与整条依赖链各减一次引用。</summary>
         public void Release(AssetKey key)
         {
+            if (m_disposed) return;
             ResourceManifest.BundleInfo bundle;
             if (!m_manifest.TryGetBundleOfAsset(key.ToString(), out bundle))
             {
@@ -109,14 +119,25 @@ namespace Yato.Resources
 
         public void ReleaseUnused()
         {
+            if (m_disposed) return;
             m_refCounter.FlushExpired();
         }
 
         /// <summary>应用退出 / 场景切换时全量卸载。</summary>
         public void Shutdown()
         {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (m_disposed) return;
+            m_disposed = true;
+            var pending = new List<AwaitableCompletionSource<UnityEngine.Object>>(m_pending);
+            m_pending.Clear();
+            foreach (var source in pending) source.SetException(new OperationCanceledException("Bundle provider shut down"));
+            m_loader.Dispose();
             m_refCounter.FlushAll();
-            m_loader.UnloadAll(false);
             m_refCounter.Unhook();
         }
 
@@ -128,7 +149,7 @@ namespace Yato.Resources
             Type type,
             AwaitableCompletionSource<UnityEngine.Object> source)
         {
-            if (ct.IsCancellationRequested)
+            if (m_disposed || ct.IsCancellationRequested)
             {
                 // 已经加过引用的前半段必须回滚，否则失败请求会永久持有 bundle
                 ReleaseChain(order, index);
@@ -139,7 +160,7 @@ namespace Yato.Resources
             if (index >= order.Count)
             {
                 // 依赖链全部就绪后才加载资产本身
-                LoadAsset(order[order.Count - 1].Name, key, type, order, source);
+                LoadAsset(order[order.Count - 1].Name, key, type, order, source, ct);
                 return;
             }
 
@@ -171,6 +192,7 @@ namespace Yato.Resources
                 {
                     // 本层之前的 [0, index) 已 AddRef，失败必须逐层归还
                     ReleaseChain(order, index);
+                    if (e is OperationCanceledException) { source.SetException(e); return; }
                     source.SetException(new ResourceException(
                         key.ToString(),
                         info.Name,
@@ -186,7 +208,8 @@ namespace Yato.Resources
             AssetKey key,
             Type type,
             List<ResourceManifest.BundleInfo> order,
-            AwaitableCompletionSource<UnityEngine.Object> source)
+            AwaitableCompletionSource<UnityEngine.Object> source,
+            CancellationToken ct)
         {
             AssetBundle bundle = m_loader.GetBundle(bundleName);
             if (bundle == null)
@@ -232,6 +255,8 @@ namespace Yato.Resources
             {
                 try
                 {
+                    if (m_disposed || ct.IsCancellationRequested)
+                        throw new OperationCanceledException(ct);
                     UnityEngine.Object asset = request.asset;
                     if (asset == null)
                     {

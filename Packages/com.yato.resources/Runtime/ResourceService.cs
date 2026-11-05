@@ -16,10 +16,16 @@ namespace Yato.Resources
     /// 句柄计数归零时只归还这一次引用；若没有任何消费者接管，则立刻归还，避免泄漏。
     /// <para>取消按调用者隔离：单个 LoadAsync 的取消只结束自己的等待，
     /// 只有全部消费者都放弃时才中止底层 Provider 加载。</para>
+    /// <para>在 Unity 主线程创建、使用和 Dispose；取消令牌允许由任意线程取消。
+    /// Dispose 会取消本服务的等待并释放全部已发出句柄，注入 Provider 默认不随服务关闭。</para>
     /// </remarks>
-    public sealed class ResourceService : IResourceService
+    public sealed class ResourceService : IResourceService, IDisposable
     {
         private readonly IResourceProvider m_provider;
+        private readonly bool m_ownsProvider;
+        private CancellationTokenRegistration m_lifetimeRegistration;
+        private bool m_disposed;
+        private readonly HashSet<IAssetHandle> m_handles = new HashSet<IAssetHandle>();
 
         /// <summary>AssetEntry 表：key → 已加载资源记录。</summary>
         private readonly Dictionary<AssetKey, AssetEntry> m_entries =
@@ -29,7 +35,10 @@ namespace Yato.Resources
         private readonly Dictionary<AssetKey, PendingLoad> m_pendings =
             new Dictionary<AssetKey, PendingLoad>();
 
-        public ResourceService(IResourceProvider provider)
+        public ResourceService(IResourceProvider provider) : this(provider, false) { }
+
+        /// <summary>Injected providers remain caller-owned unless ownsProvider is explicitly true. Dispose on the main thread.</summary>
+        public ResourceService(IResourceProvider provider, bool ownsProvider)
         {
             if (provider == null)
             {
@@ -37,6 +46,9 @@ namespace Yato.Resources
             }
 
             m_provider = provider;
+            m_ownsProvider = ownsProvider;
+            var lifetime = RuntimeHost.LifetimeToken;
+            if (!lifetime.IsCancellationRequested) m_lifetimeRegistration = lifetime.Register(Dispose);
         }
 
         public IResourceProvider Provider
@@ -75,6 +87,7 @@ namespace Yato.Resources
 
         public IAssetHandle<T> Load<T>(AssetKey key) where T : UnityEngine.Object
         {
+            ThrowIfDisposed();
             if (!key.IsValid)
             {
                 throw new ResourceException(null, null, ResourceStage.KeyNormalize, "资源 key 非法");
@@ -142,6 +155,12 @@ namespace Yato.Resources
         {
             var source = new AwaitableCompletionSource<IAssetHandle<T>>();
 
+            if (m_disposed)
+            {
+                source.SetException(new ObjectDisposedException(nameof(ResourceService)));
+                return source;
+            }
+
             if (!key.IsValid)
             {
                 source.SetException(new ResourceException(null, null, ResourceStage.KeyNormalize, "资源 key 非法"));
@@ -189,6 +208,11 @@ namespace Yato.Resources
             var consumer = new PendingConsumer(
                 delegate(PendingLoad p)
                 {
+                    if (m_disposed)
+                    {
+                        source.SetException(new ObjectDisposedException(nameof(ResourceService)));
+                        return;
+                    }
                     if (p.Error != null)
                     {
                         source.SetException(p.Error);
@@ -227,6 +251,7 @@ namespace Yato.Resources
             {
                 pending = AcquirePending(key, typeof(T));
             }
+            if (m_disposed) consumer.Cancel();
             pending.Subscribe(delegate(PendingLoad p) { CompletePending(p); });
             return source;
         }
@@ -255,8 +280,9 @@ namespace Yato.Resources
                     IAssetHandle<GameObject> capturedPrefab = prefabHandle;
 
                     // 实例句柄：Dispose 时销毁实例并释放预制体句柄
-                    var handle = new AssetHandle<GameObject>(key, instance, 1, delegate
+                    var handle = new AssetHandle<GameObject>(key, instance, 1, delegate(IAssetHandle released)
                     {
+                        lock (m_handles) m_handles.Remove(released);
                         if (instance != null)
                         {
                             UnityEngine.Object.Destroy(instance);
@@ -264,6 +290,13 @@ namespace Yato.Resources
 
                         capturedPrefab.Dispose();
                     });
+
+                    if (m_disposed)
+                    {
+                        handle.Dispose();
+                        throw new ObjectDisposedException(nameof(ResourceService));
+                    }
+                    lock (m_handles) m_handles.Add(handle);
 
                     source.SetResult(handle);
                 }
@@ -282,12 +315,19 @@ namespace Yato.Resources
             return source;
         }
 
+        /// <summary>Sequential preload; releases each successful handle and propagates the first failure or cancellation.</summary>
         public IAwaitable PreloadAsync(
             IReadOnlyList<AssetKey> keys,
             IProgress<float> progress = null,
             CancellationToken ct = default(CancellationToken))
         {
             var source = new AwaitableCompletionSource();
+
+            if (m_disposed)
+            {
+                source.SetException(new ObjectDisposedException(nameof(ResourceService)));
+                return source;
+            }
 
             if (keys == null || keys.Count == 0)
             {
@@ -335,7 +375,8 @@ namespace Yato.Resources
                     }
                     catch (Exception e)
                     {
-                        Log.Warn(string.Format("[ResourceService] 预加载失败：{0}（{1}）", key, e.Message));
+                        source.SetException(e);
+                        return;
                     }
 
                     index++;
@@ -365,7 +406,55 @@ namespace Yato.Resources
 
         public void ReleaseUnused()
         {
+            if (m_disposed) return;
             m_provider.ReleaseUnused();
+        }
+
+        /// <summary>
+        /// Cancel this service's consumers and return each provider reference once. An injected
+        /// provider is disposed only when ownership was explicitly transferred to this service.
+        /// </summary>
+        public void Dispose()
+        {
+            if (m_disposed) return;
+            m_disposed = true;
+            ResourceServiceFactory.Forget(this);
+            m_lifetimeRegistration.Dispose();
+
+            PendingLoad[] pendings;
+            lock (m_pendings)
+            {
+                pendings = new List<PendingLoad>(m_pendings.Values).ToArray();
+                m_pendings.Clear();
+            }
+            foreach (var pending in pendings) pending.CancelConsumers();
+
+            IAssetHandle[] handles;
+            lock (m_handles) { handles = new List<IAssetHandle>(m_handles).ToArray(); m_handles.Clear(); }
+            foreach (var handle in handles) handle.Dispose();
+
+            AssetEntry[] entries;
+            lock (m_entries)
+            {
+                entries = new List<AssetEntry>(m_entries.Values).ToArray();
+                m_entries.Clear();
+                foreach (var entry in entries) { entry.Asset = null; entry.RefCount = 0; }
+            }
+            foreach (var entry in entries)
+                try { m_provider.Release(entry.Key); }
+                catch (Exception error) { Log.Error("ResourceService", "关闭时释放资源失败", error); }
+
+            if (m_ownsProvider)
+            {
+                var disposable = m_provider as IDisposable;
+                if (disposable != null) disposable.Dispose();
+                else m_provider.ReleaseUnused();
+            }
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (m_disposed) throw new ObjectDisposedException(nameof(ResourceService));
         }
 
         /// <summary>同步加载路径：Provider 引用直接归入新建的 AssetEntry（已有记录时归还多余引用）。</summary>
@@ -470,6 +559,7 @@ namespace Yato.Resources
             else if (!pending.Consumed)
             {
                 // 兜底：记录不是本次加载创建的，说明这次 Provider 引用是多余的，立即归还
+                pending.Consumed = true;
                 m_provider.Release(pending.Key);
             }
 
@@ -486,7 +576,9 @@ namespace Yato.Resources
             }
 
             // RefCount 使用实时读取，避免诊断值停留在创建时的快照
-            return new AssetHandle<T>(key, asset, delegate { return captured.RefCount; }, OnHandleDisposed);
+            var handle = new AssetHandle<T>(key, asset, delegate { return captured.RefCount; }, OnHandleDisposed);
+            lock (m_handles) m_handles.Add(handle);
+            return handle;
         }
 
         private PendingLoad AcquirePending(AssetKey key, Type type)
@@ -494,6 +586,7 @@ namespace Yato.Resources
             PendingLoad pending;
             lock (m_pendings)
             {
+                ThrowIfDisposed();
                 if (m_pendings.TryGetValue(key, out pending) && !pending.IsAbandoned)
                 {
                     return pending;
@@ -572,17 +665,27 @@ namespace Yato.Resources
             }
 
             List<PendingConsumer> consumers = pending.Complete();
-            for (int i = 0; i < consumers.Count; i++)
+            IAssetHandle<UnityEngine.Object> deliveryGuard = null;
+            try
             {
-                try
+                // Completed observers are synchronous on the main thread and may immediately
+                // dispose their handle. Keep one temporary reference until every consumer has
+                // received its handle so early observers cannot release the provider underneath later ones.
+                if (pending.Error == null && !m_disposed)
+                    deliveryGuard = ConsumePending(pending, pending.Asset, pending.Asset.GetType());
+                for (int i = 0; i < consumers.Count; i++)
                 {
-                    consumers[i].Complete(pending);
-                }
-                catch (Exception e)
-                {
-                    Log.Error("ResourceService", string.Format("加载回调异常：{0}", pending.Key), e);
+                    try
+                    {
+                        consumers[i].Complete(pending);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error("ResourceService", string.Format("加载回调异常：{0}", pending.Key), e);
+                    }
                 }
             }
+            finally { deliveryGuard?.Dispose(); }
 
             // 没有任何消费者接管这次 Provider 引用（全部取消 / 类型不符）时立即归还
             if (!pending.Consumed && pending.Error == null)
@@ -595,6 +698,7 @@ namespace Yato.Resources
 
         private void OnHandleDisposed(IAssetHandle handle)
         {
+            lock (m_handles) m_handles.Remove(handle);
             if (handle == null)
             {
                 return;
@@ -756,6 +860,13 @@ namespace Yato.Resources
                 }
             }
 
+            public void CancelConsumers()
+            {
+                PendingConsumer[] consumers;
+                lock (m_gate) consumers = m_consumers.ToArray();
+                foreach (var consumer in consumers) consumer.Cancel();
+            }
+
             /// <summary>
             /// 订阅 Provider 完成事件。必须在消费者登记之后调用：
             /// Provider 可能已经同步完成，回调会立即执行。
@@ -828,7 +939,7 @@ namespace Yato.Resources
                 m_onCompleted(pending);
             }
 
-            private void Cancel()
+            public void Cancel()
             {
                 if (Interlocked.Exchange(ref m_finished, 1) != 0)
                 {

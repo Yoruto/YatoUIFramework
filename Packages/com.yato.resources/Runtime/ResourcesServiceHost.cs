@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Yato.Resources
@@ -7,7 +8,7 @@ namespace Yato.Resources
     public sealed class ResourcesServiceHost : MonoBehaviour, IResourceServiceSource
     {
         public IResourceService Resources { get; private set; }
-        private void Awake() { Resources = ResourceServiceFactory.Create(new ResourcesProvider()); }
-        private void OnDestroy() { Resources?.ReleaseUnused(); Resources = null; }
+        private void Awake() { Resources = ResourceServiceFactory.Create(new ResourcesProvider(), ownsProvider: true); }
+        private void OnDestroy() { (Resources as IDisposable)?.Dispose(); Resources = null; }
     }
 }

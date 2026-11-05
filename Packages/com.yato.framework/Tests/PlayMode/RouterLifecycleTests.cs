@@ -61,12 +61,6 @@ namespace Yato.Tests.PlayMode
         [UnityTest]
         public IEnumerator CancelOpen_DoesNotLeaveOrphan()
         {
-            // 同上：四条预期日志（2 Error + 2 Exception）
-            LogAssert.Expect(LogType.Error, new Regex("UIPageFactory"));
-            LogAssert.Expect(LogType.Exception, new Regex("ResourceException"));
-            LogAssert.Expect(LogType.Error, new Regex("UIRouter"));
-            LogAssert.Expect(LogType.Exception, new Regex("ResourceException"));
-
             // NullResourceService 同步失败，OpenAsync 内联完成、无取消窗口；
             // 用"下一帧才失败"的存根制造真实加载中状态
             UIRouter.Configure(new OneFrameResourceService(), null);
@@ -75,6 +69,7 @@ namespace Yato.Tests.PlayMode
             IAwaitable<UIPageHandle> opening = UIRouter.OpenAsync(def);
 
             Assert.IsTrue(UIRouter.CancelOpen("CancelTest"), "加载进行中应可取消");
+            Assert.IsTrue(opening.IsDone, "取消立即完成调用方结果，不等待底层加载");
 
             while (!opening.IsDone)
             {
@@ -96,6 +91,7 @@ namespace Yato.Tests.PlayMode
             }
 
             Assert.IsTrue(failed, "取消后应返回异常而不是句柄");
+            yield return null; // 底层迟到失败应安静结束，不能产生错误通知或孤儿页面。
             Assert.IsFalse(UIRouter.IsOpen("CancelTest"));
         }
 

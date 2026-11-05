@@ -28,6 +28,8 @@ namespace Yato.UI
 
         /// <summary>非单例页面的请求序号：避免并发请求互相覆盖。</summary>
         private static int s_pendingSequence;
+        private static long s_generation;
+        private static bool s_reconfiguring;
 
         /// <summary>加载遮罩出现阈值（秒）。</summary>
         public static float LoadingThresholdSeconds = 0.15f;
@@ -69,13 +71,20 @@ namespace Yato.UI
             }
         }
 
-        /// <summary>注入资源服务与门面（T-P1-09：UI 不依赖具体资源实现）。</summary>
+        /// <summary>注入资源服务与门面，并取消尚未完成的打开请求。已打开页面保持原生命周期。</summary>
         public static void Configure(IResourceService resources, IFacade facade = null)
         {
             EnsureDiagnostics();
-            s_resources = resources ?? NullResourceService.Instance;
-            s_facade = facade;
-            s_factory = new UIPageFactory(s_resources);
+            bool wasReconfiguring = s_reconfiguring;
+            s_reconfiguring = true;
+            try
+            {
+                InvalidatePendingOpens();
+                s_resources = resources ?? NullResourceService.Instance;
+                s_facade = facade;
+                s_factory = new UIPageFactory(s_resources);
+            }
+            finally { s_reconfiguring = wasReconfiguring; }
             Log.Info(string.Format(
                 "[Yato.UI] UIRouter 已配置：resources={0} facade={1}",
                 s_resources.GetType().Name,
@@ -85,20 +94,37 @@ namespace Yato.UI
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetOnPlayMode()
         {
-            s_diagnosticRegistration?.Dispose(); s_diagnosticRegistration = null;
-            ResetUiExtensions();
-            // 丢弃前必须释放实例与句柄，否则关闭 Domain Reload 时缓存页会跨会话泄漏
-            DisposeAllPages();
+            bool wasReconfiguring = s_reconfiguring;
+            s_reconfiguring = true;
+            try
+            {
+                InvalidatePendingOpens();
+                s_diagnosticRegistration?.Dispose(); s_diagnosticRegistration = null;
+                ResetUiExtensions();
+                // 丢弃前必须释放实例与句柄，否则关闭 Domain Reload 时缓存页会跨会话泄漏
+                DisposeAllPages();
 
-            s_resources = NullResourceService.Instance;
-            s_facade = null;
-            s_stack = new UIPageStack();
-            s_cache = new UIPageCache();
-            s_factory = null;
+                s_resources = NullResourceService.Instance;
+                s_facade = null;
+                s_stack = new UIPageStack();
+                s_cache = new UIPageCache();
+                s_factory = null;
+                s_pendingSequence = 0;
+                s_loadingWatchCount = 0;
+                s_loadingVisible = false;
+            }
+            finally { s_reconfiguring = wasReconfiguring; }
+        }
+
+        private static void InvalidatePendingOpens()
+        {
+            s_generation++;
+            var pending = new List<PendingOpen>(s_pendingOpens.Values);
             s_pendingOpens.Clear();
-            s_pendingSequence = 0;
             s_loadingWatchCount = 0;
+            if (s_loadingVisible) UILoading.Hide();
             s_loadingVisible = false;
+            foreach (var opening in pending) opening.Cancel();
         }
 
         /// <summary>销毁栈与缓存中的全部页面上下文（不发送通知）。</summary>
@@ -139,6 +165,12 @@ namespace Yato.UI
         {
             // Unity 6 也有 UnityEngine.AwaitableCompletionSource<T>，此处必须全限定
             var source = new Yato.Resources.AwaitableCompletionSource<UIPageHandle>();
+
+            if (s_reconfiguring)
+            {
+                source.SetException(new OperationCanceledException("UIRouter is being reset or configured"));
+                return source;
+            }
 
             if (def == null || !def.IsValid)
             {
@@ -186,20 +218,20 @@ namespace Yato.UI
                 ? def.PageId
                 : string.Format("{0}#{1}", def.PageId, Interlocked.Increment(ref s_pendingSequence));
 
-            var pending = new PendingOpen(pendingKey, def, args, targetLayer);
+            var pending = new PendingOpen(pendingKey, def, args, targetLayer, s_generation);
             s_pendingOpens[pendingKey] = pending;
             BeginLoadingWatch();
 
             IAwaitable<UIPageContext> creation;
             try
             {
-                creation = FactoryInstance.CreateAsync(def, args, targetLayer, null, pending.Token);
+                creation = FactoryInstance.CreateForRouterAsync(def, args, targetLayer, null, pending.Token);
             }
             catch (Exception e)
             {
                 // 工厂同步失败（如非法层级）：必须清理进行中状态与加载计数
                 RemovePending(pending);
-                EndLoadingWatch();
+                EndLoadingWatch(pending);
                 Log.Error("UIRouter", string.Format("打开页面失败：{0}", def.PageId), e);
                 Notify(FrameworkNotifications.UIPageFailed, e);
                 pending.Fail(e);
@@ -208,15 +240,12 @@ namespace Yato.UI
 
             creation.Completed += delegate
             {
-                RemovePending(pending);
-                EndLoadingWatch();
-
                 UIPageContext context = null;
                 try
                 {
                     context = creation.GetResult();
 
-                    if (pending.IsCancelled)
+                    if (pending.IsCancelled || pending.Generation != s_generation)
                     {
                         // 打开过程中被取消：销毁已创建实例，不回调、不产生孤儿（T-P3-01）
                         DestroyContext(context);
@@ -224,7 +253,7 @@ namespace Yato.UI
                         return;
                     }
 
-                    UIPageHandle handle = Activate(context, args, targetLayer);
+                    UIPageHandle handle = Activate(context, args, targetLayer, pending);
                     context = null; // 所有权已移交给页面栈
                     pending.Complete(handle);
                     RefreshMask();
@@ -237,9 +266,17 @@ namespace Yato.UI
                         DestroyContext(context);
                     }
 
-                    Log.Error("UIRouter", string.Format("打开页面失败：{0}", def.PageId), e);
-                    Notify(FrameworkNotifications.UIPageFailed, e);
+                    if (!(e is OperationCanceledException) && pending.Generation == s_generation)
+                    {
+                        Log.Error("UIRouter", string.Format("打开页面失败：{0}", def.PageId), e);
+                        Notify(FrameworkNotifications.UIPageFailed, e);
+                    }
                     pending.Fail(e);
+                }
+                finally
+                {
+                    RemovePending(pending);
+                    EndLoadingWatch(pending);
                 }
             };
 
@@ -386,13 +423,7 @@ namespace Yato.UI
             }
 
             PendingOpen pending = null;
-            string pendingKey = null;
-
-            if (s_pendingOpens.TryGetValue(pageId, out pending))
-            {
-                pendingKey = pageId;
-            }
-            else
+            if (!s_pendingOpens.TryGetValue(pageId, out pending))
             {
                 // 非单例页面的 pending key 带实例序号，按 PageId 回退匹配
                 foreach (KeyValuePair<string, PendingOpen> pair in s_pendingOpens)
@@ -400,7 +431,6 @@ namespace Yato.UI
                     if (pair.Value != null && pair.Value.Def != null && pair.Value.Def.PageId == pageId)
                     {
                         pending = pair.Value;
-                        pendingKey = pair.Key;
                         break;
                     }
                 }
@@ -411,8 +441,9 @@ namespace Yato.UI
                 return false;
             }
 
+            RemovePending(pending);
+            EndLoadingWatch(pending);
             pending.Cancel();
-            s_pendingOpens.Remove(pendingKey);
             Log.Info(string.Format("[Yato.UI] 已取消打开：{0}", pageId));
             return true;
         }
@@ -469,27 +500,31 @@ namespace Yato.UI
         private static void BeginLoadingWatch()
         {
             s_loadingWatchCount++;
-            RuntimeHost.RunCoroutine(ShowLoadingAfterThreshold());
+            RuntimeHost.RunCoroutine(ShowLoadingAfterThreshold(s_generation));
         }
 
-        private static IEnumerator ShowLoadingAfterThreshold()
+        private static IEnumerator ShowLoadingAfterThreshold(long generation)
         {
             float elapsed = 0f;
             while (elapsed < LoadingThresholdSeconds)
             {
+                if (generation != s_generation) yield break;
                 elapsed += Time.unscaledDeltaTime;
                 yield return null;
             }
 
-            if (s_loadingWatchCount > 0 && !s_loadingVisible)
+            if (generation == s_generation && s_loadingWatchCount > 0 && !s_loadingVisible)
             {
                 s_loadingVisible = true;
                 UILoading.Show("加载中...");
             }
         }
 
-        private static void EndLoadingWatch()
+        private static void EndLoadingWatch(PendingOpen pending)
         {
+            if (!pending.LoadingWatchActive) return;
+            pending.LoadingWatchActive = false;
+            if (pending.Generation != s_generation) return;
             if (s_loadingWatchCount > 0)
             {
                 s_loadingWatchCount--;
@@ -509,12 +544,18 @@ namespace Yato.UI
             private readonly Yato.Resources.AwaitableCompletionSource<UIPageHandle> m_result =
                 new Yato.Resources.AwaitableCompletionSource<UIPageHandle>();
 
-            public PendingOpen(string key, UIPageDef def, object args, UILayer layer)
+            private bool m_cancelled;
+            private bool m_cancelling;
+            private bool m_disposed;
+
+            public PendingOpen(string key, UIPageDef def, object args, UILayer layer, long generation)
             {
                 Key = key;
                 Def = def;
                 Args = args;
                 Layer = layer;
+                Generation = generation;
+                Token = m_source.Token;
             }
 
             public string Key { get; private set; }
@@ -531,18 +572,19 @@ namespace Yato.UI
                 get { return m_result; }
             }
 
-            public CancellationToken Token
-            {
-                get { return m_source.Token; }
-            }
+            public long Generation { get; private set; }
+            public bool LoadingWatchActive = true;
+            public CancellationToken Token { get; private set; }
 
             public bool IsCancelled
             {
-                get { return m_source.IsCancellationRequested; }
+                get { return m_cancelled; }
             }
 
             public void Cancel()
             {
+                m_cancelled = true;
+                m_cancelling = true;
                 try
                 {
                     m_source.Cancel();
@@ -550,16 +592,31 @@ namespace Yato.UI
                 catch (ObjectDisposedException)
                 {
                 }
+                catch (Exception error) { Log.Error("UIRouter", "Open cancellation observer failed", error); }
+                finally
+                {
+                    m_cancelling = false;
+                    Fail(new OperationCanceledException("UI page opening was cancelled"));
+                }
             }
 
             public void Complete(UIPageHandle handle)
             {
                 m_result.SetResult(handle);
+                DisposeTokenSource();
             }
 
             public void Fail(Exception error)
             {
                 m_result.SetException(error);
+                DisposeTokenSource();
+            }
+
+            private void DisposeTokenSource()
+            {
+                if (m_disposed || m_cancelling) return;
+                m_disposed = true;
+                m_source.Dispose();
             }
         }
 
@@ -620,7 +677,7 @@ namespace Yato.UI
         }
 
         /// <summary>首次显示：注册 → 入栈（旧页 OnCover）→ OnOpen → 激活。</summary>
-        private static UIPageHandle Activate(UIPageContext context, object args, UILayer layer)
+        private static UIPageHandle Activate(UIPageContext context, object args, UILayer layer, PendingOpen pending)
         {
             context.Layer = layer;
             context.Args = args;
@@ -634,21 +691,48 @@ namespace Yato.UI
             context.Handle = handle;
 
             Register(context);
-
-            StackInstance.Push(handle);
-            context.IsOpen = true;
-
-            SafePage(context, delegate(IUIPage page) { page.OnOpen(args); });
-
-            if (context.Instance != null)
+            try
             {
-                context.Instance.SetActive(true);
-            }
+                EnsureCurrentOpening(pending, context);
+                context.Page.OnCreate();
+                EnsureCurrentOpening(pending, context);
+                StackInstance.Push(handle);
+                context.IsOpen = true;
+                EnsureCurrentOpening(pending, context);
 
-            Notify(FrameworkNotifications.UIPageOpened, handle);
-            RaisePage(PageOpened, handle);
-            PublishTop();
-            return handle;
+                SafePage(context, delegate(IUIPage page) { page.OnOpen(args); });
+                EnsureCurrentOpening(pending, context);
+
+                if (context.Instance != null)
+                {
+                    context.Instance.SetActive(true);
+                }
+
+                Notify(FrameworkNotifications.UIPageOpened, handle);
+                RaisePage(PageOpened, handle);
+                PublishTop();
+                EnsureCurrentOpening(pending, context);
+                return handle;
+            }
+            catch
+            {
+                handle.IsValid = false;
+                if (context.IsOpen)
+                {
+                    SafePage(context, page => page.OnClose(true));
+                    StackInstance.Pop(handle);
+                    context.IsOpen = false;
+                }
+                Unregister(context);
+                throw;
+            }
+        }
+
+        private static void EnsureCurrentOpening(PendingOpen pending, UIPageContext context)
+        {
+            if (pending.IsCancelled || pending.Generation != s_generation || context.Handle == null ||
+                !context.Handle.IsValid || context.Instance == null)
+                throw new OperationCanceledException("UIRouter changed or the page closed while opening");
         }
 
         /// <summary>单例页面重复打开：只重新播报 OnOpen 并激活。</summary>
@@ -698,21 +782,23 @@ namespace Yato.UI
 
         private static void Register(UIPageContext context)
         {
-            if (s_facade == null)
+            var facade = s_facade;
+            if (facade == null)
             {
                 return;
             }
 
             try
             {
+                context.RegisteredFacade = facade;
                 if (context.Proxy != null)
                 {
-                    s_facade.RegisterProxy(context.Proxy);
+                    facade.RegisterProxy(context.Proxy);
                 }
 
                 if (context.Mediator != null)
                 {
-                    s_facade.RegisterMediator(context.Mediator);
+                    facade.RegisterMediator(context.Mediator);
                 }
             }
             catch (Exception e)
@@ -723,21 +809,23 @@ namespace Yato.UI
 
         private static void Unregister(UIPageContext context)
         {
-            if (s_facade == null)
+            var facade = context.RegisteredFacade;
+            context.RegisteredFacade = null;
+            if (facade == null)
             {
                 return;
             }
 
             try
             {
-                if (context.Mediator != null)
+                if (context.Mediator != null && ReferenceEquals(facade.RetrieveMediator(context.Mediator.MediatorName), context.Mediator))
                 {
-                    s_facade.RemoveMediator(context.Mediator.MediatorName);
+                    facade.RemoveMediator(context.Mediator.MediatorName);
                 }
 
-                if (context.Proxy != null)
+                if (context.Proxy != null && ReferenceEquals(facade.RetrieveProxy(context.Proxy.ProxyName), context.Proxy))
                 {
-                    s_facade.RemoveProxy(context.Proxy.ProxyName);
+                    facade.RemoveProxy(context.Proxy.ProxyName);
                 }
             }
             catch (Exception e)
@@ -752,6 +840,14 @@ namespace Yato.UI
             {
                 return;
             }
+
+            if (context.IsOpen)
+            {
+                context.IsOpen = false;
+                SafePage(context, page => page.OnClose(true));
+            }
+            if (context.Handle != null) context.Handle.IsValid = false;
+            Unregister(context);
 
             if (context.Instance != null)
             {

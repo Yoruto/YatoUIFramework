@@ -18,6 +18,9 @@ namespace Yato.Settings
         private readonly ISerializer m_serializer;
         private readonly Action<T> m_validator;
         private readonly string m_relativePath;
+        private readonly object m_stateGate = new object();
+        private readonly SemaphoreSlim m_loadGate = new SemaphoreSlim(1, 1);
+        private long m_revision;
 
         /// <summary>默认值模板：只读，永不对外暴露。</summary>
         private readonly T m_defaultsTemplate;
@@ -64,17 +67,17 @@ namespace Yato.Settings
         /// </summary>
         public T Current
         {
-            get { return Clone(m_current); }
+            get { lock (m_stateGate) return Clone(m_current); }
         }
 
         public bool IsLoaded
         {
-            get { return m_loaded; }
+            get { lock (m_stateGate) return m_loaded; }
         }
 
         public SettingsLoadResult LastLoadResult
         {
-            get { return m_lastLoadResult; }
+            get { lock (m_stateGate) return m_lastLoadResult; }
         }
 
         public string RelativePath
@@ -86,20 +89,29 @@ namespace Yato.Settings
 
         public SettingsLoadResult Load()
         {
+            // 不在调用线程阻塞等待异步加载：它的 continuation 可能需要 Unity 主线程。
+            if (!m_loadGate.Wait(0)) throw new FileBusyException(m_store.RootPath + "/" + m_relativePath);
+            try { return LoadCore(BeginLoad()); }
+            finally { m_loadGate.Release(); }
+        }
+
+        private SettingsLoadResult LoadCore(long revision)
+        {
             bool exists;
             try
             {
                 exists = m_store.Exists(m_relativePath);
             }
+            catch (FileBusyException) { throw; }
             catch (Exception e)
             {
-                return FallbackToDefaults(SettingsLoadStatus.Failed, e, "检查设置文件失败，使用默认值");
+                return ApplyDefaults(revision, SettingsLoadStatus.Failed, e, "检查设置文件失败，使用默认值");
             }
 
             if (!exists)
             {
                 // 缺文件必须真正回到默认值：重复 Load 时不能沿用上一次（可能已被 Apply 修改）的运行期状态
-                return ApplyDefaults(SettingsLoadStatus.DefaultsUsed, null, "用户设置文件不存在，使用默认值");
+                return ApplyDefaults(revision, SettingsLoadStatus.DefaultsUsed, null, "用户设置文件不存在，使用默认值");
             }
 
             string text;
@@ -107,33 +119,49 @@ namespace Yato.Settings
             {
                 text = m_store.ReadAllText(m_relativePath);
             }
+            catch (FileBusyException) { throw; }
             catch (Exception e)
             {
-                return FallbackToDefaults(SettingsLoadStatus.Failed, e, "读取设置文件失败，使用默认值");
+                return ApplyDefaults(revision, SettingsLoadStatus.Failed, e, "读取设置文件失败，使用默认值");
             }
 
-            return ApplyLoadedText(text);
+            return ApplyLoadedText(text, revision);
         }
 
         public async Task<SettingsLoadResult> LoadAsync(
             CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
+            long revision = BeginLoad();
+            await m_loadGate.WaitAsync(cancellationToken);
+            try
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                lock (m_stateGate)
+                    if (revision != m_revision) return Superseded();
+                return await LoadCoreAsync(revision, cancellationToken);
+            }
+            finally { m_loadGate.Release(); }
+        }
 
+        private async Task<SettingsLoadResult> LoadCoreAsync(long revision, CancellationToken cancellationToken)
+        {
             bool exists;
             try
             {
                 exists = m_store.Exists(m_relativePath);
             }
+            catch (OperationCanceledException) { throw; }
+            catch (FileBusyException) { throw; }
             catch (Exception e)
             {
-                return FallbackToDefaults(SettingsLoadStatus.Failed, e, "检查设置文件失败，使用默认值");
+                return ApplyDefaults(revision, SettingsLoadStatus.Failed, e, "检查设置文件失败，使用默认值");
             }
 
             if (!exists)
             {
                 // 与同步加载保持一致：缺文件时恢复默认值后再发布
-                return ApplyDefaults(SettingsLoadStatus.DefaultsUsed, null, "用户设置文件不存在，使用默认值");
+                return ApplyDefaults(revision, SettingsLoadStatus.DefaultsUsed, null, "用户设置文件不存在，使用默认值");
             }
 
             string text;
@@ -146,26 +174,30 @@ namespace Yato.Settings
                 // 取消不是加载失败，交给调用方处理
                 throw;
             }
+            catch (FileBusyException) { throw; }
             catch (Exception e)
             {
-                return FallbackToDefaults(SettingsLoadStatus.Failed, e, "读取设置文件失败，使用默认值");
+                return ApplyDefaults(revision, SettingsLoadStatus.Failed, e, "读取设置文件失败，使用默认值");
             }
 
-            return ApplyLoadedText(text);
+            cancellationToken.ThrowIfCancellationRequested();
+            return ApplyLoadedText(text, revision);
         }
 
         public void Save()
         {
-            Validate(m_current);
-            m_store.WriteAllText(m_relativePath, m_serializer.Serialize(m_current));
+            T snapshot = Current;
+            Validate(snapshot);
+            m_store.WriteAllText(m_relativePath, m_serializer.Serialize(snapshot));
         }
 
         public async Task SaveAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            Validate(m_current);
-            string json = m_serializer.Serialize(m_current);
+            T snapshot = Current;
+            Validate(snapshot);
+            string json = m_serializer.Serialize(snapshot);
             await m_store.WriteAllTextAsync(m_relativePath, json, cancellationToken);
         }
 
@@ -176,15 +208,23 @@ namespace Yato.Settings
                 throw new ArgumentNullException("mutate");
             }
 
-            mutate(m_current);
-            RaiseChanged();
+            lock (m_stateGate)
+            {
+                m_revision++;
+                mutate(m_current);
+                RaiseChanged();
+            }
         }
 
         public T ResetToDefaults()
         {
-            m_current = Clone(m_defaultsTemplate);
-            RaiseChanged();
-            return Clone(m_current);
+            lock (m_stateGate)
+            {
+                m_revision++;
+                m_current = Clone(m_defaultsTemplate);
+                RaiseChanged();
+                return Clone(m_current);
+            }
         }
 
         public T CreateDefaultsSnapshot()
@@ -192,8 +232,10 @@ namespace Yato.Settings
             return Clone(m_defaultsTemplate);
         }
 
-        private SettingsLoadResult ApplyLoadedText(string text)
+        private SettingsLoadResult ApplyLoadedText(string text, long revision)
         {
+            lock (m_stateGate)
+                if (revision != m_revision) return Superseded();
             T user;
             try
             {
@@ -201,7 +243,7 @@ namespace Yato.Settings
             }
             catch (Exception e)
             {
-                return FallbackToDefaults(SettingsLoadStatus.Corrupted, e, "设置文件内容损坏，已保留原文件并使用默认值");
+                return ApplyDefaults(revision, SettingsLoadStatus.Corrupted, e, "设置文件内容损坏，已保留原文件并使用默认值");
             }
 
             try
@@ -210,44 +252,51 @@ namespace Yato.Settings
             }
             catch (Exception e)
             {
-                return FallbackToDefaults(SettingsLoadStatus.Invalid, e, "设置内容未通过校验，已保留原文件并使用默认值");
+                return ApplyDefaults(revision, SettingsLoadStatus.Invalid, e, "设置内容未通过校验，已保留原文件并使用默认值");
             }
 
-            m_current = user;
-            return Publish(SettingsLoadStatus.Loaded, null, null);
+            return Publish(user, revision, SettingsLoadStatus.Loaded, null, null);
         }
 
-        /// <summary>回退到默认值，但绝不写盘（D05：不自动覆盖损坏文件）。</summary>
-        private SettingsLoadResult FallbackToDefaults(SettingsLoadStatus status, Exception error, string message)
+        private long BeginLoad()
         {
-            return ApplyDefaults(status, error, message);
+            lock (m_stateGate) return ++m_revision;
         }
 
-        /// <summary>把运行期状态恢复为默认值副本后再发布：缺文件与损坏/非法走同一条路径。</summary>
-        private SettingsLoadResult ApplyDefaults(SettingsLoadStatus status, Exception error, string message)
+        private static SettingsLoadResult Superseded()
         {
-            m_current = Clone(m_defaultsTemplate);
-            return Publish(status, error, message);
+            return SettingsLoadResult.Create(SettingsLoadStatus.Superseded, null, "已有更新的设置操作，本次加载结果未发布");
         }
 
-        private SettingsLoadResult Publish(SettingsLoadStatus status, Exception error, string message)
+        /// <summary>回退到默认值，但绝不写盘；过期加载也不能回退当前状态。</summary>
+        private SettingsLoadResult ApplyDefaults(long revision, SettingsLoadStatus status, Exception error, string message)
         {
-            m_loaded = true;
+            return Publish(Clone(m_defaultsTemplate), revision, status, error, message);
+        }
 
-            var result = SettingsLoadResult.Create(status, error, message);
-            m_lastLoadResult = result;
-
-            if (error != null)
+        private SettingsLoadResult Publish(T value, long revision, SettingsLoadStatus status, Exception error, string message)
+        {
+            lock (m_stateGate)
             {
-                Log.Error("SettingsService", message, error);
-            }
-            else if (status == SettingsLoadStatus.Loaded)
-            {
-                Log.Info(string.Format("[Yato.Settings] 已加载用户设置：{0}", m_relativePath));
-            }
+                if (revision != m_revision) return Superseded();
+                m_current = value;
+                m_loaded = true;
 
-            RaiseChanged();
-            return result;
+                var result = SettingsLoadResult.Create(status, error, message);
+                m_lastLoadResult = result;
+
+                if (error != null)
+                {
+                    Log.Error("SettingsService", message, error);
+                }
+                else if (status == SettingsLoadStatus.Loaded)
+                {
+                    Log.Info(string.Format("[Yato.Settings] 已加载用户设置：{0}", m_relativePath));
+                }
+
+                RaiseChanged();
+                return result;
+            }
         }
 
         private void Validate(T value)
@@ -287,11 +336,14 @@ namespace Yato.Settings
 
             // 事件参数与 Current 一样是快照：订阅者修改它不会影响服务内部状态
             T snapshot = Clone(m_current);
+            long revision = m_revision;
 
             // 逐个隔离：单个订阅者异常不能影响其它订阅者
             Delegate[] invocationList = handlers.GetInvocationList();
             for (int i = 0; i < invocationList.Length; i++)
             {
+                // 前面的观察者可能重入 Apply/Reset：后续观察者只应收到更新后的通知。
+                if (revision != m_revision) return;
                 var handler = (Action<T>)invocationList[i];
                 try
                 {

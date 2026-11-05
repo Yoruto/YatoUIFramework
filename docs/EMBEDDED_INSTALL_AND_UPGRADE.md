@@ -1,4 +1,4 @@
-# 嵌入式安装、示例与升级（0.6.0）
+# 嵌入式安装、示例与升级（0.6.1）
 
 仅支持 Unity 6，包最低声明为 6000.0，当前开发与实测为 6000.5.6f1。当前结果见 [实施记录](FRAMEWORK_06_IMPLEMENTATION_2026-11-01.md)，API 见 [0.6 指南](../Packages/com.yato.framework/Documentation~/foundation06.md)。
 
@@ -10,7 +10,7 @@
 |---|---|---|
 | Core | 0.2.0 | 无 |
 | Persistence | 0.1.1 | Core |
-| Resources | 0.3.0 | Core、Persistence |
+| Resources | 0.3.1 | Core、Persistence |
 | Mvc | 0.1.0 | 无 |
 | UI | 0.3.0 | Core、Resources、Mvc |
 | App | 0.3.0 | Core、Resources |
@@ -19,8 +19,8 @@
 | Flow | 0.2.0 | Core、App、Resources |
 | Config | 0.2.0 | Core、Resources |
 | Pooling | 0.2.0 | Core、Resources |
-| Editor | 0.3.0 | Core、Resources、UI、Config、App |
-| Framework | 0.6.0 | 上述默认包 |
+| Editor | 0.3.1 | Core、Resources、UI、Config、App |
+| Framework | 0.6.1 | 上述默认包 |
 | Input（可选） | 0.1.0 | 无；依赖 Unity Input System |
 | Save（可选） | 0.2.0 | Core、Persistence |
 | UI.Input（可选） | 0.2.0 | Core、UI、Input |
@@ -44,12 +44,12 @@
 
 ## 升级与行为
 
-- 各模块版本独立维护，整体功能版本为 Framework 0.6.0；替换完整包目录，保留 GUID，避免并排安装多个版本。
+- 各模块版本独立维护，整体功能版本为 Framework 0.6.1；替换完整包目录，保留 GUID，避免并排安装多个版本。
 - 导入到 Assets 的样例是副本，升级不会自动覆盖。备份或移除旧副本后再导入，避免重复 GUID。
 - Bundle 模式默认 BundleRequired；只有显式 AllowResourcesFallback 才降级。纯 Resources 项目直接传入 ResourcesProvider。
-- 热更采用 GUID 暂存、完整校验和活动指针提交；失败/提交前取消保留旧版本，提交后取消报告实际结果。Provider 固定其版本目录，缺包不跨版本混用。
-- 启动时、任何持久化 Loader/路径被使用之前显式调用 HotUpdateMaintenance.PrepareStartup。保留当前/上一版本，资源已用、指针丢失或损坏、路径不安全时拒绝清理。运行中仍不清理已提交快照。
-- 网络生产默认 HTTPS 且禁用重定向。file:// 和 loopback HTTP 仅由 RemoteDownloader.AllowFileUrls / AllowInsecureLocalhost 显式开启。本机 CRC 是意外损坏检测，不提供来源认证。
+- 热更采用 GUID 暂存、完整校验和活动指针提交；失败/提交前取消保留旧版本，提交后取消报告实际结果。活动指针或活动快照损坏时，读取会回退到指针记录的上一份成功快照。Provider 固定其版本目录，缺包不跨版本混用。
+- ResourceServiceFactory 在首次创建 Bundle Provider 前自动执行一次启动缓存维护（仅 Play Mode，可用 AutoCleanupPersistentCache 关闭）；也可在任何持久化 Loader/路径被使用之前显式调用 HotUpdateMaintenance.PrepareStartup。保留当前/上一版本，资源已用、指针丢失或损坏、路径不安全时拒绝清理。运行中仍不清理已提交快照。
+- 网络生产默认 HTTPS 且禁用重定向。file:// 和 loopback HTTP 仅由 RemoteDownloader.AllowFileUrls / AllowInsecureLocalhost 显式开启。CRC 用于意外损坏检测；清单提供 64 位 SHA-256 时会额外校验摘要，但本机校验仍不构成来源认证。
 - IAppService.Initialize 保持同步；异步启动放在 Flow。同步 UI Close 保持立即关闭；CloseAsync 等待可选淡出。OpenAsync 仍表示页面激活完成。
 - Save 不替代 Settings 或基础 Persistence；不会自动恢复、创建默认存档或写回迁移结果。通过业务明确调用恢复/删除/保存。
 - PooledInstance 是值类型代次句柄，直接 Dispose 的预热取还路径不分配；避免装箱。场景统一持有池本身。

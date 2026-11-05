@@ -46,6 +46,16 @@ UIPageCatalog 为简单无 Mediator 页面提供 ScriptableObject 注册。Requi
 
 可选 UI.Input 新增 UIInputProfile：引用源 InputActionAsset、基础/UI map 和动作路径。校验缺 map/动作、动作所属 map 及控制类型。使用 new UIInputCoordinator(input, eventSystem, profile) 时对运行时副本复用校验，既有字符串构造函数保留。
 
+## 资源与页面生命周期
+
+内置 `ResourceService` 实现 `IDisposable`。拥有服务的应用应先结束使用方并关闭页面，再释放服务；关闭会取消自己的等待、释放已发出的句柄并回收迟到加载。`ResourceServiceFactory.Create()` 自己创建的 Provider 由服务拥有；注入 Provider 默认仍由调用方拥有，可传 `ownsProvider: true` 显式转移所有权。共享 Provider 不应被任意一个使用方关闭。
+
+`PreloadAsync` 在首个加载失败时传播异常并结束，不再将部分成功报告为完整成功；已经加载的临时句柄仍会释放。取消同样传播给调用方。
+
+`UIRouter.Configure` 会取消在途打开，旧结果不得激活页面；已经打开的页面保留原生命周期。路由页面按注册 → `OnCreate` → 入栈 → `OnOpen` 执行，独立调用 `UIPageFactory.CreateAsync` 仍在返回前执行 `OnCreate`。同一个实例可能重复收到 `OnOpen`，事件绑定必须先清理旧绑定或保持幂等。
+
+Settings 同一实例的加载读取按顺序执行；更新的 Load/Apply/Reset 使旧加载返回 `SettingsLoadStatus.Superseded`，不覆盖状态或 `LastLoadResult`。文件忙时抛 `FileBusyException` 并保留当前值；同步 Load 遇到在途异步加载也会立即报告文件忙，不阻塞主线程。`UIListPool.Get(index)` 会将活动范围扩展到 `0..index`，调用 `SetCount` 可缩小该范围。
+
 ## 验证
 
 手动消费者准备工具增加 UnityLifecycleVerification：在独立工程运行 8 次 Play，覆盖 Domain Reload / Scene Reload 的四种组合并恢复测试前设置。测试不应在用户正在编辑的主工程中执行。源工程另含 100 轮真实场景卸载、Flow/UI/Pooling/Pause 的基线回归。

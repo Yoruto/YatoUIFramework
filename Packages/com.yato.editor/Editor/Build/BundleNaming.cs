@@ -20,15 +20,7 @@ namespace Yato.Editor
         public const string DefaultAssetRoot = "Assets/GameRes";
 
         /// <summary>参与打包的文件后缀（小写比较）。</summary>
-        public static readonly string[] BuildableExtensions =
-        {
-            ".prefab", ".asset", ".mat", ".shader", ".compute",
-            ".png", ".jpg", ".jpeg", ".tga", ".psd", ".tif", ".exr",
-            ".wav", ".mp3", ".ogg",
-            ".txt", ".json", ".bytes", ".csv",
-            ".anim", ".controller", ".spriteatlas", ".spriteatlasv2",
-            ".unity", ".ttf", ".otf", ".shadervariants"
-        };
+        public static readonly string[] BuildableExtensions = Yato.Resources.AssetFileExtensions.Buildable;
 
         /// <summary>判断后缀是否需要打包。</summary>
         public static bool IsBuildable(string assetPath)

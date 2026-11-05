@@ -3,6 +3,54 @@
 所有对本包的改动都记录在此文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [Unreleased]
+
+### Fixed
+
+- 异步完成源同步保护完成与订阅，后台取消的观察者回到主线程；宿主清理保留已排队的完成通知。
+- 资源服务支持显式 `IDisposable` 关闭；默认创建的 Provider 随服务释放，注入 Provider 仅在转移所有权时级联释放。关闭会取消在途等待并回收迟到结果。
+- 共享 Bundle 使用独立取消源和逐调用方等待者；全部取消后的新加载先等待旧原生请求退出，关闭后拒绝迟到注册。
+- UI Reset/Configure 使旧打开请求失效；路由先注册再调用 `OnCreate`，保留单飞与重入校验；公开页面工厂仍保留独立调用契约。
+- Survivor 页面重复打开时保持监听幂等，结算取消后停止打开结果页。
+- Settings 读取串行化，旧加载不会覆盖较新的 Load/Apply/Reset；过期结果返回 `Superseded`，文件忙直接抛异常且保留当前状态。
+- `UIListPool.Get(index)` 扩展活动前缀并维护计数；实例池预热不再产生未配对的归还回调。
+- Editor 严格 key 解析与 Bundle 收集共用扩展名，支持 TextAsset、动画等合法资产；资源预加载在首项失败时传播异常。
+
+### Compatibility
+
+- `IResourceService`/`IResourceProvider` 不增加必实现成员；现有自定义实现继续兼容。拥有服务的调用方可通过 `IDisposable` 关闭内置服务。
+- `PreloadAsync` 从忽略单项失败改为失败即结束；调用方需要观察加载异常。Settings 调用方需要处理 `FileBusyException`，并可识别未发布状态的 `Superseded`。
+
+### Verified - 2026-11-05
+
+- Unity 6000.5.6f1：源工程 EditMode 189/189、PlayMode 115/115，独立消费工程 4/4，零失败、零跳过。
+- 独立消费工程 Windows Mono Player 构建和完整冒烟通过；Domain/Scene Reload 四种组合各进出两次，共 8/8，资源基线归零。
+- 真实 UWR 使用本地文件请求验证关闭时中止；本轮不代替 Android/WebGL 实机、生产 HTTPS 或 IL2CPP 验收。原始证据摘要：`docs/verification/ASYNC_LIFECYCLE_2026-11-05.json`。
+
+## [0.6.1] - 2026-11-03
+
+热更新恢复能力与编辑器门禁补强（Resources 0.3.1、Editor 0.3.1）。
+
+### Added
+
+- 热更新单写锁支持可配置租约（`HotUpdateService.LockLeaseSeconds`，默认 900 秒）：进度会刷新租约，只有真正停摆的操作才可能被接管；宿主销毁导致协程无法执行 finally 时，后续更新可恢复。租约令牌保证旧所有者的迟到 `Exit` 不会释放新锁，进入 Play 时同步重置。
+- `HotUpdateStorage.TryGetActiveDirectory`：活动指针损坏或活动快照 manifest 缺失时，回退到指针记录的上一份成功快照（同时接受 GUID 与旧版绝对路径两种指针格式），读取过程绝不改写指针文件。
+- `VersionManifest.BundleHash.HasSha256` 与 `RemoteDownloader.DownloadAsync(expectedSha256:)`：清单提供 64 位 SHA-256 时，下载后校验与提交前快照复验都会核对摘要；CRC 与 SHA-256 共享一次文件读取。未提供摘要的旧清单保持原有 CRC 行为。
+- `ResourceServiceFactory` 在首次创建 Bundle Provider 前自动执行一次启动缓存维护（仅 Play Mode）：保留活动与上一份快照，删除无句柄引用的旧版本并清理暂存；可用 `AutoCleanupPersistentCache` 关闭。
+- `EditorAssetProvider.StrictKeys` 可禁用叶子名兜底；默认兜底时若同名候选超过一个，抛出包含全部候选的歧义错误，不再静默返回首个命中。
+- `ApiUsageValidator` 结构化扫描：四类规则（`Resources.Load*`、`SceneManager.LoadScene*`、`Time.timeScale =`、`AssetDatabase` 加载）、注释/字符串感知、`// yato:allow [rule-id]` 行级豁免、`Logs/api-usage-report.json`、`-executeMethod Yato.Editor.ApiUsageValidator.ValidateForBatch` 批处理入口，以及 `IPreprocessBuildWithReport` 构建门禁（EditMode 忽略 Tests/Editor/Samples~）。
+- `AssetKeyGenerator` 的资源收集范围与 `BundleNaming.BuildableExtensions` 一致；`UIPages` 只收集 `ui/` 目录下的预制体，不再为非 UI Prefab 生成页面定义；标识符冲突从静默跳过改为告警。
+
+### Fixed
+
+- `RemoteDownloader` 在目标路径没有目录部分时调用 `Directory.CreateDirectory("")` 抛出参数异常。
+- 新增 EditMode 回归：锁租约接管与令牌隔离、指针损坏/活动 manifest 丢失/旧平铺缓存回退、SHA-256 可选校验、清单 hash 长度校验、禁用 API 规则与豁免。
+
+### Verified
+
+- Unity 6000.5.6f1：EditMode 160/160、PlayMode 101/101 通过，0 失败 0 跳过。
+- 对当前工程执行禁用 API 门禁：Assets 51 个文件，0 命中；代码生成 87 个资源 key、9 个 UI 页面。
+
 ## [0.6.0] - 2026-11-01
 
 - 新增 Task/IAwaitable 互操作及直接 await，补齐主线程投递、会话生命周期和异常隔离。

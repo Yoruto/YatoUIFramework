@@ -1,4 +1,5 @@
 using UnityEngine;
+using PureMVC.Interfaces;
 using Yato.Resources;
 
 namespace Yato.UI
@@ -40,6 +41,9 @@ namespace Yato.UI
 
         /// <summary>数据代理（可能为空）。</summary>
         public UIPageProxy Proxy;
+
+        // 关闭时向实际注册的门面退订，Configure 更换门面后也不会误删新门面的页面。
+        internal IFacade RegisteredFacade;
 
         /// <summary>外部句柄，回指用。</summary>
         public UIPageHandle Handle;

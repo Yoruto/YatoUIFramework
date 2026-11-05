@@ -35,6 +35,7 @@ namespace Yato.Pooling
             internal IPoolCallbacks[] Callbacks;
             internal PoolMember Member;
             internal bool Active;
+            internal bool RentalStarted;
             internal ulong Generation;
         }
         private readonly IAssetHandle<GameObject> m_prefab;
@@ -114,9 +115,12 @@ namespace Yato.Pooling
         }
         private static void Deactivate(Slot slot)
         {
+            bool notify = slot.RentalStarted;
+            slot.RentalStarted = false;
             if (slot.Object == null) return;
-            foreach (var callback in slot.Callbacks)
-                try { callback.OnReturn(); } catch (Exception error) { Log.Error("Pooling", "OnReturn failed", error); }
+            if (notify)
+                foreach (var callback in slot.Callbacks)
+                    try { callback.OnReturn(); } catch (Exception error) { Log.Error("Pooling", "OnReturn failed", error); }
             if (slot.Object != null) slot.Object.SetActive(false);
         }
         internal bool Valid(Slot slot, ulong generation) => !m_disposed && slot != null && slot.Active && slot.Generation == generation && slot.Object != null;
@@ -134,6 +138,7 @@ namespace Yato.Pooling
             var slot = m_pool.Get();
             if (slot.Object == null) BuildObject(slot);
             slot.Active = true; slot.Generation++; ActiveCount++;
+            slot.RentalStarted = true;
             PeakActiveCount = Math.Max(PeakActiveCount, ActiveCount);
             var lease = new PooledInstance(this, slot);
             try

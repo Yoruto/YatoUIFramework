@@ -145,6 +145,7 @@ namespace Yato.Survivor
         }
         private async Task ResultsAsync(FlowContext context, CancellationToken ct)
         {
+            ct.ThrowIfCancellationRequested();
             UIRouter.CloseAll(); Services.UIInput.SetBaseContext("UI");
             Status = "Your watch has been recorded.";
             if (LastRun != null)
@@ -153,11 +154,18 @@ namespace Yato.Survivor
                 if (m_saveWritable)
                 {
                     try { await Services.Saves.SaveAsync("profile", History, ct); BackupAvailable = true; }
+                    catch (OperationCanceledException) { throw; }
                     catch (Exception error) { Status = "History save failed: " + error.Message; }
                 }
                 else Status = "History is available for this session. Existing unreadable save was preserved.";
             }
-            await OpenAsync(SurvivorPageKind.Results);
+            ct.ThrowIfCancellationRequested();
+            var page = await OpenAsync(SurvivorPageKind.Results);
+            if (ct.IsCancellationRequested)
+            {
+                UIRouter.Close(page);
+                ct.ThrowIfCancellationRequested();
+            }
         }
         private async Task ErrorAsync(FlowContext context, CancellationToken ct)
         {

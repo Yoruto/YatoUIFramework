@@ -48,7 +48,8 @@ namespace Yato.BasicSample
         {
             UIRouter.CancelOpen(m_page.PageId);
             UIRouter.CloseAll();
-            m_resources?.ReleaseUnused();
+            (m_resources as IDisposable)?.Dispose();
+            m_resources = null;
         }
     }
 }

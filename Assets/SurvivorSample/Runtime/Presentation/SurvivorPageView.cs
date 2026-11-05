@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 using Yato.UI;
 namespace Yato.Survivor
@@ -10,25 +12,31 @@ namespace Yato.Survivor
         private ComponentBinder m_binder;
         private SurvivorPageArgs m_args;
         private Action m_closed;
+        private readonly List<Action> m_removeListeners = new List<Action>();
         public event Action<string> ActionRequested;
         public event Action<string, float> VolumeChanged;
         protected override void Awake() { m_binder = GetComponent<ComponentBinder>(); }
         public override void OnOpen(object args)
         {
+            RemoveListeners();
             m_args = (SurvivorPageArgs)args; m_closed = m_args.Closed;
             foreach (var entry in m_binder.Bindings)
             {
                 if (entry.Target is Button button)
                 {
                     var action = entry.Name;
-                    button.onClick.AddListener(() => ActionRequested?.Invoke(action));
+                    UnityAction listener = () => ActionRequested?.Invoke(action);
+                    button.onClick.AddListener(listener);
+                    m_removeListeners.Add(() => { if (button != null) button.onClick.RemoveListener(listener); });
                 }
                 if (entry.Target is Slider slider)
                 {
                     var field = entry.Name;
                     var settings = m_args.Game.Services.Settings.Current;
                     slider.SetValueWithoutNotify(field == "Slider_Music" ? settings.Music : field == "Slider_Effects" ? settings.Effects : settings.Master);
-                    slider.onValueChanged.AddListener(value => VolumeChanged?.Invoke(field, value));
+                    UnityAction<float> listener = value => VolumeChanged?.Invoke(field, value);
+                    slider.onValueChanged.AddListener(listener);
+                    m_removeListeners.Add(() => { if (slider != null) slider.onValueChanged.RemoveListener(listener); });
                 }
             }
             Render();
@@ -88,12 +96,13 @@ namespace Yato.Survivor
         }
         public override void OnClose(bool destroy)
         {
-            foreach (var entry in m_binder.Bindings)
-            {
-                if (entry.Target is Button button) button.onClick.RemoveAllListeners();
-                if (entry.Target is Slider slider) slider.onValueChanged.RemoveAllListeners();
-            }
+            RemoveListeners();
             m_args = null; var closed = m_closed; m_closed = null; closed?.Invoke();
+        }
+        private void RemoveListeners()
+        {
+            foreach (var remove in m_removeListeners) remove();
+            m_removeListeners.Clear();
         }
         public static string TimeText(float seconds) => $"{(int)seconds / 60:00}:{(int)seconds % 60:00}";
     }

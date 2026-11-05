@@ -1,0 +1,361 @@
+{
+  "schema": 1,
+  "verifiedOn": "2026-11-05",
+  "timezone": "Asia/Shanghai",
+  "unity": "6000.5.6f1",
+  "frameworkVersion": "0.6.1",
+  "status": "unreleased-worktree-fixes",
+  "scope": "Async cancellation, UI lifecycle and reentry, resource ownership/shutdown, shared bundle cancellation, settings concurrency, pooling, strict asset keys and preload failures",
+  "sourceProject": {
+    "editMode": {
+      "source": "Logs/ReviewFix-20261105-EditMode-Frozen.xml",
+      "sha256": "9162b9a6b4d1dc1c3e2c532ba736d9b645f55c566bdd6659c6e33cc13f8fe2b3",
+      "summary": {
+        "result": "Passed",
+        "total": 189,
+        "passed": 189,
+        "failed": 0,
+        "skipped": 0,
+        "durationSeconds": 11.7504791
+      }
+    },
+    "playMode": {
+      "source": "Logs/ReviewFix-20261105-PlayMode-Frozen.xml",
+      "sha256": "3fd0e0040b70801b01d732498445995f92ce335563d32246265961219838d72a",
+      "summary": {
+        "result": "Passed",
+        "total": 115,
+        "passed": 115,
+        "failed": 0,
+        "skipped": 0,
+        "durationSeconds": 15.7389842
+      }
+    },
+    "processExitCodes": [
+      0,
+      0
+    ]
+  },
+  "consumer": {
+    "project": "C:\\Users\\xyc\\.codex\\visualizations\\2026\\11\\05\\01a1aa69-557a-7810-b7e8-5f45e658441a\\ReviewFixConsumer",
+    "packageSet": "Full with Save/Input/UI.Input",
+    "tests": {
+      "source": "Logs/ReviewFix-20261105-Consumer-Targeted.xml",
+      "sha256": "3bafd3ede3ff512306f859f695fb03d3345379c8e6701773cec12979212864fa",
+      "summary": {
+        "result": "Passed",
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "durationSeconds": 1.350162
+      }
+    },
+    "testAssemblies": [
+      "Yato.Consumer.Tests",
+      "Yato.Optional.Consumer.Tests"
+    ],
+    "windowsMonoBuild": {
+      "source": "Logs/ReviewFix-20261105-Consumer-Build-Final.log",
+      "sha256": "bbff9da695796f070bda1ec217dbe4140575c2698fca86687d52951e18c80294"
+    },
+    "buildExitCode": 0,
+    "windowsPlayerSmoke": {
+      "source": "Logs/ReviewFix-20261105-Consumer-Player.log",
+      "sha256": "7eb2811f605948fae525b6710f52fb5cf6d513d9ffcb57550a26a0e841c62450"
+    },
+    "playerExitCode": 0,
+    "lifecycleMatrix": {
+      "source": "Logs/ReviewFix-20261105-Lifecycle.log",
+      "sha256": "6950d89b01d08bbea0d271396976cd272cd9be649f00e465af8395e5812f7b2d"
+    },
+    "lifecycleResult": {
+      "sessions": 8,
+      "configurations": 4,
+      "passes": 8,
+      "exitCode": 0,
+      "resourceBaseline": "zero"
+    }
+  },
+  "earlierAttempts": [
+    {
+      "kind": "exploratory consumer run",
+      "evidence": {
+        "source": "Logs/ReviewFix-20261105-Consumer-PlayMode.xml",
+        "sha256": "32e1bcc5c1a7af703402189e56f59ac44efada443dd105e00bb5824a7eb931b4",
+        "summary": {
+          "result": "Skipped:Ignored",
+          "total": 115,
+          "passed": 104,
+          "failed": 0,
+          "skipped": 11,
+          "durationSeconds": 11.5166988
+        }
+      },
+      "note": "Eleven bundle/hot-update fixtures skipped because the fresh consumer intentionally has no source StreamingAssets bundles; source project covers these fixtures with no skips. Final consumer run explicitly targets the four consumption tests."
+    },
+    {
+      "kind": "initial consumer build",
+      "evidence": {
+        "source": "Logs/ReviewFix-20261105-Consumer-Build.log",
+        "sha256": "0ce39c614c5d0ac43ae0a0a261c4948ba746cdba9720a42a220125b505791792"
+      },
+      "exitCode": 1,
+      "reason": "Eight intentional direct API calls in standalone test/legacy JSON fixtures were rejected by the existing build gate.",
+      "resolution": "Added explicit per-line exemptions with reasons; the build gate remains enabled and the final build passed."
+    }
+  ],
+  "contracts": {
+    "resourceDisposal": "Built-in services implement IDisposable. Default-created providers are owned; injected providers remain caller-owned unless ownsProvider is true. Original signatures remain available.",
+    "preload": "The first failure or cancellation propagates; temporary handles are released.",
+    "settings": "Reads are serialized. Newer Load/Apply/Reset supersedes old results. Superseded does not publish state or replace LastLoadResult. FileBusyException propagates.",
+    "ui": "Reset/Configure invalidates pending opens. Router registers before OnCreate; standalone factory retains its original contract. Repeated OnOpen bindings must be idempotent."
+  },
+  "staticChecks": {
+    "gitDiffCheck": "passed",
+    "yatoPackages": 16,
+    "packageDependencyMismatches": 0,
+    "metaFiles": 646,
+    "duplicateGuids": 0,
+    "missingNewScriptMeta": 0
+  },
+  "limitations": [
+    "Windows Mono, headless verification; no IL2CPP or Android/WebGL device execution in this run.",
+    "The real UnityWebRequest cancellation path is covered on Windows using a local file request; production HTTPS/TLS behavior and actual audio/graphics are not certified by this run.",
+    "The workspace had pre-existing uncommitted changes. Source hashes describe the combined validated worktree, not exclusive authorship."
+  ],
+  "worktreeSourceHashes": [
+    {
+      "source": "Assets/SurvivorSample/Runtime/Bootstrap/SurvivorGame.cs",
+      "sha256": "4cd6c0fe7edd0e3afb87774316fe4a3c0eed60a7fa0814d3cd6a10f7a539585f"
+    },
+    {
+      "source": "Assets/SurvivorSample/Runtime/Bootstrap/SurvivorServices.cs",
+      "sha256": "5adb4a0b6bb3751b5adf78476a1bad5826876bea102de35d0ea26579e8c46821"
+    },
+    {
+      "source": "Assets/SurvivorSample/Runtime/Presentation/SurvivorPages.cs",
+      "sha256": "bfbaae01955bfcdab3d9f64a445982c81e2989a1cee93e254f79f0967af71470"
+    },
+    {
+      "source": "Assets/SurvivorSample/Runtime/Presentation/SurvivorPageView.cs",
+      "sha256": "774c3ac39be9c140e38372b21e11c3b258709ecbb0b8f08e3b9ab9b8296105ae"
+    },
+    {
+      "source": "Assets/SurvivorSample/Tests/PlayMode/SurvivorIntegrationTests.cs",
+      "sha256": "c6308b2c7a29fb1a07e7298dd50432dfc4eaa63e17eba8a8a0768127caf69473"
+    },
+    {
+      "source": "Packages/com.yato.core/Runtime/MainThreadDispatcher.cs",
+      "sha256": "2c3fd11be6b253c08dd591e9ca16f42123ff7e0e34f64c1aaebd138aa12b19b3"
+    },
+    {
+      "source": "Packages/com.yato.editor/Editor/Build/BundleNaming.cs",
+      "sha256": "dbfad6603f7131a03fd9337848b490f30b80b5eac8bc86160a53b6f2c852690a"
+    },
+    {
+      "source": "Packages/com.yato.editor/Editor/CodeGen/AssetKeyGenerator.cs",
+      "sha256": "36262dd15305b02b0f6077529b56b06e4b3992c35a637abb13cb9816dc92f11c"
+    },
+    {
+      "source": "Packages/com.yato.editor/Editor/Tools/ApiUsageValidator.cs",
+      "sha256": "7306676189f775fa57c26a25d2b7a51069ce305ae097adb5ebb53c526d63acce"
+    },
+    {
+      "source": "Packages/com.yato.framework/Samples~/BasicSample/Scripts/BasicSampleEntry.cs",
+      "sha256": "05116bdd9da874ac9a31c875609b81eba601982b93fb2a576b75f7b6981a07a7"
+    },
+    {
+      "source": "Packages/com.yato.framework/Samples~/FullSample/Scripts/FullSampleEntry.cs",
+      "sha256": "46b3ff0316b8afa57fb3b3502c7e0e37a77f0ecd76b4e88ffc84a3d806ae4c8a"
+    },
+    {
+      "source": "Packages/com.yato.framework/Samples~/YatoFrameworkDemo/Scripts/AppBootstrapSample.cs",
+      "sha256": "c92538fc3e13948249742b82627d1a0e77777890059cec53248b044e9209367c"
+    },
+    {
+      "source": "Packages/com.yato.framework/Samples~/YatoFrameworkDemo/Scripts/ExampleJsonLoad.cs",
+      "sha256": "0a1d3af440190904e6f7013102806108d9c9604c34f652795145633945198b3e"
+    },
+    {
+      "source": "Packages/com.yato.framework/Samples~/YatoFrameworkDemo/Scripts/GameStart.cs",
+      "sha256": "90594aac4f456778612ded457e6ac0e99a03d76391106fe5d947e2cece845957"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/EditMode/ApiUsageValidatorTests.cs",
+      "sha256": "20679d486c4a6100033bb5f39c782a427ff06308faf5b72d006490edaea6771f"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/EditMode/EditorAssetProviderTests.cs",
+      "sha256": "1faaf1fe8b82621d90740872d002e4aac85a2aba8ed32986d4356131636097be"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/EditMode/HotUpdateRecoveryTests.cs",
+      "sha256": "e79f512d45d8fad9b80803258650c8f6878250321210029b685ece6adaccd6d8"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/EditMode/ResourceAsyncLifecycleTests.cs",
+      "sha256": "8754094cc565150c5b37f1738ff1efa96d6bdfd72e41b5d5090807115b9572d8"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/EditMode/ResourceServiceTests.cs",
+      "sha256": "a846f793d103666b30732ef436467242fbd10e40daad5e3d25a32c3fb03f160b"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/EditMode/SettingsServiceTests.cs",
+      "sha256": "ae067047e1490499d233c690c0b44345da73d3503bfaf9956fefbed72e88780c"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/PlayMode/BundleModeSmokeTests.cs",
+      "sha256": "b3f03edf78b9dbf2fefcdbaa406db924326aa663a4b248cebd48ea2d57fec6b3"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/PlayMode/RouterConcurrencyTests.cs",
+      "sha256": "d05857ab2de9e45c60bf5833b4a3001054750098b82ce1fa04251c07503f3f39"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/PlayMode/RouterLifecycleTests.cs",
+      "sha256": "e31a901f66008d4b3404209d1ef3476c5b5a1961c3bf9fab5bd23b745af34e84"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/PlayMode/TaskBridgeTests.cs",
+      "sha256": "f52d3f2cae8b8c72f201b8117a24e667620f7b6fd5b2cc7f1a9f88cc20137073"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/PlayMode/UIListPoolTests.cs",
+      "sha256": "8d1f9a2053b2e25fc591a89ed2804e1b1dcc6b72b8cb889dd6f9f9db989dd888"
+    },
+    {
+      "source": "Packages/com.yato.pooling/Runtime/ResourceInstancePool.cs",
+      "sha256": "8b0ad0bdefb6e166f79ab302b1430a8f77daa3f868d1302a348e715506640689"
+    },
+    {
+      "source": "Packages/com.yato.pooling/Tests/PlayMode/PoolCallbackProbe.cs",
+      "sha256": "e1f3a0bc649a6afc91bd6093d65c04f340c69f288196fc2876700d6ce207776b"
+    },
+    {
+      "source": "Packages/com.yato.pooling/Tests/PlayMode/ResourceInstancePoolTests.cs",
+      "sha256": "070596003e0371b64a57a48c8f7d190336e6b0bbc56707448ad502f7b80b2de5"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/Abstractions/AwaitableCompletionSource.cs",
+      "sha256": "6be73a9d730f77fc32aac57325b1a46378248132b2e1f52039094f84a59b3fca"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/Abstractions/IResourceService.cs",
+      "sha256": "f04a8b88c9a191c8a1fdfcef89e9e82ca266ab52fe4859c3931ca682b78c2622"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/AssemblyInfo.cs",
+      "sha256": "06e78948c6e92bb70ba66239eb992cea737554f7838b6995eefca9366158639b"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/AssetFileExtensions.cs",
+      "sha256": "62ae7d61ed437ea6e714e8ae455b33dd7905c80f55f72c06eeff52820bfd7666"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/HotUpdate/HotUpdateMaintenance.cs",
+      "sha256": "74d3774317496731423e8718a745eebcb9d4f2b9a9baa6af9a039f3cc69c6613"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/HotUpdate/HotUpdateService.cs",
+      "sha256": "9f84771a08541406540b1086a6e20ec65adc21cbedcfd71746f22382771b746b"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/HotUpdate/HotUpdateStorage.cs",
+      "sha256": "6551793740fbf64f3a7adc6cd5fcab8e32abbf6d3ea6d2089358d1de86d62642"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/HotUpdate/RemoteDownloader.cs",
+      "sha256": "086282c9468e127b14fc2e43289a874ec9befc76c080157d48bce3fd69298a7f"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/HotUpdate/VersionManifest.cs",
+      "sha256": "2a9adc911c2022f93b3beaef23e2a5d295d1162b8c53da237c0c8698ff621d23"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/Internal/IntegrityUtil.cs",
+      "sha256": "66e705620e7dc41b49b1e01e108577a82f49448d65a66897358247ea71e87c59"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/Providers/BundleLoader.cs",
+      "sha256": "7c30d7c24a9bdb3e67b6a6f54f42af07df47bfb7e6228365338b1c58ac7e7613"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/Providers/BundleProvider.cs",
+      "sha256": "6adaed6088bf184025d9f078b5c5ae835c068b5fb5601ad65274e0026a95184d"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/Providers/EditorAssetProvider.cs",
+      "sha256": "bc51bf57f1191857285f02c6c59dbe0c0a9c950e95c2c16136712de90fdc062a"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/ResourceService.cs",
+      "sha256": "f1053509543f3317f7e48f195eaf29b629d9ec019884b27754e153219d8e50ea"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/ResourceServiceFactory.cs",
+      "sha256": "07bece8d3e9ed54e79b44fb6706395c322373cf2ec3dfcde1c4d7dd67aeeaff1"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/ResourcesServiceHost.cs",
+      "sha256": "e8c1459cd477fc253501db520ea9e3a68156f1fb59b6d207407aa8826ff22eb1"
+    },
+    {
+      "source": "Packages/com.yato.settings/Runtime/ISettingsService.cs",
+      "sha256": "eb188b78fa4063e0410613babbc460be5e3f2f427107460c584a3c19166a40ee"
+    },
+    {
+      "source": "Packages/com.yato.settings/Runtime/SettingsLoadResult.cs",
+      "sha256": "9ca2e3e6775f4a80940c8d23d605cbc3de2c725413efb40d1d35dc558adf7982"
+    },
+    {
+      "source": "Packages/com.yato.settings/Runtime/SettingsLoadStatus.cs",
+      "sha256": "0311c93b4503cb8cd39edcca978f5b1f265e49edc48a560e6557bddb5eb25cfc"
+    },
+    {
+      "source": "Packages/com.yato.settings/Runtime/SettingsService.cs",
+      "sha256": "e0769947848d62e7b7cfa640cdd4159a96cc959abd90f91452efc8d8d5fc758a"
+    },
+    {
+      "source": "Packages/com.yato.ui.input/Samples~/FocusSample/FocusSampleEntry.cs",
+      "sha256": "d0e63500596445b14745cb7f6f04b0f5f56f5e9b9431b12cac5dc6b4035670cc"
+    },
+    {
+      "source": "Packages/com.yato.ui/Runtime/IUIPage.cs",
+      "sha256": "0fc582ffbd196c4d79b16b459017510a819dadd08be8de17f88291b657504cff"
+    },
+    {
+      "source": "Packages/com.yato.ui/Runtime/UIListPool.cs",
+      "sha256": "cb1568f30f9d0789f64550472f4d41f02a687696e6c3d697271f182e2e4d7ca6"
+    },
+    {
+      "source": "Packages/com.yato.ui/Runtime/UIPageContext.cs",
+      "sha256": "f1f3f1d9e148680110c2d86941c7e9c1ee5dfe8872afefc7bf235dc3d6f07ca0"
+    },
+    {
+      "source": "Packages/com.yato.ui/Runtime/UIPageFactory.cs",
+      "sha256": "32e77fe7bb45c7dcf4bf5f82c3035eec1956ad18b4a990a4e73c82037d785684"
+    },
+    {
+      "source": "Packages/com.yato.ui/Runtime/UIRouter.cs",
+      "sha256": "82e7277b8178c95f578d0dbd5be13c28c4ad946728d292ac2fc3020747673cea"
+    },
+    {
+      "source": "tools/ConsumerPlayerSmoke.cs",
+      "sha256": "e6950df8c390bd19d680c7fc45460f2783582aaced97b595346e6a713c0280cb"
+    },
+    {
+      "source": "tools/ConsumerSmokeTests/ConsumerSmokeTests.cs",
+      "sha256": "7e924fbbe13b5092b5e1fe59a92150ed8678e0cf7796d0d47ad09eb7da0846d7"
+    },
+    {
+      "source": "tools/ConsumerSmokeTests/StarterSmokeTests.cs",
+      "sha256": "b7f2b92d07493217ab0441091e4ebbbfd8c1bb0ec26c8e57aa01b509a33539cc"
+    },
+    {
+      "source": "tools/OptionalConsumerSmokeTests/OptionalConsumerTests.cs",
+      "sha256": "0195522c90e3402ba2c051276c3dc8838153ca4ea59037d562642fdcb6e0c455"
+    }
+  ]
+}
