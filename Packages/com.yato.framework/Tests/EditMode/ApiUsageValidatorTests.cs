@@ -72,6 +72,23 @@ namespace Yato.Tests.EditMode
         }
 
         [Test]
+        public void Scan_IgnoresStringsButExemptsOnlyTheNamedRule()
+        {
+            File.WriteAllText(Path.Combine(m_root, "Strings.cs"),
+                "class Strings { void M() { System.Console.WriteLine(\"UnityEngine.Resources.Load(\\\"x\\\")\"); } }");
+            File.WriteAllText(Path.Combine(m_root, "Scoped.cs"),
+                "class Scoped { void M() { UnityEngine.Resources.Load(\"x\"); UnityEngine.Time.timeScale = 0f; } } // yato:allow resources-load");
+            File.WriteAllText(Path.Combine(m_root, "MarkerString.cs"),
+                "class MarkerString { void M() { System.Console.WriteLine(\"yato:allow timescale-write\"); UnityEngine.Time.timeScale = 0f; } }");
+
+            ApiUsageReport report = Scan();
+            Assert.AreEqual(2, report.ErrorCount, report.ToJson());
+            Assert.AreEqual("timescale-write", report.Hits[0].RuleId);
+            Assert.AreEqual("MarkerString.cs", Path.GetFileName(report.Hits[0].Path));
+            Assert.AreEqual("Scoped.cs", Path.GetFileName(report.Hits[1].Path));
+        }
+
+        [Test]
         public void Scan_IgnoresEditorSamplesAndTestDirectories()
         {
             string editor = Path.Combine(m_root, "Editor");

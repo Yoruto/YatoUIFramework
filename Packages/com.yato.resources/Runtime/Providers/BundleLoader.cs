@@ -210,7 +210,7 @@ namespace Yato.Resources
                 return source;
             }
 
-            if (RuntimePaths.RequiresWebRequest)
+            if (RuntimePaths.RequiresWebRequest || path.Contains("://") || path.StartsWith("jar:", StringComparison.OrdinalIgnoreCase))
             {
                 RuntimeHost.RunCoroutine(LoadByWebRequest(bundleName, path, source, ct));
             }

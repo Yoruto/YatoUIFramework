@@ -44,6 +44,31 @@ namespace Yato.Tests.EditMode
         }
 
         [Test]
+        public void ResourceFactory_DetectsStreamingAssetUrlManifests()
+        {
+            Assert.IsTrue(ResourceServiceFactory.IsRemoteManifestPath(
+                "jar:file:///data/app/base.apk!/assets/AssetBundles/Android/manifest.json"));
+            Assert.IsTrue(ResourceServiceFactory.IsRemoteManifestPath(
+                "https://example.test/StreamingAssets/AssetBundles/WebGL/manifest.json"));
+            Assert.IsFalse(ResourceServiceFactory.IsRemoteManifestPath(
+                "/tmp/AssetBundles/Windows/manifest.json"));
+        }
+
+        [Test]
+        public void BundleAssetLookup_UsesFullKeyWhenBasenamesCollide()
+        {
+            var names = new[]
+            {
+                "assets/gameres/ui/inventory/icon.prefab",
+                "assets/gameres/ui/equipment/icon.prefab"
+            };
+            Assert.AreEqual(names[1], BundleProvider.ResolveAssetName(names, new AssetKey("ui/equipment/icon")));
+            Assert.AreEqual(names[0], BundleProvider.ResolveAssetName(names, new AssetKey("ui/inventory/icon")));
+            Assert.Throws<InvalidOperationException>(() =>
+                BundleProvider.ResolveAssetName(names, new AssetKey("ui/unknown/icon")));
+        }
+
+        [Test]
         public void Stats_CountsDistinctHeldAssets_AndPreservesEarlierSnapshot()
         {
             using (var first = m_service.Load<ScriptableObject>(Key))

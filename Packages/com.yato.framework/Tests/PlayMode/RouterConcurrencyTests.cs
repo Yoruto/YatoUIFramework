@@ -76,6 +76,46 @@ namespace Yato.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator CloseAll_CancelsPendingOpensAndReleasesLatePrefabs()
+        {
+            var resources = new FakeResourceService(CreatePrefab("Late"))
+                { AutoComplete = false, HonorCancellation = false };
+            UIRouter.Configure(resources);
+            var def = new UIPageDef("Late", null, new AssetKey("ui/late"));
+            var opening = UIRouter.OpenAsync(def);
+
+            UIRouter.CloseAll();
+            Assert.Throws<OperationCanceledException>(() => opening.GetResult());
+            resources.CompleteAll();
+            yield return null;
+
+            Assert.IsFalse(UIRouter.IsOpen(def.PageId));
+            Assert.AreEqual(0, UIRouter.Stack.GetAllHandles().Count);
+            Assert.AreEqual(1, resources.DisposedHandles);
+        }
+
+        [UnityTest]
+        public IEnumerator CloseAll_OnlyCancelsPendingOpensOnRequestedLayer()
+        {
+            var resources = new FakeResourceService(CreatePrefab("Layered"))
+                { AutoComplete = false, HonorCancellation = false };
+            UIRouter.Configure(resources);
+            var normal = new UIPageDef("NormalPending", null, new AssetKey("ui/normal"), UILayer.Normal);
+            var popup = new UIPageDef("PopupPending", null, new AssetKey("ui/popup"), UILayer.Popup);
+            var normalOpen = UIRouter.OpenAsync(normal);
+            var popupOpen = UIRouter.OpenAsync(popup);
+
+            UIRouter.CloseAll(UILayer.Popup);
+            Assert.Throws<OperationCanceledException>(() => popupOpen.GetResult());
+            resources.CompleteAll();
+            yield return null;
+
+            Assert.IsTrue(normalOpen.GetResult().IsValid);
+            Assert.IsFalse(UIRouter.IsOpen(popup.PageId));
+            Assert.AreEqual(1, UIRouter.Stack.GetAllHandles().Count);
+        }
+
+        [UnityTest]
         public IEnumerator CachedPage_OpenCloseCycles_DisposesPrefabHandleOnce()
         {
             var resources = new FakeResourceService(CreatePrefab("Bag"));

@@ -249,8 +249,6 @@ namespace Yato.Editor
             for (int line = 0; line < lines.Length; line++)
             {
                 string original = lines[line];
-                if (IsExempt(original, null)) continue;
-
                 string code = StripComments(original, ref inBlockComment);
                 if (code.Trim().Length == 0) continue;
 
@@ -271,8 +269,8 @@ namespace Yato.Editor
         }
 
         /// <summary>
-        /// Removes line and block comments while preserving string/char literals so URLs and
-        /// quoted text are not mistaken for comments. Commented-out calls must not fail a build.
+        /// Removes comments and string/char contents. Quotes are still recognized so URLs and
+        /// comment markers inside a literal cannot affect the parser or trigger a false positive.
         /// </summary>
         private static string StripComments(string line, ref bool inBlockComment)
         {
@@ -294,10 +292,10 @@ namespace Yato.Editor
                 char c = line[i];
                 if (inString)
                 {
-                    builder.Append(c);
+                    builder.Append(' ');
                     if (c == '\\' && i + 1 < line.Length)
                     {
-                        builder.Append(line[i + 1]);
+                        builder.Append(' ');
                         i += 2;
                         continue;
                     }
@@ -311,7 +309,7 @@ namespace Yato.Editor
                 {
                     inString = true;
                     quote = c;
-                    builder.Append(c);
+                    builder.Append(' ');
                     i++;
                     continue;
                 }
@@ -335,17 +333,42 @@ namespace Yato.Editor
         }
 
         /// <summary>
-        /// A line containing <c>yato:allow</c> is skipped entirely; passing a rule id keeps the
-        /// check precise, while a null rule id answers "does this line opt out at all?".
+        /// Only a real // comment may exempt the named rule. Marker-like text in a string
+        /// literal must never disable validation of executable code on the same line.
         /// </summary>
         private static bool IsExempt(string line, string ruleId)
         {
             const string marker = "yato:allow";
-            int index = line.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+            string comment = LineComment(line);
+            int index = comment.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
             if (index < 0) return false;
-            if (string.IsNullOrEmpty(ruleId)) return true;
-            string remainder = line.Substring(index + marker.Length).Trim();
-            return remainder.Length == 0 || remainder.StartsWith(ruleId, StringComparison.OrdinalIgnoreCase);
+            string remainder = comment.Substring(index + marker.Length).Trim();
+            return remainder.Length == 0 || string.Equals(remainder.Split(' ')[0], ruleId, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string LineComment(string line)
+        {
+            char quote = '\0';
+            bool block = false;
+            for (int i = 0; i < line.Length - 1; i++)
+            {
+                char c = line[i];
+                if (quote != '\0')
+                {
+                    if (c == '\\') { i++; continue; }
+                    if (c == quote) quote = '\0';
+                    continue;
+                }
+                if (block)
+                {
+                    if (c == '*' && line[i + 1] == '/') { block = false; i++; }
+                    continue;
+                }
+                if (c == '"' || c == '\'') { quote = c; continue; }
+                if (c == '/' && line[i + 1] == '*') { block = true; i++; continue; }
+                if (c == '/' && line[i + 1] == '/') return line.Substring(i + 2);
+            }
+            return string.Empty;
         }
 
         private static bool IsExcluded(string path, ApiUsageOptions options)

@@ -1,6 +1,9 @@
 using System;
+using System.Collections;
 using System.IO;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.Networking;
 using Yato.Core;
 
 namespace Yato.Resources
@@ -62,6 +65,66 @@ namespace Yato.Resources
             return service;
         }
 
+        /// <summary>
+        /// Cross-platform entry point for bundled resources. Android/WebGL StreamingAssets are
+        /// URLs and must be read asynchronously; synchronous Create remains available when the
+        /// manifest is already on the local filesystem or an explicit provider is supplied.
+        /// </summary>
+        public static IAwaitable<IResourceService> CreateAsync(
+            ResourceFailurePolicy policy = ResourceFailurePolicy.BundleRequired, string manifestPath = null,
+            CancellationToken ct = default)
+        {
+            var result = new AwaitableCompletionSource<IResourceService>();
+            var loading = CreateProviderAsync(policy, manifestPath, ct);
+            loading.Completed += () =>
+            {
+                IResourceProvider provider = null;
+                try
+                {
+                    provider = loading.GetResult();
+                    var service = Create(provider, true);
+                    provider = null;
+                    result.SetResult(service);
+                }
+                catch (Exception error)
+                {
+                    (provider as IDisposable)?.Dispose();
+                    result.SetException(error);
+                }
+            };
+            return result;
+        }
+
+        public static IAwaitable<IResourceProvider> CreateProviderAsync(
+            ResourceFailurePolicy policy = ResourceFailurePolicy.BundleRequired, string manifestPath = null,
+            CancellationToken ct = default)
+        {
+            var result = new AwaitableCompletionSource<IResourceProvider>();
+            try
+            {
+                ct.ThrowIfCancellationRequested();
+#if UNITY_EDITOR
+                if (!ForceBundleMode)
+                {
+                    result.SetResult(new EditorAssetProvider());
+                    return result;
+                }
+#endif
+                PreparePersistentCache();
+                string path = manifestPath ?? ResolveManifestPath();
+                if (IsRemoteManifestPath(path))
+                    RuntimeHost.RunCoroutine(LoadManifestFromUrl(path, policy, result, ct));
+                else
+                {
+                    ct.ThrowIfCancellationRequested();
+                    result.SetResult(CreateBundleOrFallback(policy, path));
+                }
+            }
+            catch (OperationCanceledException error) { result.SetException(error); }
+            catch (Exception error) { CompleteProviderFailure(policy, error, result); }
+            return result;
+        }
+
         /// <summary>按当前平台/配置选择 Provider。</summary>
         public static IResourceProvider CreateProvider(ResourceFailurePolicy policy = ResourceFailurePolicy.BundleRequired, string manifestPath = null)
         {
@@ -83,27 +146,10 @@ namespace Yato.Resources
             {
                 PreparePersistentCache();
                 manifestPath = manifestPath ?? ResolveManifestPath();
+                if (IsRemoteManifestPath(manifestPath))
+                    throw new InvalidOperationException("StreamingAssets manifest is a URL; use ResourceServiceFactory.CreateAsync on Android/WebGL");
                 ResourceManifest manifest = ResourceManifest.LoadFromFile(manifestPath);
-                if (manifest.Platform != RuntimePaths.PlatformName)
-                    throw new FormatException("Manifest platform mismatch: " + manifest.Platform);
-                foreach (var bundle in manifest.Bundles) manifest.ResolveLoadOrder(bundle.Key);
-
-                BundleLoader loader = null;
-                var refCounter = new BundleRefCounter(delegate(string bundleName)
-                {
-                    if (loader != null)
-                    {
-                        loader.Unload(bundleName);
-                    }
-                });
-
-                loader = new BundleLoader(refCounter, Path.GetDirectoryName(manifestPath));
-
-                Log.Info(string.Format(
-                    "[Yato.Resources] 使用 BundleProvider：version={0} bundles={1} assets={2}",
-                    manifest.Version, manifest.BundleCount, manifest.AssetCount));
-
-                return new BundleProvider(manifest, loader, refCounter);
+                return CreateBundleProvider(manifest, manifestPath);
             }
             catch (Exception e)
             {
@@ -114,6 +160,94 @@ namespace Yato.Resources
                 Log.Warn("[Yato.Resources] Explicit Resources fallback: " + error);
                 return new ResourcesProvider();
             }
+        }
+
+        private static IResourceProvider CreateBundleProvider(ResourceManifest manifest, string manifestPath)
+        {
+            if (manifest.Platform != RuntimePaths.PlatformName)
+                throw new FormatException("Manifest platform mismatch: " + manifest.Platform);
+            foreach (var bundle in manifest.Bundles) manifest.ResolveLoadOrder(bundle.Key);
+
+            BundleLoader loader = null;
+            var refCounter = new BundleRefCounter(bundleName => loader?.Unload(bundleName));
+            int lastSlash = manifestPath.LastIndexOf('/');
+            string directory = IsRemoteManifestPath(manifestPath)
+                ? manifestPath.Substring(0, lastSlash) : Path.GetDirectoryName(manifestPath);
+            loader = new BundleLoader(refCounter, directory);
+            Log.Info(string.Format("[Yato.Resources] 使用 BundleProvider：version={0} bundles={1} assets={2}",
+                manifest.Version, manifest.BundleCount, manifest.AssetCount));
+            return new BundleProvider(manifest, loader, refCounter);
+        }
+
+        internal static bool IsRemoteManifestPath(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return false;
+            return path.StartsWith("jar:", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("file://", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static IEnumerator LoadManifestFromUrl(string path, ResourceFailurePolicy policy,
+            AwaitableCompletionSource<IResourceProvider> result, CancellationToken ct)
+        {
+            // This URL is a Unity StreamingAssets address, not an arbitrary hot-update endpoint.
+            using (var request = UnityWebRequest.Get(path))
+            {
+                request.timeout = 60;
+                request.redirectLimit = 0;
+                UnityWebRequestAsyncOperation operation = null;
+                Exception startupError = null;
+                try
+                {
+                    operation = request.SendWebRequest();
+                }
+                catch (Exception error) { startupError = error; }
+                if (startupError != null)
+                {
+                    CompleteProviderFailure(policy, startupError, result);
+                    yield break;
+                }
+                while (!operation.isDone)
+                {
+                    if (ct.IsCancellationRequested)
+                    {
+                        request.Abort();
+                        result.SetException(new OperationCanceledException(ct));
+                        yield break;
+                    }
+                    if (request.downloadedBytes > 4 * 1024 * 1024)
+                    {
+                        request.Abort();
+                        CompleteProviderFailure(policy, new IOException("StreamingAssets manifest exceeds 4 MiB"), result);
+                        yield break;
+                    }
+                    yield return null;
+                }
+                try
+                {
+                    ct.ThrowIfCancellationRequested();
+                    if (request.result != UnityWebRequest.Result.Success)
+                        throw new IOException("StreamingAssets manifest request failed: " + request.error);
+                    if (request.downloadedBytes > 4 * 1024 * 1024)
+                        throw new IOException("StreamingAssets manifest exceeds 4 MiB");
+                    ct.ThrowIfCancellationRequested();
+                    result.SetResult(CreateBundleProvider(ResourceManifest.Parse(request.downloadHandler.text, path), path));
+                }
+                catch (OperationCanceledException error) { result.SetException(error); }
+                catch (Exception error) { CompleteProviderFailure(policy, error, result); }
+            }
+        }
+
+        private static void CompleteProviderFailure(ResourceFailurePolicy policy, Exception error,
+            AwaitableCompletionSource<IResourceProvider> result)
+        {
+            if (policy == ResourceFailurePolicy.AllowResourcesFallback)
+            {
+                Log.Warn("[Yato.Resources] Explicit Resources fallback: " + error);
+                result.SetResult(new ResourcesProvider());
+            }
+            else result.SetException(error);
         }
 
         /// <summary>

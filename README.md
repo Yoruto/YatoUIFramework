@@ -59,6 +59,28 @@ private static void Register() => GameBootstrap.RegisterService(new MyService())
 GameBootstrap.Scene.LoadAsync(new SceneLoadRequest("Gameplay"));
 ```
 
+### Android / WebGL 的 Bundle 初始化
+
+Android 和 WebGL 的 `StreamingAssets` 是 URL，不可直接用 `File.ReadAllText` 读取内置 `manifest.json`。
+使用 Bundle 模式的游戏必须在初始化依赖资源的服务/UI 之前，等待异步工厂完成：
+
+```csharp
+var opening = ResourceServiceFactory.CreateAsync();
+opening.Completed += () =>
+{
+    IResourceService resources = opening.GetResult();
+    UIRouter.Configure(resources);
+    // 随后创建需要资源服务的游戏对象；退出时 Dispose 此服务。
+};
+```
+
+桌面平台和 Editor 的资源工厂仍可同步完成。`Create()` 保留为同步接口，适用于本地 manifest
+或显式注入的 Provider；Android/WebGL 内置 Bundle 模式需要上述异步初始化。基于同步
+`IAppService.Initialize()` 的项目需要调整启动顺序：在自动 Bootstrap 场景之前通过预加载入口
+创建资源服务，再注入对应的游戏服务；仅调用旧版同步 `Create()` 不会自动等待 URL 请求。
+独立演示入口 `GameStart` 已采用异步工厂。当前 Survivor 示例的自动 Bootstrap 路径仍以已验证的
+Windows/Editor 为目标，迁移到 Android/WebGL 时也必须调整这一步。
+
 ## 环境
 
 - 仅支持 Unity 6（`package.json` 的 `unity` 字段为 `6000.0`），当前开发与实测版本为 `6000.5.6f1`；

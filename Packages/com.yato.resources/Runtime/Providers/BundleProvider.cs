@@ -220,7 +220,15 @@ namespace Yato.Resources
                 return;
             }
 
-            string assetName = ResolveAssetName(bundle, key);
+            string assetName;
+            try { assetName = ResolveAssetName(bundle, key); }
+            catch (Exception error)
+            {
+                ReleaseChain(order, order.Count);
+                source.SetException(new ResourceException(key.ToString(), bundleName,
+                    ResourceStage.AssetLoad, "Ambiguous asset mapping in bundle", error));
+                return;
+            }
             if (string.IsNullOrEmpty(assetName))
             {
                 ReleaseChain(order, order.Count);
@@ -293,29 +301,45 @@ namespace Yato.Resources
         }
 
         /// <summary>
-        /// 解析资产在 bundle 内的名字：先按叶子名精确匹配，再按「同文件名不同扩展名」匹配。
+        /// Match the complete logical key first. A basename-only lookup can silently return
+        /// the wrong asset when two directories contain files with the same name.
+        /// A unique-basename fallback supports bundles from older custom build pipelines.
         /// </summary>
         private static string ResolveAssetName(AssetBundle bundle, AssetKey key)
+        {
+            return ResolveAssetName(bundle.GetAllAssetNames(), key);
+        }
+
+        internal static string ResolveAssetName(IReadOnlyList<string> names, AssetKey key)
         {
             string value = key.Value;
             int slash = value.LastIndexOf('/');
             string leaf = slash >= 0 ? value.Substring(slash + 1) : value;
 
-            if (bundle.Contains(leaf))
-            {
-                return leaf;
-            }
-
-            string[] names = bundle.GetAllAssetNames();
+            string fullMatch = null;
+            string leafMatch = null;
+            int leafCount = 0;
+            string suffix = "/" + value;
             for (int i = 0; i < names.Length; i++)
             {
-                if (string.Equals(Path.GetFileNameWithoutExtension(names[i]), leaf, StringComparison.OrdinalIgnoreCase))
+                string path = names[i].Replace('\\', '/');
+                string withoutExtension = path.Substring(0, path.Length - Path.GetExtension(path).Length);
+                if (string.Equals(withoutExtension, value, StringComparison.OrdinalIgnoreCase) ||
+                    withoutExtension.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
                 {
-                    return names[i];
+                    if (fullMatch != null)
+                        throw new InvalidOperationException("Multiple assets match the full key: " + value);
+                    fullMatch = names[i];
                 }
+                if (!string.Equals(Path.GetFileNameWithoutExtension(path), leaf, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                leafMatch = names[i];
+                leafCount++;
             }
-
-            return null;
+            if (fullMatch != null) return fullMatch;
+            if (leafCount > 1)
+                throw new InvalidOperationException("Multiple assets share a basename: " + leaf);
+            return leafMatch;
         }
     }
 }

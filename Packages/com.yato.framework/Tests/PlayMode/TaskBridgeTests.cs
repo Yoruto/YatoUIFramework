@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -12,6 +13,32 @@ namespace Yato.Tests.PlayMode
 {
     public sealed class TaskBridgeTests
     {
+        [UnityTest] public IEnumerator ResourceFactory_LoadsUrlManifestWithoutSystemIoFileReads()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "yato-url-manifest-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+            string path = Path.Combine(root, "manifest.json");
+            File.WriteAllText(path, "{\"schema\":2,\"version\":\"test\",\"platform\":\"" +
+                RuntimePaths.PlatformName + "\",\"bundles\":{},\"assets\":{}}");
+            bool previous = ResourceServiceFactory.ForceBundleMode;
+            ResourceServiceFactory.ForceBundleMode = true;
+            IResourceProvider provider = null;
+            try
+            {
+                var loading = ResourceServiceFactory.CreateProviderAsync(
+                    manifestPath: new Uri(path).AbsoluteUri);
+                yield return loading.AsEnumerator();
+                provider = loading.GetResult();
+                Assert.IsInstanceOf<BundleProvider>(provider);
+            }
+            finally
+            {
+                (provider as IDisposable)?.Dispose();
+                ResourceServiceFactory.ForceBundleMode = previous;
+                Directory.Delete(root, true);
+            }
+        }
+
         [UnityTest] public IEnumerator CompletedOperations_SupportMultipleTaskConsumersAndDirectAwait()
         {
             var source = new Yato.Resources.AwaitableCompletionSource<int>();

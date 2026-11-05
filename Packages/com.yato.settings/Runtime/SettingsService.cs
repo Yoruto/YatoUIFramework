@@ -132,13 +132,13 @@ namespace Yato.Settings
             CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            long revision = BeginLoad();
+            // A queued operation has not acquired the right to publish anything yet.
+            // If it is canceled while waiting, it must not invalidate the active reader.
             await m_loadGate.WaitAsync(cancellationToken);
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                lock (m_stateGate)
-                    if (revision != m_revision) return Superseded();
+                long revision = BeginLoad();
                 return await LoadCoreAsync(revision, cancellationToken);
             }
             finally { m_loadGate.Release(); }
