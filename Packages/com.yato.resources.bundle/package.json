@@ -1,0 +1,23 @@
+{
+  "name": "com.yato.resources.bundle",
+  "version": "0.1.0",
+  "displayName": "Yato Resources Bundle",
+  "description": "Optional local AssetBundle loading, manifests, cache-policy integration and bundle build tools. Does not require hot update.",
+  "unity": "6000.0",
+  "keywords": [
+    "framework",
+    "resources",
+    "assetbundle",
+    "yato"
+  ],
+  "author": {
+    "name": "Yato"
+  },
+  "dependencies": {
+    "com.yato.core": "0.2.0",
+    "com.yato.resources": "0.4.0",
+    "com.unity.modules.assetbundle": "1.0.0",
+    "com.unity.modules.unitywebrequest": "1.0.0",
+    "com.unity.modules.unitywebrequestassetbundle": "1.0.0"
+  }
+}

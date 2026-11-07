@@ -1,17 +1,17 @@
-最新 0.6 API 与接入工具见 [0.6 指南](foundation06.md)。
-
-0.5.0 模块与通用演示见 [基础模块指南](foundation.md)。
-
 # Yato Framework 快速上手
 
-0.3.0 起的新手路径：Package Manager 导入 BasicSample / FullSample；详细安装、快照布局与兼容变化见 [嵌入式安装与升级](installation.md)。
+当前整体版本为 **0.7.0**。按需安装、0.6 → 0.7 工厂迁移与快照布局见[安装与升级](installation.md)，现场与独立工程结果见[当前验证记录](verification.md)。0.6 的异步/诊断 API 见 [0.6 指南](foundation06.md)，基础模块用法见[基础模块指南](foundation.md)。
+
+向其他项目交付框架时，可使用模块 TGZ 或带安装器的离线 ZIP；包集选择、导出命令与 manifest 限制见[UPM 模块分发](../../../docs/UPM_DISTRIBUTION.md)。模块版本独立维护，整体版本 `0.7.0` 不代表每个模块的版本号。
+
+新项目可导入 BasicSample / 离线 FullSample；需要资源热更新时，再从 `com.yato.resources.hotupdate` 导入 HotUpdateSample。完整聚合包会带入 Bundle/HotUpdate，精简项目直接安装所需子包。
 
 ## 1. 30 分钟接入
 
 自 `0.2.0` 起框架由多个 UPM 包组成，`com.yato.framework` 是聚合元包：
 
-1. 把 `Packages/` 下的 `com.yato.*` 目录整体放入工程（内嵌包，Unity 自动识别，无需写 manifest 依赖）；
-   只想用部分能力时，也可以只放对应子包（例如 `core` + `persistence` + `resources` + `mvc` + `ui`）；
+1. 按[安装表](installation.md)把所需 `com.yato.*` 完整目录放入工程 `Packages/`，保留 `.meta` 和 `link.xml`（内嵌包无需在 manifest 重复登记）；
+   仅资源需 Core + Resources，最小 UI 再加 Mvc + UI。需要代码生成或向导时，另装 `com.yato.editor` 及其依赖；无需安装 Bundle/HotUpdate；
 2. 预制体放到 `Assets/GameRes/UI/{Module}/{Page}.prefab`，资源 key 规则：`ui/{module}/{page}`（全小写、无扩展名）；
 3. 选中预制体 → 菜单 `Yato/CodeGen/Generate Page Code (Selection)` 生成 `View/Mediator/Proxy/Bindings`；
 4. 菜单 `Yato/CodeGen/Generate Asset Keys && Pages` 生成 `Assets/YatoGenerated/{AssetKeys,UIPages}.g.cs`；
@@ -44,17 +44,36 @@ Close:     OnClose(destroy) → 出栈(新栈顶 OnReveal) → 注销 → 销毁
 - Mediator 必须提供 `(string mediatorName)` 构造函数（多实例命名）；
 - 关闭后若 `Cacheable && Singleton` 则进入 LRU（默认容量 8，`UIRouter.CacheCapacity`）；
 - 同一页面加载中重复 `OpenAsync` 会共享同一个结果（单飞），不会产生两个实例；
-- 取消只在 Unity 加载真正开始之前有效（`UIRouter.CancelOpen`）。
+- 已打开单例再次 `OpenAsync` 会调用 `OnOpen`，事件订阅与控件绑定应保持幂等；
+- `UIRouter.CancelOpen` 立即以取消结束调用方等待；底层无法中止的 Unity 请求可继续收尾，迟到实例/句柄会被回收；`CloseAll` 也取消目标范围的在途打开请求；
+- Reset/Configure 会使旧打开请求失效，不能让旧请求激活到新的路由会话。
 
 ## 3. 资源与打包
 
-| 场景 | Provider |
+| 场景 | 安装与初始化 |
 |---|---|
-| 编辑器开发 | `EditorAssetProvider`（AssetDatabase，零打包） |
-| 正式包 | `BundleProvider`（manifest v2 + 引用计数 + 5s 延迟卸载） |
-| Bundle manifest 失败 | 默认抛错；显式 `AllowResourcesFallback` 才改用 `ResourcesProvider` |
+| 基础资源 | Core + Resources；`ResourceServiceFactory.Create()` 在 Editor 用 `EditorAssetProvider`，Player 用 `ResourcesProvider` |
+| 显式 Resources-only | `ResourceServiceFactory.Create(new ResourcesProvider(), ownsProvider: true)`，Editor/Player 行为一致 |
+| 本地 AssetBundle | 加装 Resources.Bundle；`BundleResourceServiceFactory.Create/CreateAsync()` 使用 `BundleProvider`，无需热更包 |
+| Bundle manifest 失败 | 默认 `BundleRequired` 抛错；显式 `ResourceFailurePolicy.AllowResourcesFallback` 才改用 `ResourcesProvider` |
 
-打包：菜单 `Yato/Build/Bundles (Active Platform)` 或本机手动命令：
+从 0.6 升级时，Bundle 初始化从原资源工厂迁到 `BundleResourceServiceFactory`；`ForceBundleMode` 已移除。使用 Bundle 或热更类型的程序集分别引用 `Yato.Resources.Bundle` / `Yato.Resources.HotUpdate`，公开类型仍位于 `Yato.Resources` 命名空间。基础资源服务不负责自动发现或启用可选后端。
+
+Android/WebGL 的内置 `StreamingAssets` manifest 是 URL，必须先等待异步工厂，再启动依赖资源的 UI/服务：
+
+```csharp
+var opening = BundleResourceServiceFactory.CreateAsync();
+opening.Completed += () =>
+{
+    IResourceService resources = opening.GetResult();
+    UIRouter.Configure(resources);
+    // 在安全切换点或退出时 Dispose 此服务。
+};
+```
+
+同步 `Create()` 适用于本地文件系统 manifest；不会替 Android/WebGL 的同步 `IAppService.Initialize()` 自动等待 URL 请求。需要在预加载入口完成资源初始化后再注入业务服务。该跨平台路径已有代码与取消回归，移动端/WebGL Player 尚未实机验收。
+
+安装 Bundle 包后，打包工具随其 Editor 程序集提供：菜单 `Yato/Build/Bundles (Active Platform)` 或本机手动命令：
 
 ```
 Unity.exe -batchmode -quit -projectPath <path> \
@@ -63,7 +82,7 @@ Unity.exe -batchmode -quit -projectPath <path> \
 
 产物：`Build/AssetBundles/{Platform}/manifest.json + version.json + bundles`，并同步到 `Assets/StreamingAssets/AssetBundles/{Platform}/`。
 
-资源句柄规则：同一 key 多次加载共享一次 Provider 引用，全部 `Dispose` 后才归还；取消或类型不符时不会留下悬挂引用。
+资源句柄规则：同一 key 多次加载共享一次 Provider 引用，全部 `Dispose` 后才归还；取消或类型不符时不会留下悬挂引用。内置服务支持 `IDisposable`：默认创建的 Provider 随服务关闭，注入 Provider 仅在显式转移所有权时级联释放。
 
 ## 4. 场景与启动（D02 / D03）
 
@@ -115,7 +134,9 @@ audio.TryPlaySfx(new SfxRequest(new AssetKey("audio/ui/click")) { Bus = AudioBus
 
 ## 6. 热更
 
-1. 打包后把 `Build/AssetBundles` 作为远端根目录（本地可用 `python -m http.server 8080`）；
+先安装 `com.yato.resources.hotupdate` 及 Bundle/Persistence 依赖；基础资源和本地 Bundle 项目无需安装。
+
+1. 打包后把 `Build/AssetBundles` 作为远端根目录（本地可用 `python -m http.server 8080`，需显式开启 loopback HTTP 测试选项）；
 2. 运行时：
 
 ```csharp
@@ -123,11 +144,14 @@ var service = new HotUpdateService();
 var run = service.RunAsync(RuntimePaths.RemoteRootUrl);
 run.Completed += () => {
     var result = run.GetResult();
-    // 成功后重新创建 ResourceService 以加载新 manifest
+    // 成功后在业务安全切换点关闭旧 UI/资源服务，
+    // 通过 BundleResourceServiceFactory.Create/CreateAsync 创建读取新快照的服务。
 };
 ```
 
-失败/提交前取消仅清理本次暂存，保持上一成功远程快照；首次失败才继续使用 StreamingAssets。新 Provider 固定活动快照，旧 Provider 保持旧快照。生产默认 HTTPS；本地测试显式设置 RemoteDownloader.AllowFileUrls / AllowInsecureLocalhost。已提交快照暂不自动删除，见 installation.md 的容量限制。
+失败/提交前取消仅清理本次暂存，保持上一成功远程快照；首次失败才继续使用 StreamingAssets。新 Provider 固定活动快照，旧 Provider 保持旧快照。Play/Player 默认安装热更缓存策略；EditMode 工具可显式调用 `HotUpdateBundleCachePolicy.Install()`。Bundle 包本身只依赖可替换的缓存策略接口。
+
+生产默认 HTTPS；本地测试通过 `new RemoteDownloader { AllowFileUrls = true, AllowInsecureLocalhost = true }` 显式放行相应测试地址。首次创建 Bundle Provider 前可进行启动缓存维护，保留当前/上一快照；已使用或不安全的根目录会拒绝清理，运行中不清理已提交快照。详见 [安装指南](installation.md)。
 
 ## 7. 诊断
 
@@ -137,8 +161,9 @@ run.Completed += () => {
 | `Yato/Tools/Leak Report` | 退出 Play 汇总未释放句柄堆栈 |
 | `Yato/Tools/Check Forbidden APIs` | 检查业务代码是否直接调用 `Resources.Load` |
 | `Yato/UI/Validate Component Binders` | 预制体绑定校验（重名/空引用） |
-| `Yato/HotUpdate/Settings` | 设置 / 模拟远程地址 |
-| `Yato/Debug/Run Smoke Test` | 一键冒烟：自动进 Play 跑核心校验，输出 PASS/FAIL 后退出 |
+| `Yato/HotUpdate/Settings` | HotUpdate 包提供的设置 / 模拟远程地址 |
+| `Yato/Debug/Run Smoke Test` | 基础冒烟：自动进 Play 跑 7 项校验，输出 PASS/FAIL 后退出 |
+| `Yato/Debug/Run Bundle Smoke Test` | Bundle 包提供的 manifest、依赖环和引用计数 3 项校验 |
 
 ## 8. 测试
 
@@ -151,9 +176,11 @@ run.Completed += () => {
 "testables": ["com.yato.framework", "com.yato.input"]
 ```
 
+未安装 Input 包时，省略其中的 `com.yato.input`。当前现场结果为 EditMode **195 / 195**、PlayMode **120 / 120**，另有基础 **7 项**与 Bundle **3 项**冒烟；独立安装结果见[模块拆分摘要](../../../docs/verification/MODULAR_RESOURCES_2026-11-07.json)，现场会话见 [Live Unity 摘要](../../../docs/verification/LIVE_UNITY_2026-11-07.json)，验收边界见[验证记录](verification.md)。
+
 ## 9. 发布流程
 
 1. 更新各包 `package.json` 版本与 `CHANGELOG.md`；
-2. 完成 verification.md 中的发布门槛后再创建版本标签（本轮未创建）；
-3. 打包四平台 bundles 并校验 manifest；
+2. 按[验证记录](verification.md)核对本次发布目标；Windows 结果不能替代移动端/WebGL 或 IL2CPP 验收；
+3. 为目标平台构建并校验 bundles/manifest，保留测试结果与产物哈希；
 4. 外部工程导入包并跑通示例与手动验证清单（`docs/YatoFramework_ManualVerification_2026-10-31.md`）。

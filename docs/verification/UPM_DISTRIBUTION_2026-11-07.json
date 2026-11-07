@@ -1,0 +1,547 @@
+{
+  "schema": 1,
+  "verifiedOn": "2026-11-07",
+  "timezone": "Asia/Shanghai",
+  "unity": "6000.5.6f1",
+  "frameworkVersion": "0.7.0",
+  "packageCount": 18,
+  "packageSourceSha256": "184b517993b7e8d07025b98e4bcebadb29ff47b1335a9897bcab3ba141505fc2",
+  "packageVersions": [
+    {
+      "name": "com.yato.app",
+      "version": "0.3.0",
+      "sourceTreeSha256": "098671f0df51fd6c1292fef92a8981a686c5eb8df7f6f195f5f043c0b301ced6"
+    },
+    {
+      "name": "com.yato.audio",
+      "version": "0.1.1",
+      "sourceTreeSha256": "5c5c93e84e6b7374c8bfc9e5ccb39a4b52b0d916c5c3a011bb7fa88429a1a113"
+    },
+    {
+      "name": "com.yato.config",
+      "version": "0.2.0",
+      "sourceTreeSha256": "c48e6be2c9a1b82f8b9857e2cc18f1d89067c497b39b4e6e532d85ef4846fae4"
+    },
+    {
+      "name": "com.yato.core",
+      "version": "0.2.0",
+      "sourceTreeSha256": "3022c68462a518de201e366a3c15a54e2366fce6b7ae8f9eb7643ce279aaefd1"
+    },
+    {
+      "name": "com.yato.editor",
+      "version": "0.4.0",
+      "sourceTreeSha256": "2a2303f1ac5a58e16ecaafe89ec09e293636c05677e74327c664ea80ab47f5b4"
+    },
+    {
+      "name": "com.yato.flow",
+      "version": "0.2.0",
+      "sourceTreeSha256": "23cbe3e1b3f16d149ac8ca1570451e30c94e4addedf732e9a880de70df58cc23"
+    },
+    {
+      "name": "com.yato.framework",
+      "version": "0.7.0",
+      "sourceTreeSha256": "15fcda03eb703347b913e2cf7ec1fb968a8296e0731c0c0ef4f8fc3c65fc04ca"
+    },
+    {
+      "name": "com.yato.input",
+      "version": "0.1.0",
+      "sourceTreeSha256": "801b254d2f723158300bedca784923a3dcd9ec986347b0486712210e2c0e20ec"
+    },
+    {
+      "name": "com.yato.mvc",
+      "version": "0.1.0",
+      "sourceTreeSha256": "1a880ed342005f13291683f27e70c4cd82bc05f43e8f2c4f21b1e2da336f3362"
+    },
+    {
+      "name": "com.yato.persistence",
+      "version": "0.1.1",
+      "sourceTreeSha256": "f5bb3be84259692bfc22b5dbe8f064941d5f5865668e6b2f11eace7a746cffe5"
+    },
+    {
+      "name": "com.yato.pooling",
+      "version": "0.2.0",
+      "sourceTreeSha256": "ece27633f243695c4a1936ebb65d11f74849f947f1533c69c2674ba04ad04c75"
+    },
+    {
+      "name": "com.yato.resources",
+      "version": "0.4.0",
+      "sourceTreeSha256": "edc69c7562577831ec39767afb8f501a8ffb07edee83dfedaa5d3d2580d79a9b"
+    },
+    {
+      "name": "com.yato.resources.bundle",
+      "version": "0.1.0",
+      "sourceTreeSha256": "09097254b61e889ac504dfa0bc811b80d0eb9a4f8a45e35cc4761b2113a39927"
+    },
+    {
+      "name": "com.yato.resources.hotupdate",
+      "version": "0.1.0",
+      "sourceTreeSha256": "0e8d43ea77f7f70c2cfbd29d746022879278fc14122d7e14f6e727cc1f5ad864"
+    },
+    {
+      "name": "com.yato.save",
+      "version": "0.2.0",
+      "sourceTreeSha256": "c6a65335800f28fce2bce038ade94bfa8ecc219a3dc416035503a6f2f79c3756"
+    },
+    {
+      "name": "com.yato.settings",
+      "version": "0.1.1",
+      "sourceTreeSha256": "3572c82d930e903ac7997d6dec590e371a14f167e83ee0baf2aad2c35f052b72"
+    },
+    {
+      "name": "com.yato.ui",
+      "version": "0.3.0",
+      "sourceTreeSha256": "a3750aadd8db17bf6bb3ab4aa168ae381fe5a052899d7cdd58e2d26a11098227"
+    },
+    {
+      "name": "com.yato.ui.input",
+      "version": "0.2.0",
+      "sourceTreeSha256": "fa6edad74ab7c09b9872140fe1468387db91cb98a0e214f2945086760a372ddb"
+    }
+  ],
+  "archiveUnderTest": {
+    "directory": "E:\\YatoUIFramework\\Build\\DistributionExporterValidation-08d3112787ba4caf8e4adba838caaa47",
+    "sourceCommit": "92d592970e0aa7b317c8d21409d1542def6e71aa",
+    "sourceDirty": true,
+    "manifestSha256": "8557de99cbe42f100eb09ff63da6e931ece7caf48b5b912970a2109a16525fbc",
+    "zipSha256": "6727e6d2b4029a0458b8b21f57465e4064bfcfe89025312b8ea3d923a45de5d6",
+    "archives": [
+      {
+        "path": "UPM/com.yato.app-0.3.0.tgz",
+        "package": "com.yato.app",
+        "version": "0.3.0",
+        "bytes": 19402,
+        "sha256": "929bf25fe844d7419df07d65879c1f193d12225d73f3fd939d49c5c96b819a41"
+      },
+      {
+        "path": "UPM/com.yato.audio-0.1.1.tgz",
+        "package": "com.yato.audio",
+        "version": "0.1.1",
+        "bytes": 10854,
+        "sha256": "423e51c93e8ab06d86d388c4fe7dcc7c6fc3c5c6422b304a842dd16a25df07c4"
+      },
+      {
+        "path": "UPM/com.yato.config-0.2.0.tgz",
+        "package": "com.yato.config",
+        "version": "0.2.0",
+        "bytes": 4377,
+        "sha256": "e6faee3de7744ead803b78dbb28df73c0ca88b82da5edb9fcc7a59315bdfe8e9"
+      },
+      {
+        "path": "UPM/com.yato.core-0.2.0.tgz",
+        "package": "com.yato.core",
+        "version": "0.2.0",
+        "bytes": 10770,
+        "sha256": "594a275496e37ed0ddc4cebe5e1ea37e6766f9136583146b486e9f0111419888"
+      },
+      {
+        "path": "UPM/com.yato.editor-0.4.0.tgz",
+        "package": "com.yato.editor",
+        "version": "0.4.0",
+        "bytes": 21789,
+        "sha256": "6ae24c1dcc1034ef43b325d8502d865f83d88d62989e8906c388c5f205792743"
+      },
+      {
+        "path": "UPM/com.yato.flow-0.2.0.tgz",
+        "package": "com.yato.flow",
+        "version": "0.2.0",
+        "bytes": 4767,
+        "sha256": "efe4f5e54706d9e727758b5375faa890d8d146dec17cf1ff5832e302deeb0927"
+      },
+      {
+        "path": "UPM/com.yato.framework-0.7.0.tgz",
+        "package": "com.yato.framework",
+        "version": "0.7.0",
+        "bytes": 114314,
+        "sha256": "5a109c05a96d7c24dc42369414a13965d9c35e0100f8dcb29a8c942a7aef0d9d"
+      },
+      {
+        "path": "UPM/com.yato.input-0.1.0.tgz",
+        "package": "com.yato.input",
+        "version": "0.1.0",
+        "bytes": 5942,
+        "sha256": "a61f388a90416d33cefb669e5c3e03f7b56b79911a372dd72eee7a76e6f807de"
+      },
+      {
+        "path": "UPM/com.yato.mvc-0.1.0.tgz",
+        "package": "com.yato.mvc",
+        "version": "0.1.0",
+        "bytes": 7694,
+        "sha256": "8255d12c0d069a83687fc3be9fd7eb4cddea982a64a930a730f65df7a9341e95"
+      },
+      {
+        "path": "UPM/com.yato.persistence-0.1.1.tgz",
+        "package": "com.yato.persistence",
+        "version": "0.1.1",
+        "bytes": 8638,
+        "sha256": "bbbf7409b016b5adafcf05fa0c874f3ce8eeecebe23ba4fb2e4da011d76ea8ec"
+      },
+      {
+        "path": "UPM/com.yato.pooling-0.2.0.tgz",
+        "package": "com.yato.pooling",
+        "version": "0.2.0",
+        "bytes": 5949,
+        "sha256": "e4f38e8e18cf6021d0ead089246b59290562dd97e2f31c4c2356e9992a1f6a99"
+      },
+      {
+        "path": "UPM/com.yato.resources-0.4.0.tgz",
+        "package": "com.yato.resources",
+        "version": "0.4.0",
+        "bytes": 22995,
+        "sha256": "e52dbc4850270c3595669c0a46e1fe92025da2c3d894eca3c52897efeb63a9f2"
+      },
+      {
+        "path": "UPM/com.yato.resources.bundle-0.1.0.tgz",
+        "package": "com.yato.resources.bundle",
+        "version": "0.1.0",
+        "bytes": 31505,
+        "sha256": "b7be45a0aac82e3efbbce35ba683fa99f983cc39f219294a0de5a54841824c08"
+      },
+      {
+        "path": "UPM/com.yato.resources.hotupdate-0.1.0.tgz",
+        "package": "com.yato.resources.hotupdate",
+        "version": "0.1.0",
+        "bytes": 16251,
+        "sha256": "57120bbc5cd73e7b287a44b311f51a727e0f59f05f4c20b877f7b6c812b2ad57"
+      },
+      {
+        "path": "UPM/com.yato.save-0.2.0.tgz",
+        "package": "com.yato.save",
+        "version": "0.2.0",
+        "bytes": 9187,
+        "sha256": "cc39a1b335f7a68fef50b86e8b1613e3bbb83d4a87af7dcdd476d0a1f4136ee5"
+      },
+      {
+        "path": "UPM/com.yato.settings-0.1.1.tgz",
+        "package": "com.yato.settings",
+        "version": "0.1.1",
+        "bytes": 6140,
+        "sha256": "00423aac1a7602d1f6e42c3e0993b74328ecc73109e159f3349ef5b944aedb03"
+      },
+      {
+        "path": "UPM/com.yato.ui-0.3.0.tgz",
+        "package": "com.yato.ui",
+        "version": "0.3.0",
+        "bytes": 26942,
+        "sha256": "9b72260e272ee57daff94cf56ac6d305b0d8206f011edba9cde9b45fe78157ce"
+      },
+      {
+        "path": "UPM/com.yato.ui.input-0.2.0.tgz",
+        "package": "com.yato.ui.input",
+        "version": "0.2.0",
+        "bytes": 10879,
+        "sha256": "eb9e96658b610fec591837df129330e633e0e7d44a3ff29b8bd6b4cf05fb825a"
+      }
+    ],
+    "note": "This pre-commit export was used for independent Unity consumers. Match packageSourceSha256 and per-package sourceTreeSha256 in a later committed export to identify the same tested package bytes. Archive hashes can differ with provenance, tool updates, documentation layout or timestamps."
+  },
+  "installerChecks": {
+    "source": "Logs/InstallerChecks-ee6c73a7/report.json",
+    "sha256": "7941a7cfb2ef835c0436256bd73539365d47f1bd87a0b4c57251a60369d9d3f6",
+    "passed": 12,
+    "checks": [
+      {
+        "check": "ResourcesOnly",
+        "passed": true,
+        "packageCount": 2,
+        "packages": [
+          "com.yato.core",
+          "com.yato.resources"
+        ],
+        "requiredExternalDependencies": {},
+        "manifestUnchanged": true
+      },
+      {
+        "check": "MinimalUI",
+        "passed": true,
+        "packageCount": 4,
+        "packages": [
+          "com.yato.core",
+          "com.yato.mvc",
+          "com.yato.resources",
+          "com.yato.ui"
+        ],
+        "requiredExternalDependencies": {
+          "com.unity.ugui": "1.0.0"
+        },
+        "manifestUnchanged": true
+      },
+      {
+        "check": "LocalBundles",
+        "passed": true,
+        "packageCount": 3,
+        "packages": [
+          "com.yato.core",
+          "com.yato.resources",
+          "com.yato.resources.bundle"
+        ],
+        "requiredExternalDependencies": {
+          "com.unity.modules.assetbundle": "1.0.0",
+          "com.unity.modules.unitywebrequest": "1.0.0",
+          "com.unity.modules.unitywebrequestassetbundle": "1.0.0"
+        },
+        "manifestUnchanged": true
+      },
+      {
+        "check": "OfflineFull",
+        "passed": true,
+        "packageCount": 12,
+        "packages": [
+          "com.yato.app",
+          "com.yato.audio",
+          "com.yato.config",
+          "com.yato.core",
+          "com.yato.editor",
+          "com.yato.flow",
+          "com.yato.mvc",
+          "com.yato.persistence",
+          "com.yato.pooling",
+          "com.yato.resources",
+          "com.yato.settings",
+          "com.yato.ui"
+        ],
+        "requiredExternalDependencies": {
+          "com.unity.modules.jsonserialize": "1.0.0",
+          "com.unity.textmeshpro": "3.0.6",
+          "com.unity.ugui": "1.0.0"
+        },
+        "manifestUnchanged": true
+      },
+      {
+        "check": "Full",
+        "passed": true,
+        "packageCount": 15,
+        "packages": [
+          "com.yato.app",
+          "com.yato.audio",
+          "com.yato.config",
+          "com.yato.core",
+          "com.yato.editor",
+          "com.yato.flow",
+          "com.yato.framework",
+          "com.yato.mvc",
+          "com.yato.persistence",
+          "com.yato.pooling",
+          "com.yato.resources",
+          "com.yato.resources.bundle",
+          "com.yato.resources.hotupdate",
+          "com.yato.settings",
+          "com.yato.ui"
+        ],
+        "requiredExternalDependencies": {
+          "com.unity.modules.assetbundle": "1.0.0",
+          "com.unity.modules.jsonserialize": "1.0.0",
+          "com.unity.modules.unitywebrequest": "1.0.0",
+          "com.unity.modules.unitywebrequestassetbundle": "1.0.0",
+          "com.unity.textmeshpro": "3.0.6",
+          "com.unity.ugui": "1.0.0"
+        },
+        "manifestUnchanged": true
+      },
+      {
+        "check": "WhatIf",
+        "passed": true,
+        "targetUnchanged": true
+      },
+      {
+        "check": "EmbeddedConflictNoPartialWrite",
+        "passed": true,
+        "message": "Target already contains Yato package path E:\\YatoUIFramework\\Logs\\InstallerChecks-ee6c73a7\\EmbeddedConflict\\Packages\\com.yato.ui. No existing packages will be overwritten."
+      },
+      {
+        "check": "ManifestConflictNoPartialWrite",
+        "passed": true,
+        "message": "Target manifest already declares Yato package com.yato.resources; installation would mix releases. No packages were copied."
+      },
+      {
+        "check": "VersionMismatchNoPartialWrite",
+        "passed": true,
+        "message": "Yato version mismatch: com.yato.resources requires com.yato.core 99.0.0, source provides 0.2.0."
+      },
+      {
+        "check": "SourceReparseNoPartialWrite",
+        "passed": true,
+        "message": "Package contains a reparse point: E:\\YatoUIFramework\\Logs\\InstallerChecks-ee6c73a7\\LinkedSource\\com.yato.core\\LinkedRuntime"
+      },
+      {
+        "check": "OverlappingProjectAndSource",
+        "passed": true,
+        "message": "PackageSource and the target Unity project must not overlap."
+      },
+      {
+        "check": "ExplicitHotUpdateInputSave",
+        "passed": true,
+        "packageCount": 10,
+        "requiredExternalDependencies": {
+          "com.unity.inputsystem": "1.7.0",
+          "com.unity.modules.assetbundle": "1.0.0",
+          "com.unity.modules.unitywebrequest": "1.0.0",
+          "com.unity.modules.unitywebrequestassetbundle": "1.0.0",
+          "com.unity.ugui": "1.0.0"
+        }
+      }
+    ]
+  },
+  "exporterChecks": {
+    "source": "Build/DistributionExporterSelfchecks-20261107.json",
+    "sha256": "06709c3f7d4cdb90752cc272bc265564f57cbea7f1c50c1e159836eec2e3f965",
+    "report": {
+      "schemaVersion": 1,
+      "draftDirectory": "E:\\YatoUIFramework\\Build\\DistributionExporterFinalDraft-61618f09af294d088af7e4e1eed310a4",
+      "unityTestedInitialDraftDirectory": "E:\\YatoUIFramework\\Build\\DistributionExporterValidation-08d3112787ba4caf8e4adba838caaa47",
+      "sourceCommit": "92d592970e0aa7b317c8d21409d1542def6e71aa",
+      "exportSourceDirty": true,
+      "worktreeDirty": true,
+      "packageSourceSha256": "184b517993b7e8d07025b98e4bcebadb29ff47b1335a9897bcab3ba141505fc2",
+      "packageContentMatchesUnityTestedDraft": true,
+      "tarballCount": 18,
+      "tarballPayloadFilesHashed": 748,
+      "zipFileCount": 756,
+      "zipMetaFileCount": 416,
+      "profilePackageCounts": {
+        "ResourcesOnly": 2,
+        "MinimalUI": 4,
+        "LocalBundles": 3,
+        "OfflineFull": 12,
+        "Full": 15
+      },
+      "standardPackageRootsAndPayloadHashesVerified": true,
+      "zipHashesAndPayloadHashesVerified": true,
+      "currentDocumentationRelativeLayoutVerified": true,
+      "noRootAssetsMcpCacheRemotionOrGitIncluded": true,
+      "manifestSelfHashCycleAbsent": true,
+      "existingDestinationRejectedWithoutMutation": true,
+      "versionMismatchRejectedBeforeOutputCreation": true,
+      "missingAssemblyRejectedBeforeOutputCreation": true,
+      "powershell51FullExportBeforeFinalDocumentationAdjustment": "E:\\YatoUIFramework\\Build\\DistributionExporterPS51-ad3b4f9d107e49bfbec000af5a0756db",
+      "verificationBoundary": "Unity tests are run by the parent agent. The final script additionally includes the distribution verification JSON when present; no package content changed."
+    }
+  },
+  "consumers": [
+    {
+      "name": "ZipResourcesOnly",
+      "installMethod": "Offline ZIP embedded installer",
+      "packageSet": "ResourcesOnly",
+      "packageCount": 2,
+      "registeredPackages": [
+        "com.yato.core",
+        "com.yato.resources"
+      ],
+      "exactPackageSet": true,
+      "resourceFixturePrepared": true,
+      "bundleFixturePrepared": false,
+      "result": "Passed",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 0.1650263,
+      "source": "Logs/Distribution-20261107-ZipResourcesOnly.xml",
+      "sha256": "9b94e2303181033cd7e73cb20d78216b5f9e244b3aea6a325614ed2bf2fd58a5",
+      "preparationSha256": "93a4b7ea715abfa9eeff9b1d4e30d8ae141cd37dd1cfef9d6e2103e7f8c282c0",
+      "testCases": [
+        {
+          "name": "Yato.ModularConsumerTests.ResourcesConsumerTests.DefaultFactoryAndResourcesProviderLoadWithoutOptionalModules",
+          "result": "Passed"
+        }
+      ]
+    },
+    {
+      "name": "ZipFull",
+      "installMethod": "Offline ZIP embedded installer",
+      "packageSet": "Full",
+      "packageCount": 15,
+      "registeredPackages": [
+        "com.yato.app",
+        "com.yato.audio",
+        "com.yato.config",
+        "com.yato.core",
+        "com.yato.editor",
+        "com.yato.flow",
+        "com.yato.framework",
+        "com.yato.mvc",
+        "com.yato.persistence",
+        "com.yato.pooling",
+        "com.yato.resources",
+        "com.yato.resources.bundle",
+        "com.yato.resources.hotupdate",
+        "com.yato.settings",
+        "com.yato.ui"
+      ],
+      "exactPackageSet": true,
+      "resourceFixturePrepared": true,
+      "bundleFixturePrepared": true,
+      "result": "Passed",
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 0.5555218,
+      "source": "Logs/Distribution-20261107-ZipFull.xml",
+      "sha256": "89ca8111e0da4cd8159cfb35dd63c733ca7696b2806f14438cfe67de8e33457e",
+      "preparationSha256": "e89ed0e2610fdc70a4fd1d1a25682fc6bb442b69a2027e9e7517b4ed0296db39",
+      "testCases": [
+        {
+          "name": "Yato.ModularConsumerTests.BundleConsumerTests.ExplicitBundleFactoryLoadsARealLocalBundleAndDisposesIt",
+          "result": "Passed"
+        },
+        {
+          "name": "Yato.ModularConsumerTests.HotUpdateConsumerTests.OptionalUpdaterCommitsAndLoadsARealVerifiedBundleSnapshot",
+          "result": "Passed"
+        },
+        {
+          "name": "Yato.ModularConsumerTests.ResourcesConsumerTests.DefaultFactoryAndResourcesProviderLoadWithoutOptionalModules",
+          "result": "Passed"
+        },
+        {
+          "name": "Yato.ModularConsumerTests.UIConsumerTests.MinimalUIOpensAndReleasesARealResourcesPrefab",
+          "result": "Passed"
+        }
+      ]
+    },
+    {
+      "name": "TgzResourcesOnly",
+      "installMethod": "UPM tarball file entries in manifest; no embedded Yato directories",
+      "packageSet": "ResourcesOnly",
+      "packageCount": 2,
+      "registeredPackages": [
+        "com.yato.core",
+        "com.yato.resources"
+      ],
+      "exactPackageSet": true,
+      "resourceFixturePrepared": true,
+      "bundleFixturePrepared": false,
+      "result": "Passed",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 0.1715388,
+      "source": "Logs/Distribution-20261107-TgzResourcesOnly.xml",
+      "sha256": "f642722e54088c438beaa05b61b18a667c0815e9e33113829b0e92df499b28fb",
+      "preparationSha256": "93a4b7ea715abfa9eeff9b1d4e30d8ae141cd37dd1cfef9d6e2103e7f8c282c0",
+      "testCases": [
+        {
+          "name": "Yato.ModularConsumerTests.ResourcesConsumerTests.DefaultFactoryAndResourcesProviderLoadWithoutOptionalModules",
+          "result": "Passed"
+        }
+      ]
+    }
+  ],
+  "consumerTestsPassed": 6,
+  "validationScope": [
+    "Real Unity registration and compilation from ZIP installation and TGZ manifest paths",
+    "Actual resource load/release in all three consumers",
+    "Full profile: UI, Bundle load and resource hot-update smoke coverage",
+    "ZIP install preserves target manifest; production installer adds no source game assets or Unity MCP packages"
+  ],
+  "limits": [
+    "Windows Editor only; source-project and previous Windows Mono Player results are recorded separately",
+    "No registry publication, GitHub Release, mobile, WebGL, IL2CPP or production HTTPS validation is implied",
+    "Initial draft ZIP used Documentation/; exporter was corrected to preserve docs/ for current package document links. Package content hashes remain the validation identity; historical repository-only links may require the source repository",
+    "Final delivery archives are generated after the source commit; they are ignored Build outputs rather than committed binary assets"
+  ],
+  "previousVerification": [
+    "MODULAR_RESOURCES_2026-11-07.json",
+    "LIVE_UNITY_2026-11-07.json"
+  ]
+}

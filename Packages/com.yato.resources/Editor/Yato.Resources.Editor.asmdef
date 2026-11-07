@@ -1,0 +1,7 @@
+{
+    "name": "Yato.Resources.Editor",
+    "rootNamespace": "Yato.Resources.Editor",
+    "references": ["Yato.Resources"],
+    "includePlatforms": ["Editor"],
+    "autoReferenced": true
+}

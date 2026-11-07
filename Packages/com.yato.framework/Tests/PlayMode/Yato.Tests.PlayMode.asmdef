@@ -1,31 +1,33 @@
 {
-    "name": "Yato.Tests.PlayMode",
-    "rootNamespace": "Yato.Tests.PlayMode",
-    "references": [
-        "UnityEngine.TestRunner",
-        "Yato.Core",
-        "Yato.Mvc",
-        "Yato.Resources.Abstractions",
-        "Yato.Resources",
-        "Yato.UI",
-        "Yato.App",
-        "Yato.Persistence",
-        "Yato.Settings",
-        "Yato.Audio",
-        "Yato.Flow",
-        "Yato.Pooling"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": true,
-    "precompiledReferences": [
-        "nunit.framework.dll"
-    ],
-    "autoReferenced": false,
-    "defineConstraints": [
-        "UNITY_INCLUDE_TESTS"
-    ],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "Yato.Tests.PlayMode",
+  "rootNamespace": "Yato.Tests.PlayMode",
+  "references": [
+    "UnityEngine.TestRunner",
+    "Yato.Core",
+    "Yato.Mvc",
+    "Yato.Resources.Abstractions",
+    "Yato.Resources",
+    "Yato.UI",
+    "Yato.App",
+    "Yato.Persistence",
+    "Yato.Settings",
+    "Yato.Audio",
+    "Yato.Flow",
+    "Yato.Pooling",
+    "Yato.Resources.Bundle",
+    "Yato.Resources.HotUpdate"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

@@ -1,6 +1,25 @@
 {
   "name": "Yato.Survivor.Editor",
-  "references": ["Yato.Survivor", "Yato.Survivor.Domain", "Yato.Editor", "Yato.Core", "Yato.App", "Yato.Config", "Yato.Resources", "Yato.Resources.Abstractions", "Yato.UI", "Yato.UI.Input", "Yato.Input", "Unity.InputSystem", "UnityEngine.UI"],
-  "includePlatforms": ["Editor"],
+  "references": [
+    "Yato.Survivor",
+    "Yato.Survivor.Domain",
+    "Yato.Editor",
+    "Yato.Core",
+    "Yato.App",
+    "Yato.Config",
+    "Yato.Resources",
+    "Yato.Resources.Abstractions",
+    "Yato.UI",
+    "Yato.UI.Input",
+    "Yato.Input",
+    "Unity.InputSystem",
+    "UnityEngine.UI",
+    "Yato.Resources.Bundle",
+    "Yato.Resources.Bundle.Editor",
+    "Yato.Resources.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
   "autoReferenced": true
 }

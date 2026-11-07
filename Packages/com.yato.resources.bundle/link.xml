@@ -1,0 +1,4 @@
+<linker>
+  <!-- Retention belongs only to this optional package. -->
+  <assembly fullname="Yato.Resources.Bundle" preserve="all" />
+</linker>

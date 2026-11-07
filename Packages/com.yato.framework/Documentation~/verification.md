@@ -1,4 +1,24 @@
-当前 0.5 结果见 [框架实施记录](foundation-verification.md)。以下保留为 0.3 的历史验证记录。
+# 0.7.0 当前验证（2026-11-07）
+
+环境为 Windows、Unity `6000.5.6f1`。本页先列当前结果；下方 0.3 记录按当时日期保留，其中的“未完成”不覆盖后来已取得的证据。0.5/0.6 阶段记录分别见[基础模块实施记录](foundation-verification.md)和 [0.6 实施记录](foundation06-verification.md)。
+
+| 验证范围 | 当前结果 | 证据 |
+|---|---|---|
+| 现场源工程 EditMode / PlayMode | **195 / 195 + 120 / 120 = 315**，零失败、零跳过 | [Live Unity 验证](../../../docs/verification/LIVE_UNITY_2026-11-07.json) |
+| 冒烟 | 基础 **7 / 7**、Bundle **3 / 3** | 同上；EventBus 故意抛错用于观察者隔离测试，预期日志不计为失败 |
+| 默认资源模式 Survivor 现场会话 | 设置滑条/保存、战斗/升级、嵌套暂停、恢复、结算重开和退出已覆盖 | 同上；以稳定结构化快照为准 |
+| 干净 BundleProvider 会话 | 公开动作驱动菜单、战斗/升级、结算和退出；最终控制台零错误、零警告 | 同上；早期脚手架错误保留并排除 |
+| 退出清理 | 两类 Provider 会话退出后 tracked handles、loaded bundles、UI roots 均为零 | 同上；未采样销毁后的资产/订阅计数，不扩大断言范围 |
+| 五种按需安装组合 | 仅资源 / 精简 UI / 本地 Bundle / 离线完整 / 全量聚合，共 **2 / 4 / 3 / 12 / 15** 包，加载与对应示例通过 | [资源模块拆分验证](../../../docs/verification/MODULAR_RESOURCES_2026-11-07.json) |
+| Resources-only Windows Mono Player | 构建与原生加载/释放通过；Yato 程序集仅 Core、Resources、Resources.Abstractions | 同上；不含 Bundle、HotUpdate 或 Persistence |
+
+现场暂停、嵌套设置和关闭设置的战斗计时保持一致，暂停 token **1 → 2 → 1**；恢复后计时继续增长，Retry 的 RunId 改变且起始等级为 1。页面资源和订阅随切换回到基线，检查时区分活动资产数与实例句柄数。测试完成后退出 Play，恢复 ForceBundles=false、DataRoot 为空，场景与 ProjectSettings 无本次持久化改动。
+
+仍未验收：Esc 与真实键盘/手柄输入、声音听感、Package Manager Import 按钮的人工路径、Android/iOS/WebGL 实机、IL2CPP、生产 HTTPS/TLS，以及另一个真实游戏的长期复用。Registry 发布也不由本地包集验证替代。不要把现场截图或公开动作调用解释为上述项目已通过。
+
+原始日志位于工作区 `Logs/`，不纳入 Git；两份 JSON 保留路径、哈希、初次失败及验证边界。下方历史记录的旧包数、默认工厂行为和未验收状态以当时版本为准，0.7 安装/API 以[当前指南](index.md)和[安装迁移](installation.md)为准。
+
+模块 TGZ 与离线 ZIP 的制作、安装和范围见[分发指南](../../../docs/UPM_DISTRIBUTION.md)。具体导出目录、来源提交和归档哈希以该次 `release-manifest.json` 为准，不能用源工程测试替代对某个归档安装结果的核验。
 
 # 0.3.0 优化实施与验证记录（2026-10-31）
 

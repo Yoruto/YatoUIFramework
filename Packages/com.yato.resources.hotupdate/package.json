@@ -1,0 +1,30 @@
+{
+  "name": "com.yato.resources.hotupdate",
+  "version": "0.1.0",
+  "displayName": "Yato Resources Hot Update",
+  "description": "Optional bundle download, verification, transactional snapshots, recovery and cache maintenance.",
+  "unity": "6000.0",
+  "keywords": [
+    "framework",
+    "resources",
+    "hotupdate",
+    "yato"
+  ],
+  "author": {
+    "name": "Yato"
+  },
+  "dependencies": {
+    "com.yato.core": "0.2.0",
+    "com.yato.resources": "0.4.0",
+    "com.yato.resources.bundle": "0.1.0",
+    "com.yato.persistence": "0.1.1",
+    "com.unity.modules.unitywebrequest": "1.0.0"
+  },
+  "samples": [
+    {
+      "displayName": "HotUpdateSample",
+      "description": "Explicitly opt in to bundle hot updates without coupling the core samples to this package.",
+      "path": "Samples~/HotUpdateSample"
+    }
+  ]
+}

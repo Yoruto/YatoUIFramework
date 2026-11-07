@@ -1,0 +1,1106 @@
+{
+  "schema": 1,
+  "verifiedOn": "2026-11-07",
+  "timezone": "Asia/Shanghai",
+  "unity": "6000.5.6f1",
+  "frameworkVersion": "0.7.0",
+  "baseRevision": "92d592970e0aa7b317c8d21409d1542def6e71aa",
+  "branch": "codex/resources-optional-packages",
+  "packages": {
+    "base": "com.yato.resources@0.4.0",
+    "bundle": "com.yato.resources.bundle@0.1.0",
+    "hotUpdate": "com.yato.resources.hotupdate@0.1.0",
+    "totalYatoPackages": 18
+  },
+  "sourceProject": {
+    "editMode": {
+      "source": "Logs/Modular-20261107-EditMode-Final.xml",
+      "sha256": "c7ed265bed28283fce2eca18f31ef6b1557f5277f7d263f905b3cfb520a0ff01",
+      "summary": {
+        "result": "Passed",
+        "total": 195,
+        "passed": 195,
+        "failed": 0,
+        "skipped": 0,
+        "durationSeconds": 8.9706984
+      },
+      "fixtures": [
+        {
+          "name": "Yato.Config.Tests.ConfigServiceTests",
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Input.Tests.InputContextServiceTests",
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Save.Tests.SaveServiceTests",
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Survivor.Tests.SurvivorRulesTests",
+          "passed": 9,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.ApiUsageValidatorTests",
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.AssetKeyTests",
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.BundleRefCounterTests",
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.DiagnosticRegistryTests",
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.EditorAssetProviderTests",
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.FileStoreTests",
+          "passed": 27,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.HotUpdateRecoveryTests",
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.HotUpdateValidationTests",
+          "passed": 31,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.ManifestTests",
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.PageStackTests",
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.ProjectSetupTests",
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.ResourceAsyncLifecycleTests",
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.ResourceFailurePolicyTests",
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.ResourceScopeTests",
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.ResourceServiceTests",
+          "passed": 21,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.SettingsServiceTests",
+          "passed": 27,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.StartupMaintenanceTests",
+          "passed": 9,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.EditMode.UIPageCacheTests",
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    "playMode": {
+      "source": "Logs/Modular-20261107-PlayMode.xml",
+      "sha256": "f4100eea81a550844dbb9cdb1af3c63a5b32e33ec5728ac3c863209acc31a124",
+      "summary": {
+        "result": "Passed",
+        "total": 120,
+        "passed": 120,
+        "failed": 0,
+        "skipped": 0,
+        "durationSeconds": 20.0650883
+      },
+      "fixtures": [
+        {
+          "name": "Yato.Flow.Tests.FlowControllerTests",
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Input.Tests.InputSubscriptionTests",
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Pooling.Tests.ResourceInstancePoolTests",
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Survivor.Tests.SurvivorIntegrationTests",
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.PlayMode.ApplicationControlTests",
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.PlayMode.AudioServiceTests",
+          "passed": 18,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.PlayMode.BundleModeSmokeTests",
+          "passed": 8,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.PlayMode.GameBootstrapTests",
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.PlayMode.HotUpdateSmokeTests",
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.PlayMode.HotUpdateTransactionTests",
+          "passed": 11,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.PlayMode.LifecycleSoakTests",
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.PlayMode.RouterConcurrencyTests",
+          "passed": 13,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.PlayMode.RouterLifecycleTests",
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.PlayMode.SceneServiceTests",
+          "passed": 15,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.PlayMode.TaskBridgeTests",
+          "passed": 9,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.PlayMode.UIInteractionTests",
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.Tests.PlayMode.UIListPoolTests",
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.UI.Input.Tests.UIInputCoordinatorTests",
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "name": "Yato.UI.Input.Tests.UIInputProfileTests",
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    "processExitCodes": [
+      0,
+      0
+    ],
+    "realBundleToolBuild": {
+      "source": "Logs/Modular-20261107-BundleBuild.log",
+      "sha256": "033e1ff6722bef39b6e6b440c6fe69f30a335b8da05eb6c10a6643d1165ffe28"
+    },
+    "bundleBuildExitCode": 0
+  },
+  "independentConsumers": [
+    {
+      "name": "ResourcesOnly",
+      "project": "C:\\Users\\xyc\\.codex\\visualizations\\2026\\11\\05\\01a1aa69-557a-7810-b7e8-5f45e658441a\\Modular-20261107\\ResourcesOnly",
+      "packageCount": 2,
+      "packages": [
+        "com.yato.core",
+        "com.yato.resources"
+      ],
+      "exactPackageSet": true,
+      "preparedResourceFixture": true,
+      "preparedBundleFixture": false,
+      "verification": {
+        "source": "C:/Users/xyc/.codex/visualizations/2026/11/05/01a1aa69-557a-7810-b7e8-5f45e658441a/Modular-20261107/ResourcesOnly/Logs/Modular-Verify.json",
+        "sha256": "93a4b7ea715abfa9eeff9b1d4e30d8ae141cd37dd1cfef9d6e2103e7f8c282c0"
+      },
+      "tests": {
+        "source": "Logs/Modular-20261107-ResourcesOnly.xml",
+        "sha256": "248a48d1837bef4762a0375d5dd666c6f15023a25c16d6fe21145819b4908232",
+        "summary": {
+          "result": "Passed",
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "durationSeconds": 0.1154574
+        },
+        "fixtures": [
+          {
+            "name": "Yato.ModularConsumerTests.ResourcesConsumerTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          }
+        ]
+      },
+      "processExitCode": 0
+    },
+    {
+      "name": "MinimalUI",
+      "project": "C:\\Users\\xyc\\.codex\\visualizations\\2026\\11\\05\\01a1aa69-557a-7810-b7e8-5f45e658441a\\Modular-20261107\\MinimalUI",
+      "packageCount": 4,
+      "packages": [
+        "com.yato.core",
+        "com.yato.mvc",
+        "com.yato.resources",
+        "com.yato.ui"
+      ],
+      "exactPackageSet": true,
+      "preparedResourceFixture": true,
+      "preparedBundleFixture": false,
+      "verification": {
+        "source": "C:/Users/xyc/.codex/visualizations/2026/11/05/01a1aa69-557a-7810-b7e8-5f45e658441a/Modular-20261107/MinimalUI/Logs/Modular-Verify.json",
+        "sha256": "818c9bceb8aa403aa849503cc761954663d22040f25e0a0e0c82a86661b7f228"
+      },
+      "tests": {
+        "source": "Logs/Modular-20261107-MinimalUI.xml",
+        "sha256": "6cc175d1bcfd8ff74f3251f7267f22a7cc9474808a872865dd13f3d37e743397",
+        "summary": {
+          "result": "Passed",
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0,
+          "durationSeconds": 0.133775
+        },
+        "fixtures": [
+          {
+            "name": "Yato.ModularConsumerTests.ResourcesConsumerTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ModularConsumerTests.UIConsumerTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          }
+        ]
+      },
+      "processExitCode": 0
+    },
+    {
+      "name": "LocalBundles",
+      "project": "C:\\Users\\xyc\\.codex\\visualizations\\2026\\11\\05\\01a1aa69-557a-7810-b7e8-5f45e658441a\\Modular-20261107\\LocalBundles",
+      "packageCount": 3,
+      "packages": [
+        "com.yato.core",
+        "com.yato.resources",
+        "com.yato.resources.bundle"
+      ],
+      "exactPackageSet": true,
+      "preparedResourceFixture": true,
+      "preparedBundleFixture": true,
+      "verification": {
+        "source": "C:/Users/xyc/.codex/visualizations/2026/11/05/01a1aa69-557a-7810-b7e8-5f45e658441a/Modular-20261107/LocalBundles/Logs/Modular-Verify.json",
+        "sha256": "57ac4e2df228c62d22b7f80b4c407e4d9ca8b2681b9f6f258e6cddca9651165c"
+      },
+      "tests": {
+        "source": "Logs/Modular-20261107-LocalBundles-Final.xml",
+        "sha256": "9c1709d3e48505436b20edd273acff9c83bea701f388b6395ba2b1d45cea3b8c",
+        "summary": {
+          "result": "Passed",
+          "total": 3,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0,
+          "durationSeconds": 0.1445233
+        },
+        "fixtures": [
+          {
+            "name": "Yato.ModularConsumerTests.BundleConsumerTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ModularConsumerTests.LocalBundlePolicyTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ModularConsumerTests.ResourcesConsumerTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          }
+        ]
+      },
+      "processExitCode": 0
+    },
+    {
+      "name": "OfflineFull",
+      "project": "C:\\Users\\xyc\\.codex\\visualizations\\2026\\11\\05\\01a1aa69-557a-7810-b7e8-5f45e658441a\\Modular-20261107\\OfflineFull",
+      "packageCount": 12,
+      "packages": [
+        "com.yato.app",
+        "com.yato.audio",
+        "com.yato.config",
+        "com.yato.core",
+        "com.yato.editor",
+        "com.yato.flow",
+        "com.yato.mvc",
+        "com.yato.persistence",
+        "com.yato.pooling",
+        "com.yato.resources",
+        "com.yato.settings",
+        "com.yato.ui"
+      ],
+      "exactPackageSet": true,
+      "preparedResourceFixture": true,
+      "preparedBundleFixture": false,
+      "verification": {
+        "source": "C:/Users/xyc/.codex/visualizations/2026/11/05/01a1aa69-557a-7810-b7e8-5f45e658441a/Modular-20261107/OfflineFull/Logs/Modular-Verify.json",
+        "sha256": "ff67f1e59ec7e00261c9a98225a5384b8d8043a3f195d5f8dc60898e6567b9ab"
+      },
+      "tests": {
+        "source": "Logs/Modular-20261107-OfflineFull.xml",
+        "sha256": "e89e81b6490d1669e29370f532ba14fb210f235c64ffff3eac1c97a395948170",
+        "summary": {
+          "result": "Passed",
+          "total": 4,
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0,
+          "durationSeconds": 2.5788137
+        },
+        "fixtures": [
+          {
+            "name": "Yato.ConsumerTests.ConsumerSmokeTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ConsumerTests.StarterSmokeTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ModularConsumerTests.ResourcesConsumerTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ModularConsumerTests.UIConsumerTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          }
+        ]
+      },
+      "processExitCode": 0
+    },
+    {
+      "name": "Full",
+      "project": "C:\\Users\\xyc\\.codex\\visualizations\\2026\\11\\05\\01a1aa69-557a-7810-b7e8-5f45e658441a\\Modular-20261107\\Full",
+      "packageCount": 15,
+      "packages": [
+        "com.yato.app",
+        "com.yato.audio",
+        "com.yato.config",
+        "com.yato.core",
+        "com.yato.editor",
+        "com.yato.flow",
+        "com.yato.framework",
+        "com.yato.mvc",
+        "com.yato.persistence",
+        "com.yato.pooling",
+        "com.yato.resources",
+        "com.yato.resources.bundle",
+        "com.yato.resources.hotupdate",
+        "com.yato.settings",
+        "com.yato.ui"
+      ],
+      "exactPackageSet": true,
+      "preparedResourceFixture": true,
+      "preparedBundleFixture": true,
+      "verification": {
+        "source": "C:/Users/xyc/.codex/visualizations/2026/11/05/01a1aa69-557a-7810-b7e8-5f45e658441a/Modular-20261107/Full/Logs/Modular-Verify.json",
+        "sha256": "e89ed0e2610fdc70a4fd1d1a25682fc6bb442b69a2027e9e7517b4ed0296db39"
+      },
+      "tests": {
+        "source": "Logs/Modular-20261107-Full-Final.xml",
+        "sha256": "bd381e893211c18e40a237b4b216a2d0c174de6dbc6c9bf8b1fb1c1ce957fcb3",
+        "summary": {
+          "result": "Passed",
+          "total": 4,
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0,
+          "durationSeconds": 0.374207
+        },
+        "fixtures": [
+          {
+            "name": "Yato.ModularConsumerTests.BundleConsumerTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ModularConsumerTests.HotUpdateConsumerTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ModularConsumerTests.ResourcesConsumerTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ModularConsumerTests.UIConsumerTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          }
+        ]
+      },
+      "processExitCode": 0,
+      "sampleTests": {
+        "source": "Logs/Modular-20261107-Full-Samples.xml",
+        "sha256": "74be4a4237de406c713f7d30a4c659fb4533135068e58ce15a44e179254ac443",
+        "summary": {
+          "result": "Passed",
+          "total": 3,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0,
+          "durationSeconds": 0.4593797
+        },
+        "fixtures": [
+          {
+            "name": "Yato.ConsumerTests.ConsumerSmokeTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ConsumerTests.LegacySampleLifecycleTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ConsumerTests.StarterSmokeTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          }
+        ]
+      }
+    }
+  ],
+  "resourcesOnlyPlayer": {
+    "build": {
+      "source": "Logs/Modular-20261107-ResourcesOnly-Build.log",
+      "sha256": "884f774ec9ad441f61cbc8948fd75d698ed4e6e4753590f99a2366fa89922a0c"
+    },
+    "buildExitCode": 0,
+    "smoke": {
+      "source": "Logs/Modular-20261107-ResourcesOnly-Player.log",
+      "sha256": "207fa8832131ec5410da40f09063318d649d02715b1f7dbffde0ec2aba8e4907"
+    },
+    "playerExitCode": 0,
+    "managedYatoAssemblies": [
+      {
+        "name": "Yato.Core.dll",
+        "bytes": 21504,
+        "sha256": "52f0f1664b8c7d403c20d31f8f3f1793e57d0306a7b962dcbfe03e21f582f379"
+      },
+      {
+        "name": "Yato.Resources.Abstractions.dll",
+        "bytes": 19968,
+        "sha256": "ecb1f1a5ab9fda732a5728fa38e7311e5ef9e54d762feb8b5ff518e67d949f86"
+      },
+      {
+        "name": "Yato.Resources.dll",
+        "bytes": 24576,
+        "sha256": "06ce97cfb7e7990e90a8312baa21fc0603f2c3744e3e93a97982d7c4e19a4630"
+      }
+    ],
+    "excludedYatoAssemblies": [
+      "Yato.Resources.Bundle",
+      "Yato.Resources.HotUpdate",
+      "Yato.Persistence"
+    ],
+    "backend": "Windows Mono",
+    "defaultProvider": "ResourcesProvider"
+  },
+  "staticChecks": {
+    "packageVersionMismatches": 0,
+    "assemblyDefinitions": 41,
+    "missingYatoAssemblyReferences": 0,
+    "assemblyCycles": 0,
+    "metaFiles": 678,
+    "duplicateGuids": 0,
+    "originalRuntimeAndEditorMetaVerified": 66,
+    "missingOriginalGuids": 0,
+    "missingNewFileMeta": 0,
+    "gitDiffCheck": "passed"
+  },
+  "compatibility": {
+    "namespace": "Yato.Resources public namespaces retained; optional implementation types moved to new assemblies.",
+    "baseFactory": "ResourceServiceFactory.Create defaults to EditorAssetProvider in Editor and ResourcesProvider in Player.",
+    "bundleFactory": "BundleResourceServiceFactory explicitly loads bundles in Editor and Player; ForceBundleMode removed.",
+    "hotUpdate": "HotUpdateBundleCachePolicy installs after subsystem resets and preserves custom policies. Base and Bundle packages do not reference the update implementation.",
+    "samples": "FullSample is offline. HotUpdateSample is separately imported from the optional update package.",
+    "dependencies": "The Framework package is a full aggregate. Lean consumers select child packages without the aggregate."
+  },
+  "earlierAttempts": [
+    {
+      "kind": "source compiler",
+      "log": {
+        "source": "Logs/Modular-20261107-EditMode.log",
+        "sha256": "853661bf227fb9c430313c57d5baca92d100eb93a5382b4e2485a181ecab8671"
+      },
+      "resolution": "Corrected the existing IReadOnlyList asset-name iteration from Length to Count."
+    },
+    {
+      "kind": "source EditMode runner stopped without a result",
+      "log": {
+        "source": "Logs/Modular-20261107-EditMode-Retry.log",
+        "sha256": "ebfa9682ff1f09a435c548533371735a0b44f13628541ed6d16ba285a20a3907"
+      },
+      "resolution": "Replaced a blocking NUnit ThrowsAsync nested in an async cancellation test with await and an explicit exception assertion. Settings runtime behavior unchanged. Final suite passed."
+    },
+    {
+      "kind": "consumer preparation compiler",
+      "resolution": "Qualified UnityEditor.PackageManager.PackageInfo to avoid the UnityEditor.PackageInfo ambiguity."
+    },
+    {
+      "kind": "consumer unload fixture",
+      "localBundles": {
+        "source": "Logs/Modular-20261107-LocalBundles.xml",
+        "sha256": "36ebf1acdbc7af7db98d3c8c63e360a280af34ba13abd15549c73fcf90dae9bf",
+        "summary": {
+          "result": "Failed(Child)",
+          "total": 3,
+          "passed": 2,
+          "failed": 1,
+          "skipped": 0,
+          "durationSeconds": 0.2676218
+        },
+        "fixtures": [
+          {
+            "name": "Yato.ModularConsumerTests.BundleConsumerTests",
+            "passed": 0,
+            "failed": 1,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ModularConsumerTests.LocalBundlePolicyTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ModularConsumerTests.ResourcesConsumerTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          }
+        ]
+      },
+      "full": {
+        "source": "Logs/Modular-20261107-Full.xml",
+        "sha256": "813f37ef72a1a3c1c7a699527e31c2fc3caa7fe1721a3f8649ea7cbb30bd15d3",
+        "summary": {
+          "result": "Failed(Child)",
+          "total": 4,
+          "passed": 3,
+          "failed": 1,
+          "skipped": 0,
+          "durationSeconds": 0.3207664
+        },
+        "fixtures": [
+          {
+            "name": "Yato.ModularConsumerTests.BundleConsumerTests",
+            "passed": 0,
+            "failed": 1,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ModularConsumerTests.HotUpdateConsumerTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ModularConsumerTests.ResourcesConsumerTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          },
+          {
+            "name": "Yato.ModularConsumerTests.UIConsumerTests",
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0
+          }
+        ]
+      },
+      "resolution": "The test now closes the service before requiring bundle residency to be zero; ordinary release retains the existing delayed-unload contract. Final tests passed."
+    }
+  ],
+  "limitations": [
+    "Windows Editor and Mono Player only. Android/WebGL devices and IL2CPP were not built or executed in this run.",
+    "File/loopback requests validate cancellation and update behavior; production HTTPS/TLS is not certified.",
+    "The unrelated pre-existing remotion directory was preserved. No commit or push was performed for this split."
+  ],
+  "worktreeFileHashes": [
+    {
+      "source": "Assets/SurvivorSample/Editor/Yato.Survivor.Editor.asmdef",
+      "sha256": "ae6b92f3976f25834300778fd8e586246ea10144306b0c975eaa6f30c93a60a5"
+    },
+    {
+      "source": "Assets/SurvivorSample/Runtime/Bootstrap/SurvivorGame.cs",
+      "sha256": "c5a4d65ee49a49c266b8a2d416e69d519fa0c787aa3999a7417962d8a87cf457"
+    },
+    {
+      "source": "Assets/SurvivorSample/Runtime/Bootstrap/SurvivorServices.cs",
+      "sha256": "0f7c243e54c4c022e7585d5818b31ba15c866881b60c0ecaa92e7d1e015007c8"
+    },
+    {
+      "source": "Assets/SurvivorSample/Runtime/Yato.Survivor.asmdef",
+      "sha256": "7e32d296f452777a0d3e802046c2aa6939294ae6436ea4dfa23968007d69def0"
+    },
+    {
+      "source": "Packages/com.yato.app/package.json",
+      "sha256": "bed93acab4672917cde4aed2baceb759bc187117784d1290f3bab7ede2657d19"
+    },
+    {
+      "source": "Packages/com.yato.audio/package.json",
+      "sha256": "b2c700728cd37edbec864faf426869f0603d503c1e1450090edf8ed188d4fa98"
+    },
+    {
+      "source": "Packages/com.yato.config/package.json",
+      "sha256": "891520fa62f09f81325a3fecbdb7e793624133e5ed977fb130a02c6d3c563d8e"
+    },
+    {
+      "source": "Packages/com.yato.editor/Editor/Build/ConfigCatalogValidator.cs",
+      "sha256": "58a70b7947849540f1fc45e99464a2e2d1447adc236b2910865c3c2abe70e384"
+    },
+    {
+      "source": "Packages/com.yato.editor/Editor/CodeGen/AssetKeyGenerator.cs",
+      "sha256": "e82b9ba115c8033992d8d07999570407d2efddcc5e3281877046a5f1d850e084"
+    },
+    {
+      "source": "Packages/com.yato.editor/Editor/Tools/SmokeTestRunner.cs",
+      "sha256": "9757c8b42a619149bc762c1d32d2461990b197cfb3b95a8b9bce8e4bbda9bff8"
+    },
+    {
+      "source": "Packages/com.yato.editor/Editor/Yato.Editor.asmdef",
+      "sha256": "cc6281572f53fef6019efa2df80059181cc7422686244a5cf592ca484ea564ce"
+    },
+    {
+      "source": "Packages/com.yato.editor/package.json",
+      "sha256": "7f8e8ca5917d94d98a27432838020af99e1a08a641cdf41ac65521f2f57db3cd"
+    },
+    {
+      "source": "Packages/com.yato.flow/package.json",
+      "sha256": "d79812ef5f5f948387f35f63f3cb489ef7cde6eb6111538cd25d076813f2b8b4"
+    },
+    {
+      "source": "Packages/com.yato.framework/package.json",
+      "sha256": "8350e7f1a12e8bf94003cea2c572406a7f8b521edad6fec281a20470a4612599"
+    },
+    {
+      "source": "Packages/com.yato.framework/Samples~/FullSample/Scripts/FullSampleEntry.cs",
+      "sha256": "bf1c2867f6eeb8e743d6d4bfdb065e6cf0b6d5becb7a42d46ffc971fc5c52b84"
+    },
+    {
+      "source": "Packages/com.yato.framework/Samples~/YatoFrameworkDemo/Scripts/GameStart.cs",
+      "sha256": "0cd20040b9a4c98ddac23ebb1f4bac3ba74f5048ab2b977b2aa6d98d3cdcb334"
+    },
+    {
+      "source": "Packages/com.yato.framework/Samples~/YatoFrameworkDemo/Yato.FrameworkDemo.asmdef",
+      "sha256": "c0a5dfb87b8e7a7f11885237570ce0849e1fe0376669efe5ca80b40208e0c003"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/EditMode/ResourceFailurePolicyTests.cs",
+      "sha256": "9a46aaa5373bc102c71f46cbe4e5606e14e01f53f6238354f971264cec5361e9"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/EditMode/ResourceServiceTests.cs",
+      "sha256": "ec6f5c55c271cf10b4f81dc6d4541af541abbd5d74008a6a56b692b6ac9d2b2d"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/EditMode/SettingsServiceTests.cs",
+      "sha256": "87211213f5ee075f3177b79f3e0849782ba24cadf35b18ece6aec8bc514fb4b2"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/EditMode/StartupMaintenanceTests.cs",
+      "sha256": "4114fe16a9ee32cca997757367139a3e39f4de049a6a2307937b52dc9ebc364a"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/EditMode/Yato.Tests.EditMode.asmdef",
+      "sha256": "a3d5005a6fd6a5c68124aa1233abe6c47dd917c1712c785916d8f75b69db62a9"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/PlayMode/BundleModeSmokeTests.cs",
+      "sha256": "8c14f83d2405f90ec9cc92ac6d7882eec38f40c7e80ef9055cae905f58b15474"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/PlayMode/HotUpdateSmokeTests.cs",
+      "sha256": "dcbe0d41beae1133c084e5e1dc7dc7183d316f1b498def48e40f187137fce6d1"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/PlayMode/TaskBridgeTests.cs",
+      "sha256": "f09ce089b79533d03f360d1c327f9e14bbc26b4213af878be8e97e49a6dd27c6"
+    },
+    {
+      "source": "Packages/com.yato.framework/Tests/PlayMode/Yato.Tests.PlayMode.asmdef",
+      "sha256": "006a0fbe75bf5c655f88e632043cf4298d2a7fd597fe4b8ddd5f4eeeb18ffea0"
+    },
+    {
+      "source": "Packages/com.yato.pooling/package.json",
+      "sha256": "211c07ef25bb06d0f356b972937a443b3f7f458722e76f740bbbc2facf461bf1"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Editor/BuildPipelineEntry.cs",
+      "sha256": "a533cc4dab4256c07699b7430d0afedafff2aafa3a310c319ffbf0163002e9ad"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Editor/BuildReportAnalyzer.cs",
+      "sha256": "9c1e8f8a686d01f626b5aee4a9945a62531678b9de9250b5180483511961e69e"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Editor/BundleBuilder.cs",
+      "sha256": "4a8511be94227828725921f35cc4e9a1f05eca111c36446454437d26e439ed8b"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Editor/BundleNaming.cs",
+      "sha256": "05e49b20601db7f738efe52de935061b2dbf52ffde15616c65adc1efb83f5585"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Editor/BundleSmokeTestRunner.cs",
+      "sha256": "8f26c51400748eeb28d64bc274fc8f3949b7f21c67d8f6456e55b274ee53078f"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Editor/ManifestBuilder.cs",
+      "sha256": "95e0f2512fe8d8773b36d67d02ed18df269824c5cf9b5794f86a0f0d890e8c00"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Editor/PlatformResolver.cs",
+      "sha256": "2343ff917570a66e4868d7626a34ccdab047f37a9695fa9914c0a22e579947ca"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Editor/Yato.Resources.Bundle.Editor.asmdef",
+      "sha256": "ce7996e1f629f37328ad44d75783e269d5e0671ab213d26585878b107a6b64e5"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/link.xml",
+      "sha256": "17a26fa90d06b65857ec5424d2426c248939e5942dcbd0924c2f86962b4aadc5"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/package.json",
+      "sha256": "8678132af9e177f884d7bda64a8f1e8d5d9d963e6e5185db396afea568cf570e"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Runtime/AssemblyInfo.cs",
+      "sha256": "ef01b1d7a33a25ec2ba00f2a3da62bd80a2e8ea64e2480500ffc1ba8571cc621"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Runtime/BundleCachePolicy.cs",
+      "sha256": "138db21b26de6ce8156e85ff059cfa79effff07117a64c07fe4e34f66e3a4674"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Runtime/BundleEntry.cs",
+      "sha256": "2baaa744e980bcdacc9955d30aeeda286a64e2aa436cf47781bb2a9220360070"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Runtime/BundleLimits.cs",
+      "sha256": "01f11270ade61132faea8770ad826783833b3b0d892237f5ad22b83f52da0d46"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Runtime/BundleRelativePath.cs",
+      "sha256": "c03c4c98ec62aea68d3393545080301e84e132b04c1fc48dc055ff3ee1205bec"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Runtime/BundleResourceServiceFactory.cs",
+      "sha256": "5b2027e75cf2ab3179c16059de155a3758f60bcefdccd53defa4163649a06e67"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Runtime/Internal/Crc32Util.cs",
+      "sha256": "5c9363cc5298b1781f8d9a8cb1b805a52ab100641cb979c92947b0e536f20ebd"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Runtime/Internal/IntegrityUtil.cs",
+      "sha256": "66e705620e7dc41b49b1e01e108577a82f49448d65a66897358247ea71e87c59"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Runtime/Internal/MiniJson.cs",
+      "sha256": "2247f96371160dff65f20f195033a3486c95e8d50a2f3802e948ae3c15b2813d"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Runtime/Providers/BundleLoader.cs",
+      "sha256": "386c6018b949abc5bd83d6cd3fc91764163b5044253c351ddb8a5ec02945786c"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Runtime/Providers/BundleProvider.cs",
+      "sha256": "4b813b445eb29172b661e3739e799178e7dcd5ed059b0226116e5694633b5201"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Runtime/Providers/BundleRefCounter.cs",
+      "sha256": "71a355ba49aff685c8b334e5279423809c5e64d12ede9787468fb46f37d69d64"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Runtime/ResourceManifest.cs",
+      "sha256": "a375253f8ec2f2ec82ed6132b1cb62022369e449255d9ff65f210e64bfe6d23b"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Runtime/RuntimePaths.cs",
+      "sha256": "ed2285401303396112f172f96f91dbcec61de48707a8f98f5c24531ff0089cef"
+    },
+    {
+      "source": "Packages/com.yato.resources.bundle/Runtime/Yato.Resources.Bundle.asmdef",
+      "sha256": "1fb62588fe312da7c16be1566a433584dae6a73fa0e0beceb4bcc00f398a51f7"
+    },
+    {
+      "source": "Packages/com.yato.resources.hotupdate/Editor/HotUpdateWindow.cs",
+      "sha256": "c8fd9b6e53ca9144dafb2bac0075b98b1987ced03dc61c87c8ebc143ccc9abb4"
+    },
+    {
+      "source": "Packages/com.yato.resources.hotupdate/Editor/Yato.Resources.HotUpdate.Editor.asmdef",
+      "sha256": "9662c28a0124236c5694eff4f11289101aa7d52a955a788d04b35847f56a0859"
+    },
+    {
+      "source": "Packages/com.yato.resources.hotupdate/link.xml",
+      "sha256": "59bc91ae16425544a82996b5d6799b3bdb46dc3be75512d89f3c35457151cb74"
+    },
+    {
+      "source": "Packages/com.yato.resources.hotupdate/package.json",
+      "sha256": "51d5d6cc780db8382f77d3dc226fade531289592b46b95ea5db123695546f291"
+    },
+    {
+      "source": "Packages/com.yato.resources.hotupdate/Runtime/AssemblyInfo.cs",
+      "sha256": "06e78948c6e92bb70ba66239eb992cea737554f7838b6995eefca9366158639b"
+    },
+    {
+      "source": "Packages/com.yato.resources.hotupdate/Runtime/HotUpdate/HotUpdateMaintenance.cs",
+      "sha256": "74d3774317496731423e8718a745eebcb9d4f2b9a9baa6af9a039f3cc69c6613"
+    },
+    {
+      "source": "Packages/com.yato.resources.hotupdate/Runtime/HotUpdate/HotUpdateService.cs",
+      "sha256": "9f84771a08541406540b1086a6e20ec65adc21cbedcfd71746f22382771b746b"
+    },
+    {
+      "source": "Packages/com.yato.resources.hotupdate/Runtime/HotUpdate/HotUpdateStorage.cs",
+      "sha256": "6551793740fbf64f3a7adc6cd5fcab8e32abbf6d3ea6d2089358d1de86d62642"
+    },
+    {
+      "source": "Packages/com.yato.resources.hotupdate/Runtime/HotUpdate/RemoteDownloader.cs",
+      "sha256": "086282c9468e127b14fc2e43289a874ec9befc76c080157d48bce3fd69298a7f"
+    },
+    {
+      "source": "Packages/com.yato.resources.hotupdate/Runtime/HotUpdate/VersionManifest.cs",
+      "sha256": "fbefdcf38641dbf09967eaa1b172d90c1837f6308ad54edfb075bd7a04d23605"
+    },
+    {
+      "source": "Packages/com.yato.resources.hotupdate/Runtime/HotUpdateBundleCachePolicy.cs",
+      "sha256": "071fb8867761c345b4ac27a85e3190d53a9b1512f7bacd0786cafe5da93365c6"
+    },
+    {
+      "source": "Packages/com.yato.resources.hotupdate/Runtime/Yato.Resources.HotUpdate.asmdef",
+      "sha256": "194c57eb4b60023233bf4e3f9eb02f659ac10e3b20a301a398aa1dfcf899d4d5"
+    },
+    {
+      "source": "Packages/com.yato.resources.hotupdate/Samples~/HotUpdateSample/HotUpdateSampleEntry.cs",
+      "sha256": "ad208f98b23b766762c6a8788b3f57b9aa95c8c5bc819d7ae98c6c2deba187d5"
+    },
+    {
+      "source": "Packages/com.yato.resources.hotupdate/Samples~/HotUpdateSample/Yato.HotUpdateSample.asmdef",
+      "sha256": "ec624ee4b8c0e23c2c3e25fba07515c228ca024563c49887e3cee2a6008b5868"
+    },
+    {
+      "source": "Packages/com.yato.resources/Editor/AssetPathMapping.cs",
+      "sha256": "0f9a7daf01687431efa670dbd2af15a6b9835804ee54a1b4dcb9e2ddb306f941"
+    },
+    {
+      "source": "Packages/com.yato.resources/Editor/IResourceBuildValidator.cs",
+      "sha256": "718b209d65c6b82b951241aeb970f25c29672c2b2dede5d67fb470b492677390"
+    },
+    {
+      "source": "Packages/com.yato.resources/Editor/Yato.Resources.Editor.asmdef",
+      "sha256": "e3bf242d0b26c1912dff5bc3647e2b735d62f05fa59680eb9f12607408d739ee"
+    },
+    {
+      "source": "Packages/com.yato.resources/package.json",
+      "sha256": "d00066a31bc3d7a9ced1199ad407ea2b0047d64e5279d9812bd2637aec2b614e"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/ResourceServiceFactory.cs",
+      "sha256": "692c2a39a03a11c65ea63c1b597380c687b207b97fa86901749be6e07af75ba8"
+    },
+    {
+      "source": "Packages/com.yato.resources/Runtime/Yato.Resources.asmdef",
+      "sha256": "0534c3a577530ab57535c92f91c46ebde922350f4b2f3c2b94966de731b76c76"
+    },
+    {
+      "source": "Packages/com.yato.ui/package.json",
+      "sha256": "d1bbe8919b0e9f6ca9ca2facb6a120920fef07ff1b33bfe8de59872faf1fd56d"
+    },
+    {
+      "source": "Packages/packages-lock.json",
+      "sha256": "defffb6542ce0f38c155e89e50fbb0900f03af053291d6866d91e029e63af06b"
+    },
+    {
+      "source": "tools/ConsumerPlayerSmoke.cs",
+      "sha256": "bb938970c02a37bab6685fbde37e6318c7ee9ef842ff7538941f0e93b4fa2b68"
+    },
+    {
+      "source": "tools/ModularBundleVerification.cs",
+      "sha256": "8629e61013bcbe6e8a34f9aafdc049b8aea2b43517dd998fba4be027b444f05b"
+    },
+    {
+      "source": "tools/ModularConsumerTests/BundleConsumerTests.cs",
+      "sha256": "a2afdbbf6bebd1c2d0b554fcf5ada99a6a878a345e48cf1ea304954c1eaaec1c"
+    },
+    {
+      "source": "tools/ModularConsumerTests/HotUpdateConsumerTests.cs",
+      "sha256": "07804bbc4eb84906c28f489ff84c1e54eb63c7012237e71afc3ad4315df0ce8c"
+    },
+    {
+      "source": "tools/ModularConsumerTests/LocalBundlePolicyTests.cs",
+      "sha256": "149e2645779d172324eff55fd4844c58a047b8a747b10c5871191f16057a8607"
+    },
+    {
+      "source": "tools/ModularConsumerTests/ResourcesConsumerTests.cs",
+      "sha256": "b3f868772bcc82d8df0ddac48c410ab582a10f1aa60b3b81545b60ec1f671261"
+    },
+    {
+      "source": "tools/ModularConsumerTests/UIConsumerTests.cs",
+      "sha256": "494bf63ccde9600cefc1141c618cc1d48146cf4e77c338ec36c9588ab7cd2a31"
+    },
+    {
+      "source": "tools/ModularConsumerVerification.cs",
+      "sha256": "1fe8b733c52e66bff70bf6ceae7ab8854726e5e412285bc94fbdaa27bc41d935"
+    },
+    {
+      "source": "tools/ModularResourcesPlayerSmoke.cs",
+      "sha256": "e375f98ea71a53cbcb671c65f9f182fd9a8ca5df654a710f5a71ac6123f44109"
+    },
+    {
+      "source": "tools/ModularUIVerification.cs",
+      "sha256": "059b9bb702cfdcc227d91c32132312f9ed03cac5e72dbc6334496894ca93e2a5"
+    },
+    {
+      "source": "tools/Prepare-ConsumerProject.ps1",
+      "sha256": "98bb96c90fd5e9f98f7557bc6b9515e8e37cabb997c723a3180cdc2c64afee13"
+    },
+    {
+      "source": "tools/Prepare-ModularConsumers.ps1",
+      "sha256": "88451a20d8ed87ac8e91a9bbdd4c348ae8e0696b248167dca6fdff6f4b7e6846"
+    },
+    {
+      "source": "tools/Prepare-SurvivorConsumer.ps1",
+      "sha256": "761edd26b9577249a0d31fafcbd2cec17dc4a0ca1fb84e6023fba2b927f3cc7e"
+    }
+  ]
+}

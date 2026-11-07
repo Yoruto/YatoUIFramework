@@ -23,14 +23,10 @@ namespace Yato.FullSample
         private readonly List<PooledInstance> m_rentals = new List<PooledInstance>();
         public ConfigService DemoConfig { get; private set; }
         public ResourceInstancePool DemoPool { get; private set; }
-        private CancellationTokenSource m_update;
-        private string m_url = "https://example.com/bundles";
         private string m_status = "Ready";
-        private bool m_localTest;
         private readonly UIPageDef m_page = new UIPageDef("YatoFullPage", null, new AssetKey("yato/full/page"));
         private void Awake()
         {
-            Debug.Log("[FullSample] Startup cache: " + HotUpdateMaintenance.PrepareStartup());
             m_service = new FullSampleService();
             GameBootstrap.RegisterService(m_service);
             GameBootstrap.Initialize();
@@ -52,18 +48,6 @@ namespace Yato.FullSample
             float volume = GUILayout.HorizontalSlider(m_service.Volume, 0f, 1f);
             if (Math.Abs(volume - m_service.Volume) > 0.001f) m_service.ApplyVolume(volume);
             if (GUILayout.Button("Save settings explicitly")) { m_service.Save(); m_status = "Settings saved"; }
-            GUILayout.Label("Hot update root URL (published ABs required)");
-            m_url = GUILayout.TextField(m_url);
-            m_localTest = GUILayout.Toggle(m_localTest, "Allow local file:// / loopback HTTP testing");
-            if (m_update == null && GUILayout.Button("Run update"))
-            {
-                m_update = new CancellationTokenSource();
-                var downloader = new RemoteDownloader { AllowFileUrls = m_localTest, AllowInsecureLocalhost = m_localTest };
-                var operation = new HotUpdateService(downloader).RunAsync(m_url, ct: m_update.Token);
-                Observe(operation, x => x.ToString());
-                operation.Completed += () => { m_update?.Dispose(); m_update = null; };
-            }
-            if (m_update != null && GUILayout.Button("Cancel update before commit")) m_update.Cancel();
             GUILayout.Label("Foundation demo: " + m_flow.CurrentStateId);
             if (GUILayout.Button("Start flow/config/pool demo")) Observe(StartFoundationDemo(), result => result.Status + " " + result.Error?.Message);
             if (GUILayout.Button("Stop demo and release state resources")) Observe(m_flow.SwitchAsync("idle"), result => result.Status.ToString());
@@ -129,9 +113,6 @@ namespace Yato.FullSample
         {
             m_flow?.Dispose();
             m_pauseToken?.Dispose(); m_pauseToken = null; m_pause?.Dispose();
-            m_update?.Cancel();
-            m_update?.Dispose();
-            m_update = null;
             UIRouter.CancelOpen(m_page.PageId);
             UIRouter.CloseAll();
             GameBootstrap.Shutdown();

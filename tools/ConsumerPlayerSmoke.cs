@@ -102,16 +102,18 @@ namespace Yato
             while (!update.IsDone) yield return null;
             Check(update.GetResult().Success, update.GetResult().Error);
             string active = new HotUpdateStorage(local).ActiveDirectory;
-            BundleLoader loader = null;
-            var counter = new BundleRefCounter(name => loader.Unload(name));
-            loader = new BundleLoader(counter, active);
-            var provider = new BundleProvider(ResourceManifest.LoadFromFile(Path.Combine(active, "manifest.json")), loader, counter);
-            var loading = new ResourceService(provider).LoadAsync<GameObject>(new AssetKey("ui/example/example"));
-            while (!loading.IsDone) yield return null;
-            var asset = loading.GetResult();
-            Check(asset.Asset != null, "Updated AB load");
-            asset.Dispose();
-            provider.Shutdown();
+            var creating = BundleResourceServiceFactory.CreateAsync(manifestPath: Path.Combine(active, "manifest.json"));
+            while (!creating.IsDone) yield return null;
+            var resources = creating.GetResult();
+            try
+            {
+                var loading = resources.LoadAsync<GameObject>(new AssetKey("ui/example/example"));
+                while (!loading.IsDone) yield return null;
+                var asset = loading.GetResult();
+                Check(asset.Asset != null, "Updated AB load");
+                asset.Dispose();
+            }
+            finally { (resources as IDisposable)?.Dispose(); }
             UIRouter.CloseAll();
             GameBootstrap.Shutdown();
             Check(!GameBootstrap.IsInitialized, "Shutdown");

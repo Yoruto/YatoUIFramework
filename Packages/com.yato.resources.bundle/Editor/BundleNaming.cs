@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Yato.Resources.Editor;
 
 namespace Yato.Editor
 {
@@ -17,53 +18,27 @@ namespace Yato.Editor
     public static class BundleNaming
     {
         /// <summary>默认资源根目录（不含尾部斜杠）。</summary>
-        public const string DefaultAssetRoot = "Assets/GameRes";
+        public const string DefaultAssetRoot = AssetPathMapping.DefaultAssetRoot;
 
         /// <summary>参与打包的文件后缀（小写比较）。</summary>
-        public static readonly string[] BuildableExtensions = Yato.Resources.AssetFileExtensions.Buildable;
+        public static readonly string[] BuildableExtensions = AssetPathMapping.SupportedExtensions;
 
         /// <summary>判断后缀是否需要打包。</summary>
         public static bool IsBuildable(string assetPath)
         {
-            if (string.IsNullOrEmpty(assetPath))
-            {
-                return false;
-            }
-
-            string ext = System.IO.Path.GetExtension(assetPath).ToLowerInvariant();
-            for (int i = 0; i < BuildableExtensions.Length; i++)
-            {
-                if (BuildableExtensions[i] == ext)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return AssetPathMapping.IsSupportedAsset(assetPath);
         }
 
         /// <summary>资源 key：资源根下的相对路径，小写、去扩展名、正斜杠。</summary>
         public static string GetAssetKey(string assetPath, string assetRoot)
         {
-            string relative = ToRelative(assetPath, assetRoot);
-            if (string.IsNullOrEmpty(relative))
-            {
-                return null;
-            }
-
-            int dot = relative.LastIndexOf('.');
-            if (dot >= 0)
-            {
-                relative = relative.Substring(0, dot);
-            }
-
-            return relative.ToLowerInvariant();
+            return AssetPathMapping.GetAssetKey(assetPath, assetRoot);
         }
 
         /// <summary>按目录规则推导 bundle 名。</summary>
         public static string GetBundleName(string assetPath, string assetRoot)
         {
-            string relative = ToRelative(assetPath, assetRoot);
+            string relative = AssetPathMapping.GetRelativePath(assetPath, assetRoot);
             if (string.IsNullOrEmpty(relative))
             {
                 return null;
@@ -105,49 +80,7 @@ namespace Yato.Editor
         /// <summary>收集需要打包的资源（按后缀过滤，跳过 Editor 目录与 ~ 结尾目录）。</summary>
         public static List<string> CollectBuildableAssets(string assetRoot)
         {
-            var result = new List<string>();
-            if (!System.IO.Directory.Exists(assetRoot))
-            {
-                return result;
-            }
-
-            string[] files = System.IO.Directory.GetFiles(assetRoot, "*.*", System.IO.SearchOption.AllDirectories);
-            for (int i = 0; i < files.Length; i++)
-            {
-                string path = files[i].Replace('\\', '/');
-                if (!IsBuildable(path))
-                {
-                    continue;
-                }
-
-                if (path.Contains("/Editor/") || path.Contains("~/"))
-                {
-                    continue;
-                }
-
-                result.Add(path);
-            }
-
-            result.Sort(StringComparer.Ordinal);
-            return result;
-        }
-
-        private static string ToRelative(string assetPath, string assetRoot)
-        {
-            if (string.IsNullOrEmpty(assetPath))
-            {
-                return null;
-            }
-
-            string normalizedPath = assetPath.Replace('\\', '/');
-            string normalizedRoot = (assetRoot ?? DefaultAssetRoot).Replace('\\', '/').TrimEnd('/') + "/";
-
-            if (!normalizedPath.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
-            {
-                return null;
-            }
-
-            return normalizedPath.Substring(normalizedRoot.Length);
+            return AssetPathMapping.CollectAssets(assetRoot);
         }
 
         private static string WithoutExtension(string fileName)

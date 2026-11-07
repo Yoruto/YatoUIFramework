@@ -40,7 +40,7 @@ namespace Yato.Editor
 
             if (GUILayout.Button("用本地 Build 目录模拟远程"))
             {
-                string dir = PlatformResolver.GetProjectRoot().Replace('\\', '/') + "/Build/AssetBundles";
+                string dir = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "Build", "AssetBundles");
                 if (!Directory.Exists(dir))
                 {
                     Debug.LogError("[Yato.HotUpdate] 目录不存在，请先打包：" + dir);
@@ -57,7 +57,8 @@ namespace Yato.Editor
             EditorGUILayout.Space();
             if (GUILayout.Button("重新打包并生成 manifest/version"))
             {
-                BundleBuilder.Build(EditorUserBuildSettings.activeBuildTarget);
+                if (!EditorApplication.ExecuteMenuItem("Yato/Build/Bundles (Active Platform)"))
+                    Debug.LogError("[Yato.HotUpdate] 找不到 Bundle 打包菜单，请检查 com.yato.resources.bundle 是否已安装并成功编译。");
             }
 
             EditorGUILayout.HelpBox(

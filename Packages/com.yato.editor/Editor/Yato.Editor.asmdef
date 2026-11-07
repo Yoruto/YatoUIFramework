@@ -5,6 +5,7 @@
         "Yato.Core",
         "Yato.Resources.Abstractions",
         "Yato.Resources",
+        "Yato.Resources.Editor",
         "Yato.UI",
         "Unity.TextMeshPro",
         "Yato.Config",

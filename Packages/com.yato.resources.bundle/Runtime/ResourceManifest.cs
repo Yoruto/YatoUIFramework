@@ -232,7 +232,7 @@ namespace Yato.Resources
                     Name = pair.Key,
                     Hash = MiniJson.GetString(data, "hash"),
                     Crc = data.ContainsKey("crc") ? (uint)MiniJson.RequireInteger(data, "crc", uint.MaxValue) : 0,
-                    Size = data.ContainsKey("size") ? MiniJson.RequireInteger(data, "size", VersionManifest.MaxBundleBytes) : 0,
+                    Size = data.ContainsKey("size") ? MiniJson.RequireInteger(data, "size", BundleLimits.MaxBundleBytes) : 0,
                     Compression = MiniJson.GetString(data, "compression"),
                     Dependencies = MiniJson.GetStringList(data, "deps"),
                     Assets = MiniJson.GetStringList(data, "assets")

@@ -23,16 +23,14 @@ namespace Yato.Tests.PlayMode
         [UnitySetUp]
         public IEnumerator SetUp()
         {
-            ResourceServiceFactory.ForceBundleMode = true;
 
             if (!System.IO.File.Exists(RuntimePaths.GetManifestPath(false)))
             {
-                ResourceServiceFactory.ForceBundleMode = false;
                 Assert.Ignore("未找到 AB manifest，请先打包：Yato/Build/Bundles (Windows)");
                 yield break;
             }
 
-            m_service = ResourceServiceFactory.Create();
+            m_service = BundleResourceServiceFactory.Create();
             Assert.IsInstanceOf<BundleProvider>(((ResourceService)m_service).Provider, "应选中 BundleProvider");
             yield return null;
         }
@@ -53,8 +51,6 @@ namespace Yato.Tests.PlayMode
                     provider.Shutdown();
                 }
             }
-
-            ResourceServiceFactory.ForceBundleMode = false;
             m_service = null;
             yield return null;
         }

@@ -1,6 +1,6 @@
 # 文档索引
 
-更新日期：2026-11-05（Asia/Shanghai）。当前框架版本为 `0.6.1`，Survivor 游戏版本为 `0.1.0`，开发与实测环境为 Unity `6000.5.6f1`。最新未发布修复见框架版本记录。
+更新日期：2026-11-07（Asia/Shanghai）。当前框架版本为 `0.7.0`，Survivor 游戏版本为 `0.1.0`，开发与实测环境为 Unity `6000.5.6f1`。资源基础、Bundle 和热更新可独立安装，迁移见安装指南。
 
 ## 使用与开发
 
@@ -8,6 +8,7 @@
 |---|---|
 | [仓库说明](../README.md) | 当前状态、包结构和快速开始 |
 | [安装与升级](EMBEDDED_INSTALL_AND_UPGRADE.md) | 完整 / 精简 / 可选包集及消费工程 |
+| [UPM 模块包与离线安装](UPM_DISTRIBUTION.md) | 0.7.0 模块 TGZ / ZIP 导出、安装器与 ResourcesOnly 等按需组合 |
 | [框架接入指南](../Packages/com.yato.framework/Documentation~/index.md) | API 与各模块的使用方式 |
 | [0.6 接入指南](../Packages/com.yato.framework/Documentation~/foundation06.md) | 异步适配、诊断、向导与预检 |
 | [Survivor 手册](../Assets/SurvivorSample/README.md) | 运行、操作、资产重建、构建与移植 |
@@ -17,6 +18,9 @@
 
 | 记录 | 阅读说明 |
 |---|---|
+| [Live Unity 验证](verification/LIVE_UNITY_2026-11-07.json) | 0.7 现场重跑 315 个测试、10 项冒烟、Survivor 交互与清理快照，保留脚手架错误及验收边界 |
+| [UPM 归档安装验证](verification/UPM_DISTRIBUTION_2026-11-07.json) | ZIP/TGZ 三个独立消费工程的 6 项加载测试、12 项安装器检查及内容哈希 |
+| [资源模块拆分验证](verification/MODULAR_RESOURCES_2026-11-07.json) | 0.7：五种独立包集、源工程回归、仅资源 Player 及程序集检查 |
 | [生命周期与异步修复验证](verification/ASYNC_LIFECYCLE_2026-11-05.json) | 2026-11-05 源工程回归、消费工程与原始证据摘要 |
 | [Survivor 实施记录](SURVIVOR_IMPLEMENTATION_2026-11-01.md) | 已按最终日志更新；含完整战斗、独立构建、压力测量与未验收项目 |
 | [Survivor 验证摘要](verification/SURVIVOR_2026-11-01.json) | 从本地原始日志提取的结果及 SHA-256，方便随仓库查看 |
@@ -26,7 +30,25 @@
 | [优化验证记录](OPTIMIZATION_VERIFICATION_2026-10-31.md) | 更早的资源、生命周期与发布门槛验证 |
 | [框架版本记录](../Packages/com.yato.framework/CHANGELOG.md) | 框架包的版本变更；Survivor 在 Assets 下独立交付 |
 
-`Logs/`、`Build/` 和独立消费工程属于本机验证或构建产物，不纳入 Git；提交的 JSON 摘要保留原始日志名称与哈希，不代替完整日志。历史实施记录按当时范围阅读，当前 Survivor 状态以其实施记录为准。
+`Logs/`、`Build/` 和独立消费工程属于本机验证或构建产物，不纳入 Git；提交的 JSON 摘要保留原始日志名称与哈希，不代替完整日志。历史实施记录按当时范围阅读；较早文档中的“未验收”以其日期为界，已补充验证的部分见下方及当前 0.7 验证摘要。
+
+### 2026-11-07 UPM 模块分发
+
+导出 18 个标准 UPM TGZ 和带安装器的离线 ZIP。ZIP 两包资源模式、ZIP 15 包完整模式及 TGZ 两包资源模式在独立 Unity 6000.5.6f1 工程完成解析、编译和加载/释放，**6 / 6** 通过；五种包集及拒绝覆盖、依赖版本、路径等安装器检查 **12 / 12** 通过。使用与校验方式见[分发指南](UPM_DISTRIBUTION.md)，已验证包内容以[归档安装验证](verification/UPM_DISTRIBUTION_2026-11-07.json)的 `packageSourceSha256` 匹配。归档保留模块元数据与示例，不包含源工程 Survivor 素材或本机 Unity MCP。
+
+### 2026-11-07 Live Unity 现场验证
+
+本机 Windows Unity `6000.5.6f1` 通过官方 Pipeline 重跑源工程 EditMode **195 / 195**、PlayMode **120 / 120**，合计 **315 / 315**，零失败、零跳过；基础冒烟 **7 项**和 Bundle 冒烟 **3 项**通过。这是对当前源工程的再次执行，不与下方同规模的拆包回归相加计算。
+
+Survivor 默认 `EditorAssetProvider` 会话覆盖菜单、设置滑条与保存、战斗/升级、暂停与嵌套设置、恢复、结算重开和退出。暂停嵌套期间三次快照的战斗计时保持不变，暂停 token 为 **1 → 2 → 1**；恢复后计时增长，Retry 获得新的 RunId。资源与订阅随页面关闭回到基线。另在全新 Play 会话以公开动作验证 `BundleProvider` 的菜单、战斗/升级、结算与退出；最终控制台零错误、零警告。两类 Provider 退出后的实测项是 **tracked handles、loaded bundles、UI roots 均为零**，未将这些结果扩大解释为销毁后所有统计项都已采样。
+
+冒烟中 EventBus 故意抛出一次异常来验证监听隔离，其 Error/Exception 日志属于预期；早期 Bundle 验证脚手架的错误类型转换已保留并从最终干净会话中排除。现场记录未证明 Esc/真实键盘或手柄输入、听音验收，也不代表移动端/WebGL、IL2CPP 或生产 HTTPS 已通过。详见 [Live 验证摘要](verification/LIVE_UNITY_2026-11-07.json)。
+
+### 2026-11-07 按需资源模块
+
+资源基础、Bundle 和 HotUpdate 已拆为独立包。源工程 EditMode **195 / 195**、PlayMode **120 / 120** 通过，零失败、零跳过；五个消费工程实际安装的 Yato 包数分别为 **2 / 4 / 3 / 12 / 15**，对应仅资源、精简 UI、本地 Bundle、离线完整、完整聚合。各组合的加载测试与完整/离线示例均通过；真实 AB 打包入口通过。
+
+两包 ResourcesOnly 工程的 Windows Mono 构建和原生资源加载/释放冒烟通过，成品仅含 `Yato.Core`、`Yato.Resources`、`Yato.Resources.Abstractions` 三个 Yato 程序集，不包含 Bundle、HotUpdate 或 Persistence。初始化迁移见[安装指南](EMBEDDED_INSTALL_AND_UPGRADE.md)，日志哈希和初次失败修正见本次验证摘要。移动端/WebGL 与 IL2CPP 仍需专项验收。
 
 ### 2026-11-05 生命周期与异步修复
 

@@ -1,0 +1,5 @@
+{
+  "name": "Yato.HotUpdateSample",
+  "references": ["Yato.Core", "Yato.Resources", "Yato.Resources.Abstractions", "Yato.Resources.Bundle", "Yato.Resources.HotUpdate"],
+  "autoReferenced": true
+}

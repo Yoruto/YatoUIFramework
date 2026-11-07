@@ -320,7 +320,7 @@ namespace Yato.Resources
             string leafMatch = null;
             int leafCount = 0;
             string suffix = "/" + value;
-            for (int i = 0; i < names.Length; i++)
+            for (int i = 0; i < names.Count; i++)
             {
                 string path = names[i].Replace('\\', '/');
                 string withoutExtension = path.Substring(0, path.Length - Path.GetExtension(path).Length);

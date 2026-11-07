@@ -1,0 +1,7 @@
+{
+    "name": "Yato.Resources.HotUpdate.Editor",
+    "rootNamespace": "Yato.Editor",
+    "references": ["Yato.Resources.HotUpdate", "Yato.Resources.Bundle"],
+    "includePlatforms": ["Editor"],
+    "autoReferenced": true
+}

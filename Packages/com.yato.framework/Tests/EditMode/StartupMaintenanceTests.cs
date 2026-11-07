@@ -9,8 +9,18 @@ namespace Yato.Tests.EditMode
     public sealed class StartupMaintenanceTests
     {
         private string m_root;
-        [SetUp] public void Setup() { m_root = Path.Combine(Path.GetTempPath(), "yato-maintenance-" + Guid.NewGuid().ToString("N")); }
-        [TearDown] public void Teardown() { if (Directory.Exists(m_root)) Directory.Delete(m_root, true); }
+        private IBundleCachePolicy m_previousPolicy;
+        [SetUp] public void Setup()
+        {
+            m_previousPolicy = BundleCachePolicy.Current;
+            HotUpdateBundleCachePolicy.Install();
+            m_root = Path.Combine(Path.GetTempPath(), "yato-maintenance-" + Guid.NewGuid().ToString("N"));
+        }
+        [TearDown] public void Teardown()
+        {
+            BundleCachePolicy.Current = m_previousPolicy;
+            if (Directory.Exists(m_root)) Directory.Delete(m_root, true);
+        }
         private string Commit(HotUpdateStorage storage, string content)
         {
             string stage = storage.Begin();

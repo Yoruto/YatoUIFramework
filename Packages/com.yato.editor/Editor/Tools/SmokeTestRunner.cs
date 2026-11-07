@@ -86,9 +86,6 @@ namespace Yato.Editor
             var watch = Stopwatch.StartNew();
 
             Check(results, ref passed, ref failed, "AssetKey 规范化", VerifyAssetKey);
-            Check(results, ref passed, ref failed, "Manifest 解析与索引", VerifyManifest);
-            Check(results, ref passed, ref failed, "依赖环检测", VerifyCycleDetection);
-            Check(results, ref passed, ref failed, "Bundle 引用计数与延迟卸载", VerifyRefCounter);
             Check(results, ref passed, ref failed, "EventBus 订阅/退订/异常隔离", VerifyEventBus);
             Check(results, ref passed, ref failed, "DisposableBag 逆序释放", VerifyDisposableBag);
             Check(results, ref passed, ref failed, "ServiceLocator 注册/解析", VerifyServiceLocator);
@@ -139,86 +136,6 @@ namespace Yato.Editor
             if (new AssetKey("  ").IsValid)
             {
                 return "空 key 不应有效";
-            }
-
-            return null;
-        }
-
-        private static string VerifyManifest()
-        {
-            const string json = @"{
-              ""schema"": 2, ""version"": ""1.0.0"", ""platform"": ""Windows"",
-              ""bundles"": {
-                ""ui/bag"": { ""crc"": 1, ""size"": 10, ""deps"": [""ui/common""], ""assets"": [""ui/bag/bagform""] },
-                ""ui/common"": { ""crc"": 2, ""size"": 5, ""deps"": [], ""assets"": [""ui/common/btn""] }
-              },
-              ""assets"": { ""ui/bag/bagform"": ""ui/bag"", ""ui/common/btn"": ""ui/common"" }
-            }";
-
-            ResourceManifest manifest = ResourceManifest.Parse(json);
-            if (manifest.BundleCount != 2 || manifest.AssetCount != 2)
-            {
-                return "索引数量错误";
-            }
-
-            List<ResourceManifest.BundleInfo> order = manifest.ResolveLoadOrder("ui/bag");
-            if (order.Count != 2 || order[0].Name != "ui/common" || order[1].Name != "ui/bag")
-            {
-                return "依赖顺序错误（依赖必须在自身之前）";
-            }
-
-            ResourceManifest.BundleInfo bundle;
-            if (!manifest.TryGetBundleOfAsset("UI/Bag/BagForm", out bundle) || bundle.Name != "ui/bag")
-            {
-                return "asset → bundle 索引错误";
-            }
-
-            return null;
-        }
-
-        private static string VerifyCycleDetection()
-        {
-            const string json = @"{
-              ""schema"": 2, ""version"": ""1"", ""platform"": ""Windows"",
-              ""bundles"": {
-                ""a"": { ""deps"": [""b""], ""assets"": [] },
-                ""b"": { ""deps"": [""a""], ""assets"": [] }
-              },
-              ""assets"": {}
-            }";
-
-            try
-            {
-                ResourceManifest.Parse(json).ResolveLoadOrder("a");
-                return "循环依赖未抛出异常";
-            }
-            catch (ResourceException)
-            {
-                return null;
-            }
-        }
-
-        private static string VerifyRefCounter()
-        {
-            var unloaded = new List<string>();
-            var counter = new BundleRefCounter(delegate(string name) { unloaded.Add(name); });
-            counter.UnloadDelaySeconds = 0f;
-
-            counter.AddRef("ui/bag");
-            counter.AddRef("ui/bag");
-            counter.Release("ui/bag");
-            counter.Release("ui/bag");
-            counter.Release("ui/bag");
-
-            if (counter.PendingCount != 1)
-            {
-                return "延迟卸载队列未按名字去重，PendingCount=" + counter.PendingCount;
-            }
-
-            counter.FlushExpired();
-            if (unloaded.Count != 1 || unloaded[0] != "ui/bag")
-            {
-                return "到期未卸载或重复卸载";
             }
 
             return null;

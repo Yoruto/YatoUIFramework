@@ -80,7 +80,7 @@ namespace Yato.Resources
 
         public static string GetManifestPath(bool persistent)
         {
-            string dir = persistent ? new HotUpdateStorage(PersistentBundleDir).ActiveDirectory : StreamingAssetsBundleDir;
+            string dir = persistent ? BundleCachePolicy.Current.GetActiveDirectory(PersistentBundleDir) : StreamingAssetsBundleDir;
             return Path.Combine(dir, ManifestFileName);
         }
 
@@ -93,7 +93,7 @@ namespace Yato.Resources
             BundleRelativePath.ValidateBundle(bundleName);
             if (PreferPersistent)
             {
-                string active = new HotUpdateStorage(PersistentBundleDir).ActiveDirectory;
+                string active = BundleCachePolicy.Current.GetActiveDirectory(PersistentBundleDir);
                 if (File.Exists(BundleRelativePath.Resolve(active, ManifestFileName)))
                     return ResolveBundlePath(bundleName, active);
             }
@@ -104,7 +104,7 @@ namespace Yato.Resources
         public static string ResolveBundlePath(string bundleName, string snapshotDirectory)
         {
             BundleRelativePath.ValidateBundle(bundleName);
-            HotUpdateMaintenance.MarkUsed(snapshotDirectory);
+            BundleCachePolicy.Current.MarkUsed(snapshotDirectory);
             if (snapshotDirectory.Contains("://") || snapshotDirectory.StartsWith("jar:", StringComparison.Ordinal))
                 return snapshotDirectory.TrimEnd('/') + "/" + bundleName;
             return ToLoadPath(BundleRelativePath.Resolve(snapshotDirectory, bundleName));
@@ -149,8 +149,13 @@ namespace Yato.Resources
                 return null;
             }
 
-            string root = RemoteRootUrl.TrimEnd('/');
-            return new RemoteDownloader().FileUrl(root, PlatformName + "/" + fileName);
+            string relative = BundleRelativePath.Validate(PlatformName + "/" + fileName);
+            Uri root;
+            if (!Uri.TryCreate(RemoteRootUrl, UriKind.Absolute, out root) || root.Scheme != Uri.UriSchemeHttps ||
+                string.IsNullOrEmpty(root.Host) || !string.IsNullOrEmpty(root.UserInfo) ||
+                !string.IsNullOrEmpty(root.Query) || !string.IsNullOrEmpty(root.Fragment))
+                throw new ArgumentException("Remote bundle URL requires an absolute HTTPS root without credentials, query or fragment");
+            return new Uri(root.AbsoluteUri.TrimEnd('/') + "/" + relative).AbsoluteUri;
         }
 
         /// <summary>确保可写目录存在。</summary>

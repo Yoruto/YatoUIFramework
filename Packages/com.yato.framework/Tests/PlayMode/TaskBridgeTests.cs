@@ -13,6 +13,48 @@ namespace Yato.Tests.PlayMode
 {
     public sealed class TaskBridgeTests
     {
+        [UnityTest] public IEnumerator BundleFactory_HostShutdownCancelsPendingManifestInitialization()
+        {
+            var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+            listener.Start();
+            try
+            {
+                int port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
+                var operation = BundleResourceServiceFactory.CreateAsync(manifestPath: "http://127.0.0.1:" + port + "/manifest.json");
+                Assert.IsFalse(operation.IsDone);
+                UnityEngine.Object.DestroyImmediate(RuntimeHost.Instance.gameObject);
+                Assert.IsTrue(operation.IsDone, "Shutdown must finish initialization without another coroutine tick");
+                Assert.Catch<OperationCanceledException>(() => operation.GetResult());
+            }
+            finally { listener.Stop(); }
+            var recreated = RuntimeHost.Instance;
+            yield return null;
+        }
+
+        [UnityTest] public IEnumerator BundleFactory_WorkerCancellationFinishesProviderAndDispatchesOnMainThread()
+        {
+            var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+            listener.Start();
+            using (var cancellation = new CancellationTokenSource())
+            {
+                try
+                {
+                    int port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
+                    int mainThread = Thread.CurrentThread.ManagedThreadId, callbackThread = -1;
+                    var operation = BundleResourceServiceFactory.CreateProviderAsync(
+                        manifestPath: "http://127.0.0.1:" + port + "/manifest.json", ct: cancellation.Token);
+                    operation.Completed += () => callbackThread = Thread.CurrentThread.ManagedThreadId;
+                    var worker = new Thread(cancellation.Cancel);
+                    worker.Start(); Assert.IsTrue(worker.Join(5000));
+                    Assert.IsTrue(operation.IsDone);
+                    Assert.Catch<OperationCanceledException>(() => operation.GetResult());
+                    for (var frame = 0; frame < 30 && callbackThread == -1; frame++) yield return null;
+                    Assert.AreEqual(mainThread, callbackThread);
+                }
+                finally { listener.Stop(); }
+            }
+        }
+
         [UnityTest] public IEnumerator ResourceFactory_LoadsUrlManifestWithoutSystemIoFileReads()
         {
             string root = Path.Combine(Path.GetTempPath(), "yato-url-manifest-" + Guid.NewGuid().ToString("N"));
@@ -20,12 +62,10 @@ namespace Yato.Tests.PlayMode
             string path = Path.Combine(root, "manifest.json");
             File.WriteAllText(path, "{\"schema\":2,\"version\":\"test\",\"platform\":\"" +
                 RuntimePaths.PlatformName + "\",\"bundles\":{},\"assets\":{}}");
-            bool previous = ResourceServiceFactory.ForceBundleMode;
-            ResourceServiceFactory.ForceBundleMode = true;
             IResourceProvider provider = null;
             try
             {
-                var loading = ResourceServiceFactory.CreateProviderAsync(
+                var loading = BundleResourceServiceFactory.CreateProviderAsync(
                     manifestPath: new Uri(path).AbsoluteUri);
                 yield return loading.AsEnumerator();
                 provider = loading.GetResult();
@@ -34,7 +74,6 @@ namespace Yato.Tests.PlayMode
             finally
             {
                 (provider as IDisposable)?.Dispose();
-                ResourceServiceFactory.ForceBundleMode = previous;
                 Directory.Delete(root, true);
             }
         }

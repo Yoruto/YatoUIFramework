@@ -29,7 +29,7 @@ namespace Yato.FrameworkDemo
             // Android/WebGL StreamingAssets are URLs; the async factory reads the manifest
             // with UnityWebRequest while desktop/Editor initialization still completes inline.
             m_setupCancellation = new CancellationTokenSource();
-            var setup = ResourceServiceFactory.CreateAsync(ct: m_setupCancellation.Token);
+            var setup = CreateResources();
             setup.Completed += () =>
             {
                 try
@@ -42,6 +42,15 @@ namespace Yato.FrameworkDemo
                 }
                 catch (Exception e) { if (!m_destroyed) Debug.LogException(e); }
             };
+        }
+
+        private IAwaitable<IResourceService> CreateResources()
+        {
+            if (!Application.isEditor)
+                return BundleResourceServiceFactory.CreateAsync(ct: m_setupCancellation.Token);
+            var completed = new Yato.Resources.AwaitableCompletionSource<IResourceService>();
+            completed.SetResult(ResourceServiceFactory.Create());
+            return completed;
         }
 
         private void OpenExample()

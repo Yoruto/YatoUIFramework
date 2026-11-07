@@ -3,7 +3,30 @@
 所有对本包的改动都记录在此文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [Unreleased]
+## [0.7.0] - 2026-11-07
+
+### Added
+
+- 可重现的 UPM 模块导出与离线 ZIP 套件：18 个模块 TGZ、安装器、依赖/哈希清单；按 ResourcesOnly、MinimalUI、LocalBundles、OfflineFull、Full 选择包集并补齐 Yato 依赖。详见[分发指南](../../docs/UPM_DISTRIBUTION.md)。归档存放在忽略的 Build 目录，源码提交不包含二进制归档。
+
+### Changed
+
+- 资源层拆为基础 `com.yato.resources` 0.4.0、可选 `com.yato.resources.bundle` 0.1.0 和可选 `com.yato.resources.hotupdate` 0.1.0。基础资源包仅依赖 Core，不再依赖 Persistence、AssetBundle 或 UnityWebRequest 模块。
+- 基础 `ResourceServiceFactory.Create` 默认选择 EditorAssetProvider / Player ResourcesProvider；Bundle 初始化迁至显式 `BundleResourceServiceFactory`，不再使用全局 ForceBundleMode。移动的类型保留 `Yato.Resources` 命名空间与原文件 GUID，使用方需更新程序集引用。
+- Bundle 通过缓存策略接口接入热更快照；无热更包时只加载本地目录，不引用热更实现。各包的 link.xml 仅保留自身程序集。
+- AB 打包与热更编辑器工具随对应可选包提供；通用向导、代码生成和诊断无需依赖这两类运行时扩展。
+- FullSample 改为离线演示，热更 GUI 移至 HotUpdate 包单独导入的 HotUpdateSample。
+- 消费工程准备工具增加仅资源、精简 UI、本地 Bundle 和离线完整组合；全量聚合包保留完整功能集。
+
+### Verified
+
+- Unity 6000.5.6f1：源工程 EditMode 195/195、PlayMode 120/120，零失败、零跳过。
+- 五种独立包集（2/4/3/12/15 包）的真实加载通过；FullSample 在无 Bundle/HotUpdate 的 OfflineFull 中运行，完整包集的热更提交和加载通过。
+- 两包 ResourcesOnly 的 Windows Mono 构建与原生冒烟通过；成品仅有 Core、Resources、Resources.Abstractions 三个 Yato 程序集。66 个原 Runtime/Editor 元数据 GUID 保留，无重复。
+- 实际 Bundle 打包工具入口通过。原始证据摘要：`docs/verification/MODULAR_RESOURCES_2026-11-07.json`；未将 Windows 结果当作移动端/WebGL 或 IL2CPP 实测。
+- 2026-11-07 本机官方 Unity Pipeline 现场再次执行 EditMode 195/195、PlayMode 120/120，共 315 个测试通过；基础冒烟 7 项、Bundle 冒烟 3 项通过。默认资源模式完成 Survivor 页面、设置保存、嵌套暂停、恢复和重开会话；干净 Bundle 会话通过公开动作验证菜单、战斗/升级、结算和退出。
+- 两类 Provider 退出后的 tracked handles、loaded bundles、UI roots 均为零；现场证据保留预期 EventBus 异常、早期脚手架错误和未验收项，不声称已验证 Esc、真实键盘/手柄、听音、移动端/WebGL、IL2CPP 或生产 HTTPS。
+- 当前证据：[按需资源模块](../../docs/verification/MODULAR_RESOURCES_2026-11-07.json)、[Live Unity 现场验证](../../docs/verification/LIVE_UNITY_2026-11-07.json)。
 
 ### Fixed
 

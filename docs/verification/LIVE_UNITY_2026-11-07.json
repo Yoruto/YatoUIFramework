@@ -1,0 +1,634 @@
+{
+  "schema": 1,
+  "verifiedOn": "2026-11-07",
+  "timezone": "Asia/Shanghai",
+  "unity": "6000.5.6f1",
+  "frameworkVersion": "0.7.0",
+  "platform": "Windows Unity Editor",
+  "status": "passed-with-documented-harness-errors-and-validation-limits",
+  "scope": "Live Editor verification of optional resource packages, Survivor lifecycle and cleanup; independent package/Player validation is recorded separately.",
+  "automatedTests": {
+    "editMode": {
+      "source": "Logs/LiveUnity-20261107-EditMode.json",
+      "mechanism": "Official Unity Pipeline run_tests and test_status",
+      "status": "completed",
+      "summary": {
+        "total": 195,
+        "passed": 195,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "durationSeconds": 12.49,
+      "resultRowsVerified": 195
+    },
+    "playMode": {
+      "source": "Logs/LiveUnity-20261107-PlayMode.json",
+      "mechanism": "Official Unity Pipeline run_tests and test_status",
+      "status": "completed",
+      "summary": {
+        "total": 120,
+        "passed": 120,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "durationSeconds": 22.07,
+      "resultRowsVerified": 120
+    },
+    "totalPassed": 315
+  },
+  "smoke": {
+    "source": "Logs/LiveUnity-20261107-SmokeConsole.json",
+    "bundle": {
+      "passed": 3,
+      "failed": 0,
+      "checks": [
+        "Manifest",
+        "dependency cycle",
+        "reference counter"
+      ],
+      "message": "[Yato.Bundle] Manifest, dependency cycle and reference counter smoke checks passed."
+    },
+    "foundation": {
+      "passed": 7,
+      "failed": 0,
+      "checks": [
+        "AssetKey normalization",
+        "EventBus subscribe/unsubscribe/exception isolation",
+        "DisposableBag reverse disposal",
+        "ServiceLocator",
+        "UIRoot five canvases",
+        "UIMask/UILoading",
+        "UIListPool reuse"
+      ]
+    },
+    "expectedErrorLogs": [
+      {
+        "seq": 179,
+        "message": "[Yato] [EventBus] 事件处理异常：System.Int32 ← <>c.<VerifyEventBus>b__10_1"
+      },
+      {
+        "seq": 180,
+        "message": "InvalidOperationException: 冒烟测试：故意抛错"
+      }
+    ],
+    "expectedErrorExplanation": "VerifyEventBus deliberately throws once to check observer isolation. UnityLogger emits one Error and one Exception entry; these two entries do not mean two smoke failures."
+  },
+  "liveSurvivor": {
+    "defaultProviderSession": {
+      "provider": "EditorAssetProvider",
+      "operatorReportedGuiSequence": [
+        "Menu",
+        "Settings slider/save",
+        "Run",
+        "Upgrade",
+        "Pause",
+        "Nested Settings",
+        "Resume",
+        "Results",
+        "Retry",
+        "Abandon",
+        "Menu",
+        "Quit"
+      ],
+      "consoleStatusSource": "Logs/LiveUnity-20261107-Editor-ConsoleStatus.json",
+      "consoleErrors": 0,
+      "consoleWarnings": 0
+    },
+    "coreSamples": [
+      {
+        "source": "Logs/LiveUnity-20261107-Editor-SettingsClosed.json",
+        "provider": "EditorAssetProvider",
+        "state": "MainMenu",
+        "pages": [
+          "Popup:SurvivorMenu"
+        ],
+        "assets": 3,
+        "handles": 3,
+        "subscribers": 1,
+        "pauseCount": 0,
+        "timeScale": 1,
+        "sceneCount": 1,
+        "runId": null,
+        "elapsedSeconds": null,
+        "level": null,
+        "masterVolume": 0.4127905,
+        "moveEnabled": false,
+        "error": null
+      },
+      {
+        "source": "Logs/LiveUnity-20261107-Editor-Settings.json",
+        "provider": "EditorAssetProvider",
+        "state": "MainMenu",
+        "pages": [
+          "Popup:SurvivorMenu",
+          "Popup:SurvivorSettings"
+        ],
+        "assets": 4,
+        "handles": 4,
+        "subscribers": 2,
+        "pauseCount": 0,
+        "timeScale": 1,
+        "sceneCount": 1,
+        "runId": null,
+        "elapsedSeconds": null,
+        "level": null,
+        "masterVolume": 0.7,
+        "moveEnabled": false,
+        "error": null
+      },
+      {
+        "source": "Logs/LiveUnity-20261107-Editor-Saved.json",
+        "provider": "EditorAssetProvider",
+        "state": "MainMenu",
+        "pages": [
+          "Popup:SurvivorMenu",
+          "Popup:SurvivorSettings"
+        ],
+        "assets": 4,
+        "handles": 4,
+        "subscribers": 2,
+        "pauseCount": 0,
+        "timeScale": 1,
+        "sceneCount": 1,
+        "runId": null,
+        "elapsedSeconds": null,
+        "level": null,
+        "masterVolume": 0.4127905,
+        "moveEnabled": false,
+        "error": null
+      },
+      {
+        "source": "Logs/LiveUnity-20261107-Editor-Pause.json",
+        "provider": "EditorAssetProvider",
+        "state": "Run",
+        "pages": [
+          "Popup:SurvivorPause",
+          "Normal:SurvivorHud"
+        ],
+        "assets": 9,
+        "handles": 10,
+        "subscribers": 2,
+        "pauseCount": 1,
+        "timeScale": 0,
+        "sceneCount": 2,
+        "runId": "ef89c75840844738a4e785edc5a253d6",
+        "elapsedSeconds": 48.2668571,
+        "level": 4,
+        "masterVolume": 0.4127905,
+        "moveEnabled": false,
+        "error": null
+      },
+      {
+        "source": "Logs/LiveUnity-20261107-Editor-NestedPause.json",
+        "provider": "EditorAssetProvider",
+        "state": "Run",
+        "pages": [
+          "Popup:SurvivorPause",
+          "Popup:SurvivorSettings",
+          "Normal:SurvivorHud"
+        ],
+        "assets": 10,
+        "handles": 11,
+        "subscribers": 3,
+        "pauseCount": 2,
+        "timeScale": 0,
+        "sceneCount": 2,
+        "runId": "ef89c75840844738a4e785edc5a253d6",
+        "elapsedSeconds": 48.2668571,
+        "level": 4,
+        "masterVolume": 0.4127905,
+        "moveEnabled": false,
+        "error": null
+      },
+      {
+        "source": "Logs/LiveUnity-20261107-Editor-NestedClosed.json",
+        "provider": "EditorAssetProvider",
+        "state": "Run",
+        "pages": [
+          "Popup:SurvivorPause",
+          "Normal:SurvivorHud"
+        ],
+        "assets": 9,
+        "handles": 10,
+        "subscribers": 2,
+        "pauseCount": 1,
+        "timeScale": 0,
+        "sceneCount": 2,
+        "runId": "ef89c75840844738a4e785edc5a253d6",
+        "elapsedSeconds": 48.2668571,
+        "level": 4,
+        "masterVolume": 0.4127905,
+        "moveEnabled": false,
+        "error": null
+      },
+      {
+        "source": "Logs/LiveUnity-20261107-Editor-Resumed.json",
+        "provider": "EditorAssetProvider",
+        "state": "Run",
+        "pages": [
+          "Normal:SurvivorHud"
+        ],
+        "assets": 8,
+        "handles": 9,
+        "subscribers": 1,
+        "pauseCount": 0,
+        "timeScale": 1,
+        "sceneCount": 2,
+        "runId": "ef89c75840844738a4e785edc5a253d6",
+        "elapsedSeconds": 50.51323,
+        "level": 4,
+        "masterVolume": 0.4127905,
+        "moveEnabled": true,
+        "error": null
+      },
+      {
+        "source": "Logs/LiveUnity-20261107-Editor-Results.json",
+        "provider": "EditorAssetProvider",
+        "state": "Results",
+        "pages": [
+          "Popup:SurvivorResults"
+        ],
+        "assets": 3,
+        "handles": 3,
+        "subscribers": 1,
+        "pauseCount": 0,
+        "timeScale": 1,
+        "sceneCount": 1,
+        "runId": null,
+        "elapsedSeconds": null,
+        "level": null,
+        "masterVolume": 0.4127905,
+        "moveEnabled": false,
+        "error": null
+      },
+      {
+        "source": "Logs/LiveUnity-20261107-Editor-Retry.json",
+        "provider": "EditorAssetProvider",
+        "state": "Run",
+        "pages": [
+          "Normal:SurvivorHud"
+        ],
+        "assets": 8,
+        "handles": 9,
+        "subscribers": 1,
+        "pauseCount": 0,
+        "timeScale": 1,
+        "sceneCount": 2,
+        "runId": "8a650c11ff90460a8cbb4b5a930bd9bb",
+        "elapsedSeconds": 2.10928774,
+        "level": 1,
+        "masterVolume": 0.4127905,
+        "moveEnabled": true,
+        "error": null
+      },
+      {
+        "source": "Logs/LiveUnity-20261107-Editor-ReturnedMenu.json",
+        "provider": "EditorAssetProvider",
+        "state": "MainMenu",
+        "pages": [
+          "Popup:SurvivorMenu"
+        ],
+        "assets": 3,
+        "handles": 3,
+        "subscribers": 1,
+        "pauseCount": 0,
+        "timeScale": 1,
+        "sceneCount": 1,
+        "runId": null,
+        "elapsedSeconds": null,
+        "level": null,
+        "masterVolume": 0.4127905,
+        "moveEnabled": false,
+        "error": null
+      },
+      {
+        "source": "Logs/LiveUnity-20261107-Bundle-CleanMenu.json",
+        "provider": "BundleProvider",
+        "state": "MainMenu",
+        "pages": [
+          "Popup:SurvivorMenu"
+        ],
+        "assets": 3,
+        "handles": 3,
+        "subscribers": 1,
+        "pauseCount": 0,
+        "timeScale": 1,
+        "sceneCount": 1,
+        "runId": null,
+        "elapsedSeconds": null,
+        "level": null,
+        "masterVolume": 0.4127905,
+        "moveEnabled": false,
+        "error": null
+      },
+      {
+        "source": "Logs/LiveUnity-20261107-Bundle-CleanRun.json",
+        "provider": "BundleProvider",
+        "state": "Run",
+        "pages": [
+          "Popup:SurvivorUpgrade",
+          "Normal:SurvivorHud"
+        ],
+        "assets": 9,
+        "handles": 10,
+        "subscribers": 2,
+        "pauseCount": 1,
+        "timeScale": 0,
+        "sceneCount": 2,
+        "runId": "e7d5cb1a442e4ce3adc7c528ddb27753",
+        "elapsedSeconds": 13.49642,
+        "level": 2,
+        "masterVolume": 0.4127905,
+        "moveEnabled": false,
+        "error": null
+      },
+      {
+        "source": "Logs/LiveUnity-20261107-Bundle-CleanResults.json",
+        "provider": "BundleProvider",
+        "state": "Results",
+        "pages": [
+          "Popup:SurvivorResults"
+        ],
+        "assets": 3,
+        "handles": 3,
+        "subscribers": 1,
+        "pauseCount": 0,
+        "timeScale": 1,
+        "sceneCount": 1,
+        "runId": null,
+        "elapsedSeconds": null,
+        "level": null,
+        "masterVolume": 0.4127905,
+        "moveEnabled": false,
+        "error": null
+      }
+    ],
+    "pauseFreeze": {
+      "sources": [
+        "Logs/LiveUnity-20261107-Editor-Pause.json",
+        "Logs/LiveUnity-20261107-Editor-NestedPause.json",
+        "Logs/LiveUnity-20261107-Editor-NestedClosed.json"
+      ],
+      "elapsedSeconds": [
+        48.2668571,
+        48.2668571,
+        48.2668571
+      ],
+      "pauseCounts": [
+        1,
+        2,
+        1
+      ],
+      "observationSpanSecondsApprox": 38,
+      "timeScale": 0,
+      "movementDisabled": true,
+      "resumedElapsedSeconds": 50.51323,
+      "resumedTimeScale": 1
+    },
+    "retry": {
+      "source": "Logs/LiveUnity-20261107-Editor-Retry.json",
+      "previousRunId": "ef89c75840844738a4e785edc5a253d6",
+      "newRunId": "8a650c11ff90460a8cbb4b5a930bd9bb",
+      "distinctRunId": true,
+      "level": 1,
+      "elapsedSeconds": 2.10928774
+    },
+    "subscriptions": "Every structured core sample has one SurvivorUiChanged subscription per open page; nested settings counts return from 3 to 2 and resumed/menu/results counts return to 1.",
+    "shutdowns": [
+      {
+        "source": "Logs/LiveUnity-20261107-Editor-Shutdown.json",
+        "observed": {
+          "play": false,
+          "handles": 0,
+          "bundles": 0,
+          "roots": 0
+        }
+      },
+      {
+        "source": "Logs/LiveUnity-20261107-Bundle-Shutdown.json",
+        "observed": {
+          "play": false,
+          "handles": 0,
+          "bundles": 0,
+          "roots": 0
+        }
+      },
+      {
+        "source": "Logs/LiveUnity-20261107-Bundle-CleanShutdown.json",
+        "observed": {
+          "play": false,
+          "handles": 0,
+          "bundles": 0,
+          "roots": 0
+        }
+      }
+    ],
+    "shutdownMeasurementBoundary": "Shutdown snapshots explicitly measure play=false and zero tracked handles, loaded bundles and UI roots. They do not record asset or EventBus subscriber counts after service destruction.",
+    "initialBundleHarnessFailure": {
+      "source": "Logs/LiveUnity-20261107-Bundle-HarnessError.json",
+      "affectedSnapshots": [
+        "Logs/LiveUnity-20261107-Bundle-Pause.json",
+        "Logs/LiveUnity-20261107-Bundle-Results.json"
+      ],
+      "explanation": "Operator supplied Context.Page cast as SurvivorPageView; Context.Page is the mediator, so the incorrect cast supplied null to the action. This is retained as a harness failure, not classified as an unexpected production failure.",
+      "excludedFromCleanSession": true
+    },
+    "finalCleanBundleSession": {
+      "snapshotSources": [
+        "Logs/LiveUnity-20261107-Bundle-CleanMenu.json",
+        "Logs/LiveUnity-20261107-Bundle-CleanRun.json",
+        "Logs/LiveUnity-20261107-Bundle-CleanResults.json",
+        "Logs/LiveUnity-20261107-Bundle-CleanShutdown.json"
+      ],
+      "operatorReportedPublicActions": [
+        "Btn_Start",
+        "Btn_Abandon",
+        "Btn_Quit"
+      ],
+      "restartedFromCleanPlaySession": true,
+      "runSnapshotIncludesUpgradePage": true,
+      "snapshotErrors": 0,
+      "consoleSource": "Logs/LiveUnity-20261107-Bundle-CleanConsole.json",
+      "consoleCounts": {
+        "error": 0,
+        "warn": 0,
+        "log": 8
+      },
+      "consoleGroundTruth": {
+        "sampledUtc": "2026-11-07T07:14:10.4188572Z",
+        "ageMs": 179,
+        "compilationFailed": false,
+        "compiling": false,
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "consoleLogs": 8,
+        "seeded": true
+      }
+    }
+  },
+  "evidenceCaveats": [
+    "Editor-Menu was captured while ready=false/busy=true; stable menu baselines use SettingsClosed or ReturnedMenu.",
+    "Editor-Run contains a fallback string after Vector2 serialization; it is preserved raw and not treated as a structured page list. Resumed and Retry provide structured run evidence.",
+    "The initial Bundle Run/Escape and Pause snapshots have different RunIds; their elapsed values are not a continuous pause-freeze measurement.",
+    "Esc input was not reliably validated. The Escape-named snapshot shows an upgrade page and does not prove Escape handling.",
+    "This evidence covers Windows Editor, not IL2CPP, Android, iOS, WebGL, or production HTTPS. It does not establish physical keyboard/gamepad or listening acceptance.",
+    "BaselineConsole retains two unsupported editor status command errors and pre-existing deprecation/meta warnings. It is a baseline artifact, not the clean-session result."
+  ],
+  "restoration": {
+    "source": "Logs/LiveUnity-20261107-Restored.json",
+    "forceBundles": false,
+    "dataRoot": "",
+    "sceneDirty": false,
+    "editorStopped": true,
+    "editorLeftOpen": true,
+    "openScene": "Assets/SurvivorSample/Scenes/SurvivorBootstrap.unity",
+    "sceneChangesPersisted": false,
+    "sceneAndProjectSettingsGitDiffClean": true,
+    "basis": "Restored successful stopped-editor guard, restored serialized values, dirty=false; operator verified no scene or ProjectSettings diff."
+  },
+  "onlyValidationMetadataRepair": {
+    "operation": "delete",
+    "path": "Packages/com.yato.resources.hotupdate/Samples~.meta",
+    "reason": "Remove orphan metadata for the UPM Samples~ container",
+    "sampleDirectoryRetained": "Packages/com.yato.resources.hotupdate/Samples~/HotUpdateSample",
+    "sampleEntryScriptExists": true,
+    "sampleContentDeleted": false
+  },
+  "rawArtifactCount": 33,
+  "rawArtifacts": {
+    "Logs/LiveUnity-20261107-BaselineConsole.json": {
+      "sha256": "733a4ab6d6f4f4d1c96e1638b4611b09b13ece05b62b8ec93b459564fbc1513b",
+      "bytes": 10682
+    },
+    "Logs/LiveUnity-20261107-Bundle-CleanConsole.json": {
+      "sha256": "90a3e86d6ef5c5cda5e449ef10826702f90b3f5e774c3c2c8c46a72fe9d598b3",
+      "bytes": 10350
+    },
+    "Logs/LiveUnity-20261107-Bundle-CleanMenu.json": {
+      "sha256": "6c1dcec0e80a72a325dbdd598968486b09273dc9b69c8ac5d3a36bd9fa4f6992",
+      "bytes": 1177
+    },
+    "Logs/LiveUnity-20261107-Bundle-CleanResults.json": {
+      "sha256": "8578afb66990766716a605d87569bacd3cf7771273ff557d42ab7c09f135b7d9",
+      "bytes": 1179
+    },
+    "Logs/LiveUnity-20261107-Bundle-CleanRun.json": {
+      "sha256": "6171cf78aae055e5c97362ec74fd32c8261df872368872ff1b3a6e91aa5ff3ce",
+      "bytes": 1250
+    },
+    "Logs/LiveUnity-20261107-Bundle-CleanShutdown.json": {
+      "sha256": "145b616e8401d79be2f6d0b5d48316976553f4966cd949927c2ddce33247e428",
+      "bytes": 790
+    },
+    "Logs/LiveUnity-20261107-Bundle-Escape.json": {
+      "sha256": "43baffdaa69f84f9a604288f880e31b8982f026c80efd0f13e65652307550972",
+      "bytes": 1250
+    },
+    "Logs/LiveUnity-20261107-Bundle-HarnessError.json": {
+      "sha256": "ee5ee49305065bbe15907c84de7a71d4f634c5a44a2997abf599a82e3ee61605",
+      "bytes": 3974
+    },
+    "Logs/LiveUnity-20261107-Bundle-Menu.json": {
+      "sha256": "6c1dcec0e80a72a325dbdd598968486b09273dc9b69c8ac5d3a36bd9fa4f6992",
+      "bytes": 1177
+    },
+    "Logs/LiveUnity-20261107-Bundle-Pause.json": {
+      "sha256": "1006f9dccecf52982d296c79e222465aedda384fcce6dea4992c823fe23074c9",
+      "bytes": 1300
+    },
+    "Logs/LiveUnity-20261107-Bundle-Results.json": {
+      "sha256": "bff3ac05a926dbbba8c991209c9a459aceb28e7dc50f7e4ba421dead837957ed",
+      "bytes": 1229
+    },
+    "Logs/LiveUnity-20261107-Bundle-Run.json": {
+      "sha256": "8475d02b69bc985bc9616e1d99b15e852263a6a7ebb8d1808e3e4e61ce882d95",
+      "bytes": 1215
+    },
+    "Logs/LiveUnity-20261107-Bundle-Shutdown.json": {
+      "sha256": "9813da6287762d457511a8e84d08b76e5ebfb57ac2cb42fb813bb533cdde7c57",
+      "bytes": 791
+    },
+    "Logs/LiveUnity-20261107-ConsoleBeforeSmoke.json": {
+      "sha256": "2b275cb9ea2becd3bf332e6bdf30eb118bff5ed61e7aa43bde40b37ef68f228e",
+      "bytes": 312110
+    },
+    "Logs/LiveUnity-20261107-EditMode.json": {
+      "sha256": "d2d7b7a1ef91f9d410e998b285fb6bc4f62608311e9c640941d6913ea4e8a1c0",
+      "bytes": 51129
+    },
+    "Logs/LiveUnity-20261107-Editor-Abandoned.json": {
+      "sha256": "800124d965697934e9466efed768c3b08c0189c447737e47916c623b3810de43",
+      "bytes": 1184
+    },
+    "Logs/LiveUnity-20261107-Editor-ConsoleStatus.json": {
+      "sha256": "b2b894dfceedfb0345e5aabe693d59626abfc6d191be3cf77b991959e3a87f13",
+      "bytes": 864
+    },
+    "Logs/LiveUnity-20261107-Editor-Menu.json": {
+      "sha256": "351eb3c2bcac7f17eac59137d71096f255b4f4d4cd3ea02489c27a6df83822cf",
+      "bytes": 1127
+    },
+    "Logs/LiveUnity-20261107-Editor-NestedClosed.json": {
+      "sha256": "832ba7f84edd0cb736dd6e010fb32bcaa6535b37873a936e1309f9fa4734d137",
+      "bytes": 1255
+    },
+    "Logs/LiveUnity-20261107-Editor-NestedPause.json": {
+      "sha256": "21054cdea79baf0c08112d8a279a25d4cf662c162730813c5cc2356515ded275",
+      "bytes": 1293
+    },
+    "Logs/LiveUnity-20261107-Editor-Pause.json": {
+      "sha256": "832ba7f84edd0cb736dd6e010fb32bcaa6535b37873a936e1309f9fa4734d137",
+      "bytes": 1255
+    },
+    "Logs/LiveUnity-20261107-Editor-Results.json": {
+      "sha256": "800124d965697934e9466efed768c3b08c0189c447737e47916c623b3810de43",
+      "bytes": 1184
+    },
+    "Logs/LiveUnity-20261107-Editor-Resumed.json": {
+      "sha256": "387088513341672b20cc1f5b31b2605dd1117fc0927c65564fb74b2cf2eb5232",
+      "bytes": 1218
+    },
+    "Logs/LiveUnity-20261107-Editor-Retry.json": {
+      "sha256": "9be40c048151a2fbb921633af18b45ea820c670c254e865ba4141e45bdb17dbf",
+      "bytes": 1220
+    },
+    "Logs/LiveUnity-20261107-Editor-ReturnedMenu.json": {
+      "sha256": "9bd6fc2bcb9e26419e97d54ed88dabda53658feece52f7c1ba4e0e3aec687ad5",
+      "bytes": 1182
+    },
+    "Logs/LiveUnity-20261107-Editor-Run.json": {
+      "sha256": "8ca19e15584ace75ddd3721fff9ffb79657fcaffb98cb3fb4f400a622137bdc1",
+      "bytes": 973
+    },
+    "Logs/LiveUnity-20261107-Editor-Saved.json": {
+      "sha256": "0c6a5cfa1875724243390a88de2c3787c74df9dda9f678266e9a191046ef8427",
+      "bytes": 1219
+    },
+    "Logs/LiveUnity-20261107-Editor-Settings.json": {
+      "sha256": "071c6eaa39939056ff24e43eb8a81f26dc34f8074ab5add1334ebcb34e01fd64",
+      "bytes": 1213
+    },
+    "Logs/LiveUnity-20261107-Editor-SettingsClosed.json": {
+      "sha256": "9bd6fc2bcb9e26419e97d54ed88dabda53658feece52f7c1ba4e0e3aec687ad5",
+      "bytes": 1182
+    },
+    "Logs/LiveUnity-20261107-Editor-Shutdown.json": {
+      "sha256": "9813da6287762d457511a8e84d08b76e5ebfb57ac2cb42fb813bb533cdde7c57",
+      "bytes": 791
+    },
+    "Logs/LiveUnity-20261107-PlayMode.json": {
+      "sha256": "f9c66d366e3fd2a900a374eb74bd2f34c7c8ebcfaf1b9d8f3a0bf16edc788d9b",
+      "bytes": 31656
+    },
+    "Logs/LiveUnity-20261107-Restored.json": {
+      "sha256": "8b8c750106a5a3a33f56579ac528c1c1502173771adc737963d529d1c60cbf97",
+      "bytes": 955
+    },
+    "Logs/LiveUnity-20261107-SmokeConsole.json": {
+      "sha256": "9755fdf671f9c4b9f46d616a353d8fb361fa1786bfc91cf3eaef455ca2aa51ca",
+      "bytes": 8698
+    }
+  }
+}

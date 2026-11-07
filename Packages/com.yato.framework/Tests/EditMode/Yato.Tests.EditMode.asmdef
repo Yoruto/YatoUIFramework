@@ -1,33 +1,37 @@
 {
-    "name": "Yato.Tests.EditMode",
-    "rootNamespace": "Yato.Tests.EditMode",
-    "references": [
-        "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner",
-        "Yato.Core",
-        "Yato.Mvc",
-        "Yato.Resources.Abstractions",
-        "Yato.Resources",
-        "Yato.UI",
-        "Yato.App",
-        "Yato.Persistence",
-        "Yato.Settings",
-        "Yato.Audio",
-        "Yato.Editor"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": true,
-    "precompiledReferences": [
-        "nunit.framework.dll"
-    ],
-    "autoReferenced": false,
-    "defineConstraints": [
-        "UNITY_INCLUDE_TESTS"
-    ],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "Yato.Tests.EditMode",
+  "rootNamespace": "Yato.Tests.EditMode",
+  "references": [
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner",
+    "Yato.Core",
+    "Yato.Mvc",
+    "Yato.Resources.Abstractions",
+    "Yato.Resources",
+    "Yato.UI",
+    "Yato.App",
+    "Yato.Persistence",
+    "Yato.Settings",
+    "Yato.Audio",
+    "Yato.Editor",
+    "Yato.Resources.Bundle",
+    "Yato.Resources.HotUpdate",
+    "Yato.Resources.Editor",
+    "Yato.Resources.Bundle.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

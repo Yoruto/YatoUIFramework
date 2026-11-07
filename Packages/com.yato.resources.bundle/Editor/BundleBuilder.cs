@@ -4,6 +4,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 using Yato.Resources;
+using Yato.Resources.Editor;
 
 namespace Yato.Editor
 {
@@ -76,7 +77,7 @@ namespace Yato.Editor
 
             try
             {
-                ConfigCatalogValidator.ValidateAll();
+                ResourceBuildValidation.ValidateAll();
                 string warning = PlatformResolver.ValidateTarget(target);
                 if (!string.IsNullOrEmpty(warning))
                 {

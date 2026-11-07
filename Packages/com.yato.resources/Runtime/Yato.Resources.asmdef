@@ -3,8 +3,7 @@
     "rootNamespace": "Yato.Resources",
     "references": [
         "Yato.Core",
-        "Yato.Resources.Abstractions",
-        "Yato.Persistence"
+        "Yato.Resources.Abstractions"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

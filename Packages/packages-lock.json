@@ -258,7 +258,7 @@
       "source": "embedded",
       "dependencies": {
         "com.yato.core": "0.2.0",
-        "com.yato.resources": "0.3.1"
+        "com.yato.resources": "0.4.0"
       }
     },
     "com.yato.audio": {
@@ -267,7 +267,7 @@
       "source": "embedded",
       "dependencies": {
         "com.yato.core": "0.2.0",
-        "com.yato.resources": "0.3.1"
+        "com.yato.resources": "0.4.0"
       }
     },
     "com.yato.config": {
@@ -276,7 +276,7 @@
       "source": "embedded",
       "dependencies": {
         "com.yato.core": "0.2.0",
-        "com.yato.resources": "0.3.1",
+        "com.yato.resources": "0.4.0",
         "com.unity.modules.jsonserialize": "1.0.0"
       }
     },
@@ -292,7 +292,7 @@
       "source": "embedded",
       "dependencies": {
         "com.yato.core": "0.2.0",
-        "com.yato.resources": "0.3.1",
+        "com.yato.resources": "0.4.0",
         "com.yato.ui": "0.3.0",
         "com.unity.ugui": "1.0.0",
         "com.unity.textmeshpro": "3.0.6",
@@ -307,7 +307,7 @@
       "dependencies": {
         "com.yato.core": "0.2.0",
         "com.yato.app": "0.3.0",
-        "com.yato.resources": "0.3.1"
+        "com.yato.resources": "0.4.0"
       }
     },
     "com.yato.framework": {
@@ -317,16 +317,18 @@
       "dependencies": {
         "com.yato.core": "0.2.0",
         "com.yato.mvc": "0.1.0",
-        "com.yato.resources": "0.3.1",
+        "com.yato.resources": "0.4.0",
         "com.yato.ui": "0.3.0",
         "com.yato.app": "0.3.0",
         "com.yato.persistence": "0.1.1",
         "com.yato.settings": "0.1.1",
         "com.yato.audio": "0.1.1",
-        "com.yato.editor": "0.3.1",
+        "com.yato.editor": "0.4.0",
         "com.yato.flow": "0.2.0",
         "com.yato.config": "0.2.0",
-        "com.yato.pooling": "0.2.0"
+        "com.yato.pooling": "0.2.0",
+        "com.yato.resources.bundle": "0.1.0",
+        "com.yato.resources.hotupdate": "0.1.0"
       }
     },
     "com.yato.input": {
@@ -357,7 +359,7 @@
       "source": "embedded",
       "dependencies": {
         "com.yato.core": "0.2.0",
-        "com.yato.resources": "0.3.1"
+        "com.yato.resources": "0.4.0"
       }
     },
     "com.yato.resources": {
@@ -365,12 +367,31 @@
       "depth": 0,
       "source": "embedded",
       "dependencies": {
+        "com.yato.core": "0.2.0"
+      }
+    },
+    "com.yato.resources.bundle": {
+      "version": "file:com.yato.resources.bundle",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
         "com.yato.core": "0.2.0",
+        "com.yato.resources": "0.4.0",
         "com.unity.modules.assetbundle": "1.0.0",
-        "com.unity.modules.jsonserialize": "1.0.0",
         "com.unity.modules.unitywebrequest": "1.0.0",
-        "com.unity.modules.unitywebrequestassetbundle": "1.0.0",
-        "com.yato.persistence": "0.1.1"
+        "com.unity.modules.unitywebrequestassetbundle": "1.0.0"
+      }
+    },
+    "com.yato.resources.hotupdate": {
+      "version": "file:com.yato.resources.hotupdate",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.yato.core": "0.2.0",
+        "com.yato.resources": "0.4.0",
+        "com.yato.resources.bundle": "0.1.0",
+        "com.yato.persistence": "0.1.1",
+        "com.unity.modules.unitywebrequest": "1.0.0"
       }
     },
     "com.yato.save": {
@@ -398,7 +419,7 @@
       "dependencies": {
         "com.yato.core": "0.2.0",
         "com.yato.mvc": "0.1.0",
-        "com.yato.resources": "0.3.1",
+        "com.yato.resources": "0.4.0",
         "com.unity.ugui": "1.0.0"
       }
     },

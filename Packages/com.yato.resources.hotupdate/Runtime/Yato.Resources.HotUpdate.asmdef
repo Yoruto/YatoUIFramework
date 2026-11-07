@@ -1,0 +1,19 @@
+{
+    "name": "Yato.Resources.HotUpdate",
+    "rootNamespace": "Yato.Resources",
+    "references": [
+        "Yato.Core",
+        "Yato.Resources.Abstractions",
+        "Yato.Resources.Bundle",
+        "Yato.Persistence"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -58,10 +58,8 @@ namespace Yato.Survivor
             Application.runInBackground = true;
             try
             {
-                HotUpdateMaintenance.PrepareStartup();
-                ResourceServiceFactory.ForceBundleMode = ForceBundles;
                 if (string.IsNullOrWhiteSpace(DataRoot)) DataRoot = SurvivorPerformanceScenario.Argument("--survivor-test-data") ?? Environment.GetEnvironmentVariable("YATO_SURVIVOR_TEST_DATA");
-                Services = new SurvivorServices(DataRoot);
+                Services = new SurvivorServices(DataRoot, ForceBundles);
                 GameBootstrap.RegisterService(Services);
             }
             catch (Exception error) { Debug.LogException(error); ErrorMessage = error.Message; }

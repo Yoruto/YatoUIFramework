@@ -23,7 +23,12 @@ namespace Yato.Survivor
     public sealed class SurvivorServices : IAppService
     {
         private readonly string m_dataRoot;
-        public SurvivorServices(string dataRoot = null) { m_dataRoot = string.IsNullOrWhiteSpace(dataRoot) ? null : dataRoot; }
+        private readonly bool m_useBundles;
+        public SurvivorServices(string dataRoot = null, bool useBundles = false)
+        {
+            m_dataRoot = string.IsNullOrWhiteSpace(dataRoot) ? null : dataRoot;
+            m_useBundles = useBundles || !Application.isEditor;
+        }
         public string Name => "Yato Survivor";
         public int Order => 100;
         public IResourceService Resources { get; private set; }
@@ -40,7 +45,7 @@ namespace Yato.Survivor
         public void Initialize()
         {
             if (Resources != null) return;
-            Resources = ResourceServiceFactory.Create();
+            Resources = m_useBundles ? BundleResourceServiceFactory.Create() : ResourceServiceFactory.Create();
             var store = new FileStore(m_dataRoot);
             Settings = new SettingsService<SurvivorSettings>(new SurvivorSettings(), store, "survivor/settings.json", validator: value =>
             {

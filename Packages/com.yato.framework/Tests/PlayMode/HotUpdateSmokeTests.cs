@@ -53,7 +53,6 @@ namespace Yato.Tests.PlayMode
         [UnityTearDown]
         public IEnumerator TearDown()
         {
-            ResourceServiceFactory.ForceBundleMode = false;
             if (!string.IsNullOrEmpty(m_localRoot) && Directory.Exists(m_localRoot)) Directory.Delete(m_localRoot, true);
 
             if (!string.IsNullOrEmpty(m_remoteRoot) && Directory.Exists(m_remoteRoot))
@@ -123,8 +122,6 @@ namespace Yato.Tests.PlayMode
             IAwaitable<HotUpdateResult> updating = service.RunAsync(m_remoteUrl);
             yield return updating.AsEnumerator();
             Assert.IsTrue(updating.GetResult().Success, "热更应成功");
-
-            ResourceServiceFactory.ForceBundleMode = true;
             string active = new HotUpdateStorage(m_localRoot).ActiveDirectory;
             BundleLoader loader = null;
             var counter = new BundleRefCounter(name => loader.Unload(name));

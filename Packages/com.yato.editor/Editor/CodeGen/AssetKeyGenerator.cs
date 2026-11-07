@@ -6,13 +6,14 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 using Yato.Resources;
+using Yato.Resources.Editor;
 using Yato.UI;
 
 namespace Yato.Editor
 {
     /// <summary>
     /// 扫描可打包资源生成 <c>AssetKeys.g.cs</c> 与 <c>UIPages.g.cs</c>（T-P4-03）。
-    /// 约束：收集范围与 <see cref="BundleNaming.BuildableExtensions"/> 一致；UIPages 只收
+    /// 约束：按基础资源模块的 <see cref="AssetPathMapping.SupportedExtensions"/> 收集；UIPages 只收
     /// <c>ui/</c> 目录下的预制体；只读命名与目录、不读场景；生成物带 auto-generated 头；
     /// 内容无变化不写盘。
     /// </summary>
@@ -54,24 +55,24 @@ namespace Yato.Editor
                 assets.Count, uiPrefabs.Count, changed));
         }
 
-        /// <summary>与打包保持一致：按 <see cref="BundleNaming.BuildableExtensions"/> 过滤并排除 Editor/~ 目录。</summary>
+        /// <summary>使用共用资源路径规则，排除 Editor/~ 目录；无需安装 Bundle 模块。</summary>
         private static List<string> CollectAssets(string assetRoot)
         {
-            return BundleNaming.CollectBuildableAssets(assetRoot);
+            return AssetPathMapping.CollectAssets(assetRoot);
         }
 
         /// <summary>页面表只接受 ui/ 目录下的预制体，避免 Enemy/Projectile 等资源被误生成页面定义。</summary>
         private static List<string> CollectUIPrefabs(List<string> assets, string assetRoot)
         {
             var result = new List<string>();
-            string root = (assetRoot ?? BundleNaming.DefaultAssetRoot).Replace('\\', '/').TrimEnd('/') + "/";
+            string root = (assetRoot ?? AssetPathMapping.DefaultAssetRoot).Replace('\\', '/').TrimEnd('/') + "/";
             for (int i = 0; i < assets.Count; i++)
             {
                 string path = assets[i].Replace('\\', '/');
                 if (!path.EndsWith(".prefab", StringComparison.OrdinalIgnoreCase)) continue;
                 if (!path.StartsWith(root, StringComparison.OrdinalIgnoreCase)) continue;
 
-                string key = BundleNaming.GetAssetKey(path, assetRoot);
+                string key = AssetPathMapping.GetAssetKey(path, assetRoot);
                 if (string.IsNullOrEmpty(key) || !key.StartsWith("ui/", StringComparison.OrdinalIgnoreCase)) continue;
                 result.Add(path);
             }
@@ -91,7 +92,7 @@ namespace Yato.Editor
             var used = new Dictionary<string, string>(StringComparer.Ordinal);
             for (int i = 0; i < assets.Count; i++)
             {
-                string key = BundleNaming.GetAssetKey(assets[i], assetRoot);
+                string key = AssetPathMapping.GetAssetKey(assets[i], assetRoot);
                 if (string.IsNullOrEmpty(key))
                 {
                     continue;
@@ -131,7 +132,7 @@ namespace Yato.Editor
             for (int i = 0; i < prefabs.Count; i++)
             {
                 string path = prefabs[i];
-                string key = BundleNaming.GetAssetKey(path, assetRoot);
+                string key = AssetPathMapping.GetAssetKey(path, assetRoot);
                 if (string.IsNullOrEmpty(key))
                 {
                     continue;

@@ -16,7 +16,7 @@ namespace Yato.Resources
     {
         public const int CurrentSchema = 1;
         public const int MaxBundleCount = 10000;
-        public const long MaxBundleBytes = 1024L * 1024 * 1024;
+        public const long MaxBundleBytes = BundleLimits.MaxBundleBytes;
         public const long MaxTotalBytes = 8L * 1024 * 1024 * 1024;
 
         private readonly Dictionary<string, BundleHash> m_bundles =

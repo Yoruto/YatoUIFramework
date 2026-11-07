@@ -7,7 +7,7 @@ if ($survivorTargetRoot.StartsWith($survivorSourceRoot + [IO.Path]::DirectorySep
 foreach ($relative in @('Assets', 'Assets/GameRes', 'Assets/GameRes/UI', 'Assets/GameRes/Config', 'Assets/GameRes/Audio', 'Packages', 'ProjectSettings', 'Logs')) {
     New-Item -ItemType Directory -Path (Join-Path $survivorTargetRoot $relative) -Force | Out-Null
 }
-foreach ($package in @('core', 'mvc', 'persistence', 'resources', 'ui', 'app', 'settings', 'audio', 'flow', 'config', 'pooling', 'save', 'input', 'ui.input', 'editor', 'framework')) {
+foreach ($package in @('core', 'mvc', 'persistence', 'resources', 'resources.bundle', 'resources.hotupdate', 'ui', 'app', 'settings', 'audio', 'flow', 'config', 'pooling', 'save', 'input', 'ui.input', 'editor', 'framework')) {
     Copy-Item -LiteralPath (Join-Path $survivorSourceRoot "Packages/com.yato.$package") -Destination (Join-Path $survivorTargetRoot 'Packages') -Recurse
 }
 foreach ($relative in @('Assets/SurvivorSample', 'Assets/GameRes/Survivor', 'Assets/GameRes/UI/Survivor', 'Assets/GameRes/Config/Survivor', 'Assets/GameRes/Audio/Survivor')) {

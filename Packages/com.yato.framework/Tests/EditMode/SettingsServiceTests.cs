@@ -377,7 +377,10 @@ namespace Yato.Tests.EditMode
             {
                 Task<SettingsLoadResult> queued = service.LoadAsync(cts.Token);
                 cts.Cancel();
-                Assert.ThrowsAsync<OperationCanceledException>(async () => { await queued; });
+                Exception queuedFailure = null;
+                try { await queued; }
+                catch (Exception error) { queuedFailure = error; }
+                Assert.IsInstanceOf<OperationCanceledException>(queuedFailure);
             }
             store.Read.SetResult(m_serializer.Serialize(new TestSettings { Volume = 15 }));
             Assert.AreEqual(SettingsLoadStatus.Loaded, (await active).Status);

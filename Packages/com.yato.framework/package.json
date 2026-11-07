@@ -1,8 +1,8 @@
 {
   "name": "com.yato.framework",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "displayName": "Yato Framework",
-  "description": "Yato Unity 6 通用框架聚合包：流程、配置、资源、实例池、UI、App、设置、音频和编辑器工具；附独立示例、测试与裁剪配置。Save、Input 和 UI/Input 按需安装。",
+  "description": "Yato Unity 6 框架全量聚合包；资源基础、AssetBundle 和资源热更新可独立安装。离线项目可直接组合子包。",
   "unity": "6000.0",
   "keywords": [
     "framework",
@@ -17,16 +17,18 @@
   "dependencies": {
     "com.yato.core": "0.2.0",
     "com.yato.mvc": "0.1.0",
-    "com.yato.resources": "0.3.1",
+    "com.yato.resources": "0.4.0",
     "com.yato.ui": "0.3.0",
     "com.yato.app": "0.3.0",
     "com.yato.persistence": "0.1.1",
     "com.yato.settings": "0.1.1",
     "com.yato.audio": "0.1.1",
-    "com.yato.editor": "0.3.1",
+    "com.yato.editor": "0.4.0",
     "com.yato.flow": "0.2.0",
     "com.yato.config": "0.2.0",
-    "com.yato.pooling": "0.2.0"
+    "com.yato.pooling": "0.2.0",
+    "com.yato.resources.bundle": "0.1.0",
+    "com.yato.resources.hotupdate": "0.1.0"
   },
   "samples": [
     {
@@ -36,7 +38,7 @@
     },
     {
       "displayName": "FullSample",
-      "description": "Standalone Flow, Config, Pooling, Settings, Audio and transactional hot-update demo.",
+      "description": "Offline Flow, Config, Pooling, Settings and Audio demo. Resource hot-update demo is separately supplied by Yato Resources HotUpdate.",
       "path": "Samples~/FullSample"
     }
   ]

@@ -1,0 +1,7 @@
+{
+    "name": "Yato.Resources.Bundle.Editor",
+    "rootNamespace": "Yato.Editor",
+    "references": ["Yato.Core", "Yato.Resources.Abstractions", "Yato.Resources", "Yato.Resources.Editor", "Yato.Resources.Bundle"],
+    "includePlatforms": ["Editor"],
+    "autoReferenced": true
+}

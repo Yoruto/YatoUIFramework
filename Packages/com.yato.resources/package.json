@@ -1,24 +1,18 @@
 {
   "name": "com.yato.resources",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "displayName": "Yato Resources",
-  "description": "Yato 框架资源层：资源句柄与引用计数、Provider（Editor / Resources / AssetBundle）、热更新与诊断。含 Yato.Resources.Abstractions 子程序集。",
+  "description": "Yato 资源基础：句柄、引用计数、异步契约、Resources / Editor Provider 与诊断；Bundle 和热更新分别按需安装。",
   "unity": "6000.0",
   "keywords": [
     "framework",
     "resources",
-    "assetbundle",
     "yato"
   ],
   "author": {
     "name": "Yato"
   },
   "dependencies": {
-    "com.yato.core": "0.2.0",
-    "com.unity.modules.assetbundle": "1.0.0",
-    "com.unity.modules.jsonserialize": "1.0.0",
-    "com.unity.modules.unitywebrequest": "1.0.0",
-    "com.unity.modules.unitywebrequestassetbundle": "1.0.0",
-    "com.yato.persistence": "0.1.1"
+    "com.yato.core": "0.2.0"
   }
 }

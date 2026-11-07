@@ -46,11 +46,11 @@ namespace Yato.Tests.EditMode
         [Test]
         public void ResourceFactory_DetectsStreamingAssetUrlManifests()
         {
-            Assert.IsTrue(ResourceServiceFactory.IsRemoteManifestPath(
+            Assert.IsTrue(BundleResourceServiceFactory.IsRemoteManifestPath(
                 "jar:file:///data/app/base.apk!/assets/AssetBundles/Android/manifest.json"));
-            Assert.IsTrue(ResourceServiceFactory.IsRemoteManifestPath(
+            Assert.IsTrue(BundleResourceServiceFactory.IsRemoteManifestPath(
                 "https://example.test/StreamingAssets/AssetBundles/WebGL/manifest.json"));
-            Assert.IsFalse(ResourceServiceFactory.IsRemoteManifestPath(
+            Assert.IsFalse(BundleResourceServiceFactory.IsRemoteManifestPath(
                 "/tmp/AssetBundles/Windows/manifest.json"));
         }
 
