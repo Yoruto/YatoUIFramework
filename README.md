@@ -13,6 +13,7 @@ Unity `6000.5.6f1` 现场重跑 EditMode **195 / 195**、PlayMode **120 / 120**�
 | [完整文档索引](docs/README.md) | 使用指南、当前交付、历史验收与计划的阅读入口 |
 | [0.7 按需资源模块验证](docs/verification/MODULAR_RESOURCES_2026-11-07.json) | 五种独立包集、真实 Bundle 构建、Resources-only Player 与程序集检查 |
 | [Live Unity 验证](docs/verification/LIVE_UNITY_2026-11-07.json) | 315 个测试、10 项冒烟、Survivor 会话快照及未验收边界 |
+| [URP 迁移记录](docs/verification/URP_MIGRATION_2026-11-07.json) | 源工程/Survivor 渲染配置、迁移后的视觉证据与未验收项 |
 | [Survivor 运行与开发手册](Assets/SurvivorSample/README.md) | 操作、游戏入口、重建、验证与移植 |
 | [Survivor 实施记录](docs/SURVIVOR_IMPLEMENTATION_2026-11-01.md) | 交付目录、框架接入、实测结果和验证范围 |
 | [Survivor 示例开发计划](docs/SURVIVOR_DEVELOPMENT_PLAN_2026-11-01.md) | 玩法范围、框架接入约束、资源所有权、实施阶段与验收 |
@@ -125,8 +126,14 @@ Windows/Editor 为目标，迁移到 Android/WebGL 时也必须调整这一步�
 - 包内测试需在 `Packages/manifest.json` 中登记 `"testables": ["com.yato.framework"]`；
 - 所有包均为内嵌包（直接放在 `Packages/` 下），无需写入 manifest 依赖。
 
+### 源工程的渲染管线
+
+为处理本机 Unity Hub 在 Unity 6.5 下的 Built-In 弃用提示，源工程与 Survivor 改用 **URP 17.5.0 + 2D Renderer / Unlit**。渲染资产位于 `Assets/SurvivorSample/Rendering`，由 GraphicsSettings 与 QualitySettings 引用；Survivor 消费工程准备工具同步这些资产、设置及源 manifest 的精确 URP 版本，不复制本机 Pipeline/MCP。
+
+这是示例宿主的配置，**18 个通用 Yato UPM 模块仍与渲染管线无关，不要求其他项目安装 URP**。迁移后需重建 AssetBundle 和 Player；旧 Built-In 构建和前述历史测试不代表 URP 视觉验收。迁移结果单独见[URP 记录](docs/verification/URP_MIGRATION_2026-11-07.json)，无画面 batch 测试不作为渲染通过的证据。
+
 ## 运行 Survivor 示例
 
 在 Unity 中打开 `Assets/SurvivorSample/Scenes/SurvivorBootstrap.unity` 后 Play，使用 WASD / 方向键移动，自动攻击，Escape 暂停。宿主工程输入模式为 Both，构建列表包含 Bootstrap 和 Arena。
 
-通过 `Yato/Survivor/Build Windows Game` 生成 `Build/SurvivorWindows/TheLastWatch.exe`；本机整理好的运行目录为 `Build/TheLastWatch`。构建产物不纳入 Git，首次克隆后需要自行构建。独立移植可运行 `tools/Prepare-SurvivorConsumer.ps1 -Destination <新目录>`，详见[示例手册](Assets/SurvivorSample/README.md)。
+通过 `Yato/Survivor/Build Windows Game` 重新生成 `Build/SurvivorWindows/TheLastWatch.exe` 及平台 Bundle；迁移前的 `Build/TheLastWatch` 不代表 URP 版本。构建产物不纳入 Git，首次克隆后需要自行构建。独立移植可运行 `tools/Prepare-SurvivorConsumer.ps1 -Destination <新目录>`，详见[示例手册](Assets/SurvivorSample/README.md)。

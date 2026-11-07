@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.Rendering;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 using Yato.App;
@@ -192,11 +193,17 @@ namespace Yato.Survivor.Editor
             var go = new GameObject(name, typeof(SpriteRenderer), typeof(SurvivorEntity));
             try
             {
+                ApplyDefault2DMaterial(go.GetComponent<SpriteRenderer>());
                 go.GetComponent<SpriteRenderer>().sprite = s_art.Find("knight_idle").Frames[0];
                 go.GetComponent<SurvivorEntity>().Renderer = go.GetComponent<SpriteRenderer>();
                 go.SetActive(name == "Player"); PrefabUtility.SaveAsPrefabAsset(go, Root + "/Prefabs/" + name + ".prefab");
             }
             finally { UnityEngine.Object.DestroyImmediate(go); }
+        }
+        private static void ApplyDefault2DMaterial(Renderer renderer)
+        {
+            var pipeline = GraphicsSettings.currentRenderPipeline ?? GraphicsSettings.defaultRenderPipeline;
+            if (pipeline != null && pipeline.default2DMaterial != null) renderer.sharedMaterial = pipeline.default2DMaterial;
         }
         private static Color Hex(string hex) { ColorUtility.TryParseHtmlString("#" + hex, out var color); return color; }
         private static RectTransform Rect(Transform parent, string name, float x, float y, float width, float height)
@@ -384,6 +391,7 @@ namespace Yato.Survivor.Editor
             {
                 var mapObject = new GameObject("Floor", typeof(Tilemap), typeof(TilemapRenderer)); mapObject.transform.SetParent(arena.transform, false);
                 var map = mapObject.GetComponent<Tilemap>(); mapObject.GetComponent<TilemapRenderer>().sortingOrder = -1000;
+                ApplyDefault2DMaterial(mapObject.GetComponent<TilemapRenderer>());
                 var floors = new[] { 5, 10, 6, 7 }.Select(index => {
                     var tile = Asset<Tile>(Presentation + "/Floor" + index + ".asset"); tile.sprite = Sprites("Environment/Floors/floor_" + index + ".png")[0];
                     tile.color = new Color(.7f, .74f, .82f); tile.colliderType = Tile.ColliderType.None; EditorUtility.SetDirty(tile); return tile;

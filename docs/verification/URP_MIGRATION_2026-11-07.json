@@ -1,0 +1,440 @@
+{
+  "schema": 1,
+  "verifiedOn": "2026-11-07",
+  "timezone": "Asia/Shanghai",
+  "unity": "6000.5.6f1",
+  "urp": {
+    "version": "17.5.0",
+    "source": "Unity builtin package"
+  },
+  "frameworkVersion": "0.7.0",
+  "status": "passed-with-documented-tooling-iterations-and-validation-limits",
+  "scope": "Source project URP 2D migration, Windows Editor and Windows Mono rendered validation; framework UPM packages remain render-pipeline independent.",
+  "rendering": {
+    "configuredSource": "Logs/URP-20261107-Configured.json",
+    "pipeline": "SurvivorURP",
+    "pipelineGuid": "f543ebc9073d83649b06de421f47edcd",
+    "renderer": "Renderer2D",
+    "defaultSpriteShader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+    "graphicsPipelineMatches": true,
+    "qualityLevelCount": 6,
+    "allQualityLevelsMatch": true,
+    "colorSpace": "Linear",
+    "colorSpacePreserved": true,
+    "renderingAssets": [
+      "Assets/SurvivorSample/Rendering/SurvivorURP.asset",
+      "Assets/SurvivorSample/Rendering/SurvivorRenderer2D.asset",
+      "Assets/SurvivorSample/Rendering/UniversalRenderPipelineGlobalSettings.asset",
+      "Assets/SurvivorSample/Rendering/DefaultVolumeProfile.asset"
+    ],
+    "staticReferenceReview": {
+      "resolvedNonBuiltinReferences": 195,
+      "unresolvedReferences": 0,
+      "projectAssetReferencesOutsideRenderingRoot": 0
+    },
+    "prefabsMigrated": 6,
+    "materialChange": "Only builtin Sprites-Default GUID/fileID was replaced by URP Sprite-Unlit-Default in Player, Enemy, Projectile, Pickup, Effect and SurvivorArenaRoot prefabs.",
+    "setupRerun": "Custom material GUIDs are excluded; unchanged prefabs are not saved. Setup does not open or save user scenes.",
+    "actualSetupRerun": {
+      "source": "Logs/URP-20261107-Configure-Idempotent.json",
+      "success": true,
+      "prefabsUnchanged": true,
+      "qualityUnchanged": true,
+      "sceneDirty": false
+    },
+    "materialOwnership": "Sprite-Unlit-Default is referenced from the installed URP package. The project Rendering folder contains four pipeline/settings assets and no project-owned material."
+  },
+  "automatedTests": {
+    "mechanism": "Official Unity Pipeline run_tests/test_status",
+    "editMode": {
+      "source": "Logs/URP-20261107-EditMode.json",
+      "status": "completed",
+      "summary": {
+        "total": 195,
+        "passed": 195,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "durationSeconds": 11.24,
+      "verifiedResultRows": 195
+    },
+    "playMode": {
+      "source": "Logs/URP-20261107-PlayMode.json",
+      "status": "completed",
+      "summary": {
+        "total": 120,
+        "passed": 120,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "durationSeconds": 22.15,
+      "verifiedResultRows": 120
+    },
+    "totalPassed": 315
+  },
+  "sourceEditor": {
+    "samples": [
+      {
+        "source": "Logs/URP-20261107-Editor-Menu.json",
+        "provider": "EditorAssetProvider",
+        "state": "MainMenu",
+        "pipeline": "SurvivorURP",
+        "renderer": "UnityEngine.Rendering.Universal.Renderer2D",
+        "defaultSpriteShader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+        "quality": "Ultra",
+        "colorSpace": "Linear",
+        "assets": 3,
+        "handles": 3,
+        "loadedBundles": 0,
+        "sampledRenderers": 0,
+        "allSampledShadersSupported": true,
+        "error": null
+      },
+      {
+        "source": "Logs/URP-20261107-Editor-Run.json",
+        "provider": "EditorAssetProvider",
+        "state": "Run",
+        "pipeline": "SurvivorURP",
+        "renderer": "UnityEngine.Rendering.Universal.Renderer2D",
+        "defaultSpriteShader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+        "quality": "Ultra",
+        "colorSpace": "Linear",
+        "assets": 9,
+        "handles": 10,
+        "loadedBundles": 0,
+        "sampledRenderers": 18,
+        "allSampledShadersSupported": true,
+        "error": null
+      },
+      {
+        "source": "Logs/URP-20261107-Bundle-Menu.json",
+        "provider": "BundleProvider",
+        "state": "MainMenu",
+        "pipeline": "SurvivorURP",
+        "renderer": "UnityEngine.Rendering.Universal.Renderer2D",
+        "defaultSpriteShader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+        "quality": "Ultra",
+        "colorSpace": "Linear",
+        "assets": 3,
+        "handles": 3,
+        "loadedBundles": 4,
+        "sampledRenderers": 0,
+        "allSampledShadersSupported": true,
+        "error": null
+      },
+      {
+        "source": "Logs/URP-20261107-Bundle-Run.json",
+        "provider": "BundleProvider",
+        "state": "Run",
+        "pipeline": "SurvivorURP",
+        "renderer": "UnityEngine.Rendering.Universal.Renderer2D",
+        "defaultSpriteShader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+        "quality": "Ultra",
+        "colorSpace": "Linear",
+        "assets": 8,
+        "handles": 9,
+        "loadedBundles": 4,
+        "sampledRenderers": 20,
+        "allSampledShadersSupported": true,
+        "error": null
+      }
+    ],
+    "visuallyInspectedLocalImages": [
+      {
+        "source": "Logs/URP-20261107-Editor-Menu.png",
+        "scope": "Default-provider menu"
+      },
+      {
+        "source": "Logs/URP-20261107-Editor-Run.png",
+        "scope": "Camera-only default-provider battle capture; not a full overlay-UI capture"
+      },
+      {
+        "source": "Logs/URP-20261107-Bundle-HUD.png",
+        "scope": "BundleProvider complete HUD and sprites"
+      }
+    ],
+    "bundleConsoleSource": "Logs/URP-20261107-Bundle-ConsoleStatus.json",
+    "bundleConsoleGroundTruth": {
+      "sampledUtc": "2026-11-07T08:57:17.9854321Z",
+      "ageMs": 72,
+      "compilationFailed": false,
+      "compiling": false,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "consoleLogs": 7,
+      "seeded": true
+    },
+    "observation": "Menu, battle sprites and full Bundle HUD visually inspected without pink/magenta or black rendering failure."
+  },
+  "nativeWindowsMono": {
+    "buildSource": "Logs/Survivor-Windows-Build.json",
+    "buildResult": {
+      "result": "Succeeded",
+      "errors": 0,
+      "warnings": 1,
+      "bytes": 104917809
+    },
+    "buildWarning": {
+      "source": "Logs/URP-20261107-BuildConsole.json",
+      "message": "Pipeline: No RuntimePipelineConfig asset found (Project Settings > Pipeline > Runtime). Pipeline will be disabled in Player builds.",
+      "classification": "Unity Pipeline development-tool configuration warning, not a URP render-pipeline failure",
+      "temporaryScreenshotOrphanMeta": "A separate console warning about temporary screenshot metadata was cleaned up; not a second BuildReport warning."
+    },
+    "renderedPressure": {
+      "source": "Logs/URP-20261107-Player-Rendered.json",
+      "result": {
+        "Seconds": 60.00300996657461,
+        "MeanMilliseconds": 6.068879333121736,
+        "P95Milliseconds": 6.06568856164813,
+        "Frames": 9887,
+        "MinimumEnemies": 200,
+        "MinimumProjectiles": 100,
+        "MinimumPickups": 200,
+        "PoolOverflows": 0,
+        "Width": 1280,
+        "Height": 720,
+        "MemoryMegabytes": 16106,
+        "PoolActiveEnemies": 200,
+        "PoolActiveProjectiles": 100,
+        "Gen0Collections": 3,
+        "MainThreadAllocatedBytes": -1,
+        "AllocationProbeDelta": 0,
+        "ManagedMemoryBefore": 4481024,
+        "ManagedMemoryAfter": 4493312,
+        "AllocationCounterSupported": false,
+        "Quality": "Ultra",
+        "Cpu": "11th Gen Intel(R) Core(TM) i7-11800H @ 2.30GHz",
+        "Gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+        "Notes": "Release rendered pressure fixture; fixed population, excess drops returned; health and pending upgrades stabilized. Allocation bytes are -1 if a 4096-byte positive control fails. Managed heap is net usage, not cumulative allocations. Not a gameplay victory test."
+      },
+      "exitSource": "Logs/URP-20261107-PlayerExit.json",
+      "exitCode": 0
+    },
+    "secondPlayerVisualObservation": {
+      "basis": "Operator computer-use observation",
+      "menuAndBattleHudRenderedCorrectly": true,
+      "closedSuccessfullyWithAltF4": true,
+      "localScreenshot": null,
+      "note": "No local PNG was saved for this second native visual run; no screenshot hash is claimed."
+    },
+    "shutdownWarnings": "Native Player logs retain engine/URP ComputeBuffer garbage-collection disposal messages at shutdown. This report does not claim a warning-free Player exit."
+  },
+  "independentConsumer": {
+    "projectPath": "C:\\Users\\xyc\\.codex\\visualizations\\2026\\11\\05\\01a1aa69-557a-7810-b7e8-5f45e658441a\\URP-SurvivorConsumer-20261107",
+    "source": "C:/Users/xyc/.codex/visualizations/2026/11/05/01a1aa69-557a-7810-b7e8-5f45e658441a/URP-SurvivorConsumer-20261107/Logs/URP-Consumer-Unity.json",
+    "result": {
+      "unity": "6000.5.6f1",
+      "pipeline": "SurvivorURP",
+      "rebuiltUnlitRenderers": 6,
+      "allQualityLevelsMatch": true,
+      "success": true,
+      "visualCheck": false
+    },
+    "batchImportAndAssetBuilderRebuild": {
+      "source": "Logs/URP-20261107-Consumer-Final.log",
+      "operatorReportedExitCode": 0
+    },
+    "visualCheckClaimed": false,
+    "windowsPowerShell51Encoding": {
+      "source": "Logs/URP-20261107-PS51-Encoding.json",
+      "actualPrepareScriptRerun": true,
+      "generatedTextHeaders": [
+        {
+          "path": "Packages/manifest.json",
+          "utf8Bom": false
+        },
+        {
+          "path": "ProjectSettings/ProjectSettings.asset",
+          "utf8Bom": false
+        },
+        {
+          "path": "Assets/SurvivorVerification.index",
+          "utf8Bom": false
+        }
+      ],
+      "allUtf8WithoutBom": true
+    }
+  },
+  "resolvedToolingIterations": [
+    {
+      "issue": "Initial setup used an internal TryGet API and failed compilation",
+      "resolution": "Replaced with public GraphicsSettings.GetRenderPipelineSettings API."
+    },
+    {
+      "issue": "GlobalSettings initialization was attempted before activating the pipeline",
+      "resolution": "Graphics/Quality pipeline assignment now precedes GlobalSettings configuration."
+    },
+    {
+      "issue": "First Configure API request exceeded its five-second response timeout",
+      "resolution": "Background operation completed; Configured snapshot and later rendering/tests confirm success."
+    },
+    {
+      "issue": "Initial independent consumer import failed on Windows PowerShell 5 UTF-8 BOM manifest output",
+      "resolution": "Prepare-SurvivorConsumer writes the three generated texts without BOM. Existing consumer BOMs were removed, final import/rebuild succeeded, and an actual Windows PowerShell 5.1 preparation rerun confirmed all three headers.",
+      "initialEvidence": "Logs/URP-20261107-Consumer.log",
+      "finalEvidence": "Logs/URP-20261107-Consumer-Final.log"
+    }
+  ],
+  "hubObservation": {
+    "basis": "Operator graphical inspection",
+    "project": "YatoUIFramework",
+    "yellowWarningDisappeared": true,
+    "localScreenshot": null,
+    "note": "No local Hub screenshot was saved; no screenshot hash is claimed."
+  },
+  "restoration": {
+    "source": "Logs/URP-20261107-Restored.json",
+    "observed": {
+      "ForceBundles": false,
+      "DataRoot": "",
+      "dirty": false,
+      "handles": 0,
+      "bundles": 0,
+      "pipeline": "SurvivorURP"
+    },
+    "editorStopped": true,
+    "openScene": "Assets/SurvivorSample/Scenes/SurvivorBootstrap.unity",
+    "playerSettingsRestoredToOriginalDiskValues": true,
+    "renderingSettingsIntentionallyRetained": [
+      "ProjectSettings/GraphicsSettings.asset",
+      "ProjectSettings/QualitySettings.asset",
+      "ProjectSettings/URPProjectSettings.asset",
+      "ProjectSettings/ShaderGraphSettings.asset"
+    ]
+  },
+  "distribution": {
+    "yatoPackageCount": 18,
+    "yatoPackageContentChanged": false,
+    "urpForcedOnUpmConsumers": false,
+    "previousUpmDistributionNeedsRebuild": false,
+    "scope": "URP is a source/sample-project dependency; the general com.yato.* package set is unchanged."
+  },
+  "limitations": [
+    "Verified on Windows Unity Editor and Windows Mono only; not IL2CPP or mobile platform acceptance.",
+    "Rendered stress uses a fixed-population fixture with stabilized health/upgrades; not a natural gameplay victory test.",
+    "Allocation positive control was unsupported: MainThreadAllocatedBytes=-1 and AllocationCounterSupported=false; no zero-allocation claim. Managed heap is net usage, not cumulative allocations.",
+    "Editor overall log and consumer import logs were hashed only; their contents are not embedded here. No process command lines or licensing credentials were collected."
+  ],
+  "rawArtifactCount": 29,
+  "rawArtifacts": {
+    "Logs/URP-20261107-Build.cs": {
+      "sha256": "571e22a500524a158b1d5c87b3f1b4c396e65ec3f540b07bb49a39dcb6fac1f5",
+      "bytes": 514
+    },
+    "Logs/URP-20261107-BuildConsole.json": {
+      "sha256": "ac74a200626c6d2281dbdf0464e5c409a0bd44701f7381a3007e62333f92e1d4",
+      "bytes": 3545
+    },
+    "Logs/URP-20261107-Bundle-ConsoleStatus.json": {
+      "sha256": "bf7eb0d4796cec855e8327801de6f0c3f59bb9a908f07e17414cbb4cf078cc0d",
+      "bytes": 862
+    },
+    "Logs/URP-20261107-Bundle-HUD.png": {
+      "sha256": "8ed1e6d5c86231ab707411aeeba5fe94c8f074fbdd25ed94a492c0792ce39bc6",
+      "bytes": 96870
+    },
+    "Logs/URP-20261107-Bundle-Menu.json": {
+      "sha256": "a45f00a1f6bb934e8182314a56c4d260509c06245b64fa6427b0449b578cfe4d",
+      "bytes": 1528
+    },
+    "Logs/URP-20261107-Bundle-Run.json": {
+      "sha256": "043cb537c321a3477545d5743449428b5ca15d8326adc0ed2b7698dac0dcc16c",
+      "bytes": 8970
+    },
+    "Logs/URP-20261107-Configured.json": {
+      "sha256": "a39a8b2b02c25b87b46e111ef262022429fca2915816aa7b6a7cd6a357f46ee1",
+      "bytes": 1465
+    },
+    "Logs/URP-20261107-Consumer-Final.log": {
+      "sha256": "9371352edd404a2609d879e517d88aa1ac6a0c780060e81140e6839bbaa00160",
+      "bytes": 1588451
+    },
+    "Logs/URP-20261107-Consumer.log": {
+      "sha256": "577ddac8f31ab5f389323008ae3b0ee28eb813af0d450e9a135760f251b61444",
+      "bytes": 11329
+    },
+    "Logs/URP-20261107-EditMode.json": {
+      "sha256": "45b371c081ba8a785293088a5e217d146126c146bd11e672bc64cc4d47fc02c3",
+      "bytes": 51128
+    },
+    "Logs/URP-20261107-Editor-Console.json": {
+      "sha256": "3c5239682dd6a2b3bf4335704e5c5f7f689f2248a505edffa9510912cc672916",
+      "bytes": 900
+    },
+    "Logs/URP-20261107-Editor-Menu.json": {
+      "sha256": "dd9ae7b7f0ff8a6fdc525f24489c315615c0ad0ef3474e022e2f413912193578",
+      "bytes": 1526
+    },
+    "Logs/URP-20261107-Editor-Menu.png": {
+      "sha256": "bd4ede46a044cd5e5b96436513b7111de9333b4b87c6c45a29050eaa4f5de7c0",
+      "bytes": 90957
+    },
+    "Logs/URP-20261107-Editor-Run.json": {
+      "sha256": "1936598f5368f30e0bff89999461b40baaa45a455b0fbf85e5c5538b84042df9",
+      "bytes": 8238
+    },
+    "Logs/URP-20261107-Editor-Run.png": {
+      "sha256": "28894116a14783a3c16591e6173281364ffc2f4329e3ae584a8ca9f3fed6d612",
+      "bytes": 37268
+    },
+    "Logs/URP-20261107-Player-Rendered.json": {
+      "sha256": "cd01c34c03e6f0a630028ea3f02497d0c88331ece4f18c91df88bc7ce86b8a50",
+      "bytes": 999
+    },
+    "Logs/URP-20261107-Player-Visual.log": {
+      "sha256": "e5c998e9a6d7be78006e337973ef14bdb445a347366710bd8ac4e1dd2936011a",
+      "bytes": 1826
+    },
+    "Logs/URP-20261107-Player.log": {
+      "sha256": "3f35bd639eb4e6af0308f8a54853f65d4acd9b6a3aa6dfafcde3d2e5773d466f",
+      "bytes": 1826
+    },
+    "Logs/URP-20261107-PlayerBuildComplete.json": {
+      "sha256": "c955e57777ec0d73639dca6748560d00aa5eb8e12f13ebb2ed9656add3908f97",
+      "bytes": 16
+    },
+    "Logs/URP-20261107-PlayerExit.json": {
+      "sha256": "7c03be4fd8031eee47057cfbf5dd5c4bc51b1096cba7d3ce2cf2ceb2720d17bd",
+      "bytes": 40
+    },
+    "Logs/URP-20261107-PlayMode.json": {
+      "sha256": "edb067fc544316b0bee90a8ca7596a3a9fbf297bb02ee622004ea4e88f0619b8",
+      "bytes": 31652
+    },
+    "Logs/URP-20261107-PS51-Encoding.json": {
+      "sha256": "8f46bbdef6182dc7eaace8bcb883a33cd10c4606a58ee84dc05e75dfaa48b874",
+      "bytes": 247
+    },
+    "Logs/URP-20261107-Restored.json": {
+      "sha256": "0c596fe9170e0a2c2a415e74094156e55c5300286cbc7dbff45f8a9f44dfbd22",
+      "bytes": 1081
+    },
+    "Logs/URP-20261107-SetupConsole.json": {
+      "sha256": "2517b5d43fa7274c9d81aea4fd4d26d5b16e5e37ab0175bcc50a4f142955c4cf",
+      "bytes": 9215
+    },
+    "Logs/URP-20261107-Snapshot.cs": {
+      "sha256": "f4622d23574fa48b9ed32e2dac5ea8ab55f72213af337d24572f2ab260a985f1",
+      "bytes": 1874
+    },
+    "Logs/Survivor-Windows-Build.json": {
+      "sha256": "d73d254a035a90b67905110d5d3bb57f37f1d6da4faf0ccd1f4b77ea84c22dc7",
+      "bytes": 64
+    },
+    "C:/Users/xyc/.codex/visualizations/2026/11/05/01a1aa69-557a-7810-b7e8-5f45e658441a/URP-SurvivorConsumer-20261107/Logs/URP-Consumer-Unity.json": {
+      "sha256": "1946657f2dac192154ddebeb619cf1be3052b9a60922ada07418742864afbd0c",
+      "bytes": 137
+    },
+    "Logs/URP-20261107-Editor.log": {
+      "sha256": "c98b797db51d96b337b7a4ec66fe9bbe3076095935d6c2a227507db2c406e77b",
+      "bytes": 3857891,
+      "hashScope": "First recorded bytes of an active append-only log; validate this prefix if the log later grows."
+    },
+    "Logs/URP-20261107-Configure-Idempotent.json": {
+      "sha256": "ad8562c2ae1be8bc0ec6b1356250f58539115597b2d7c27f25f7cbd71d65803c",
+      "bytes": 1273
+    }
+  }
+}

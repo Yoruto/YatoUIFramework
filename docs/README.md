@@ -18,6 +18,7 @@
 
 | 记录 | 阅读说明 |
 |---|---|
+| [URP 迁移记录](verification/URP_MIGRATION_2026-11-07.json) | 源工程/Survivor 的 URP 17.5.0、2D Unlit 配置及迁移后视觉证据；与下方历史结果分开阅读 |
 | [Live Unity 验证](verification/LIVE_UNITY_2026-11-07.json) | 0.7 现场重跑 315 个测试、10 项冒烟、Survivor 交互与清理快照，保留脚手架错误及验收边界 |
 | [UPM 归档安装验证](verification/UPM_DISTRIBUTION_2026-11-07.json) | ZIP/TGZ 三个独立消费工程的 6 项加载测试、12 项安装器检查及内容哈希 |
 | [资源模块拆分验证](verification/MODULAR_RESOURCES_2026-11-07.json) | 0.7：五种独立包集、源工程回归、仅资源 Player 及程序集检查 |
@@ -31,6 +32,12 @@
 | [框架版本记录](../Packages/com.yato.framework/CHANGELOG.md) | 框架包的版本变更；Survivor 在 Assets 下独立交付 |
 
 `Logs/`、`Build/` 和独立消费工程属于本机验证或构建产物，不纳入 Git；提交的 JSON 摘要保留原始日志名称与哈希，不代替完整日志。历史实施记录按当时范围阅读；较早文档中的“未验收”以其日期为界，已补充验证的部分见下方及当前 0.7 验证摘要。
+
+### 2026-11-07 源工程渲染迁移
+
+为处理本机 Unity Hub 在 Unity 6.5 下显示的 Built-In 弃用提示，源工程与 Survivor 采用 **URP 17.5.0 + 2D Renderer / Unlit**，资产统一放在 `Assets/SurvivorSample/Rendering`。Survivor 消费工具读取源 manifest 的精确 URP 版本，并复制 GraphicsSettings/QualitySettings 与示例渲染资产，保持开发渲染基线一致；不复制整个 ProjectSettings 或本机 Pipeline/MCP。
+
+18 个通用 UPM 模块保持渲染管线无关，普通模块安装不强制引入 URP。旧 Bundle 和 Player 需重建；下方已有测试和 Built-In 现场会话不证明 URP 渲染通过，迁移后的可见 Editor、Bundle 和 Player 证据单独见 [URP 记录](verification/URP_MIGRATION_2026-11-07.json)。
 
 ### 2026-11-07 UPM 模块分发
 

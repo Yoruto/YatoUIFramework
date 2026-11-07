@@ -1,10 +1,10 @@
 # The Last Watch / Yato Survivor
 
-Unity 6（本次实测 6000.5.6f1）上的完整单机幸存者示例。框架版本 0.6.0，游戏版本 0.1.0；界面为英文。
+Unity 6（开发版本 6000.5.6f1）上的完整单机幸存者示例。框架版本 0.7.0，游戏版本 0.1.0；界面为英文。源工程与独立 Survivor 消费工程使用 URP 17.5.0、2D Renderer 和 Unlit Sprite 材质；渲染迁移的验证状态单独记录。
 
 ## 运行
 
-Editor 打开 `Scenes/SurvivorBootstrap.unity` 后 Play。本机已整理的 Windows 交付在工程根目录 `Build/TheLastWatch/TheLastWatch.exe`，保留同目录的 Data、Mono 和 DLL 文件。`Build/` 不纳入 Git；首次克隆后通过 `Yato/Survivor/Build Windows Game` 构建，输出为 `Build/SurvivorWindows`。
+Editor 打开 `Scenes/SurvivorBootstrap.unity` 后 Play。通过 `Yato/Survivor/Build Windows Game` 构建 Windows 版本，输出为 `Build/SurvivorWindows`；分发时保留 exe 同目录的 Data、Mono 和 DLL 文件。`Build/` 不纳入 Git。URP 迁移前的 `Build/TheLastWatch`、Player 和 AssetBundle 不是新渲染配置的产物，需重新构建，不能直接用于当前视觉验收。
 
 - WASD / 方向键 / 手柄左摇杆移动，角色自动攻击。
 - 收集蓝色经验宝石，升级时选择一项祝福；可解锁弓与自动索敌法杖。
@@ -16,6 +16,14 @@ Editor 打开 `Scenes/SurvivorBootstrap.unity` 后 Play。本机已整理的 Win
 
 历史记录与设置通过框架保存到 `Application.persistentDataPath` 下的 `survivor` 目录。损坏历史主档保留原文件；有可用备份时在设置页显式选择 Recover History Backup。首版不保存正在进行的战斗。
 
+## 渲染配置
+
+为处理本机 Unity Hub 在 Unity 6.5 下显示的 Built-In Render Pipeline 弃用提示，示例宿主切换为 **URP 17.5.0 + 2D Renderer**；Sprite/Tilemap 使用 Unlit 路径，保持像素场景无需 2D 灯光即可显示。管线、Renderer、全局设置和默认 Volume Profile 位于 `Rendering/`，精灵材质引用 URP 包内的 `Sprite-Unlit-Default`。`ProjectSettings/GraphicsSettings.asset` 与全部质量级别均引用同一管线，保留 Linear 色彩空间。
+
+此配置属于源工程和 Survivor 示例，通用的 **18 个 Yato UPM 包仍与渲染管线无关**，不会因为安装资源/UI 框架就强制带入 URP。独立 Survivor 消费工程需要与源工程相同的 URP 版本与渲染资产；普通 ResourcesOnly/MinimalUI 框架项目可继续使用自己的渲染配置。
+
+视觉验收应分别检查 Editor 默认资源模式、重建后的 Bundle 模式以及新构建的可见 Player：地砖、人物、敌人、弹体/掉落和 UGUI 文字/遮罩均需实际可见。`-nographics` 下的测试或资源句柄检查不能证明渲染通过。当前迁移的证据与未验收项见[URP 迁移记录](../../docs/verification/URP_MIGRATION_2026-11-07.json)；既往 Built-In 会话记录不作为迁移后的渲染结论。
+
 ## 开发入口
 
 - `Runtime/Bootstrap/SurvivorGame.cs`：服务注册、Flow、场景准备、路由页面与协作退出。
@@ -26,6 +34,7 @@ Editor 打开 `Scenes/SurvivorBootstrap.unity` 后 Play。本机已整理的 Win
 - `Assets/GameRes/Survivor/Presentation/SurvivorArt.asset`：Sprite 子资源、输入、音频和资源 key 集合，通过资源服务加载并持有句柄。
 - `Yato/Survivor/Create or Update Sample Assets`：重建默认示例资产；会重置默认配置与页面 Prefab，现有场景文件保留。
 - `Yato/Survivor/Build Windows Game`：校验、AssetBundle 和 Windows Mono 构建。
+- 源工程的 `Yato/Project/Configure URP 2D`：重新配置本机宿主管线；只替换指定示例 Prefab 的旧内置精灵材质，保留其他自定义材质。此源工程工具不包含在通用 UPM 包内。
 
 资源加载走 IResourceService；场景走 SceneService；流程走 Flow；实体走 ResourceInstancePool；暂停走 PauseService；UI 和输入走 UIRouter / InputContextService / UIInputCoordinator；持久化与音频使用 Settings / Save / Audio。框架运行时与编辑器实现未为本示例修改；提交前仅修正了热更测试对单 Bundle 产物的假设，示例输入测试也显式设置并恢复无窗口验证所需的焦点策略。
 
@@ -35,7 +44,7 @@ Editor 打开 `Scenes/SurvivorBootstrap.unity` 后 Play。本机已整理的 Win
 
 EditMode 程序集 `Yato.Survivor.Tests.EditMode`；PlayMode 程序集 `Yato.Survivor.Tests.PlayMode`。项目根的 `tools/Verify-Survivor.cs` 可通过 Unity run_script 执行生命周期、完整战斗和输入 / 存档专项。验证时使用独立 DataRoot 或 `YATO_SURVIVOR_TEST_DATA`，发布场景 DataRoot 保持空。
 
-`tools/Prepare-SurvivorConsumer.ps1 -Destination <新目录>` 生成独立消费工程，复制游戏与所需框架包，不复制 Library 或本机 Pipeline 包。项目设置只复用 Unity 版本与当前构建场景列表，另行生成最小 PlayerSettings（输入模式 Both）；目标必须是源工程外尚不存在的目录。
+`tools/Prepare-SurvivorConsumer.ps1 -Destination <新目录>` 生成独立消费工程，复制游戏与所需框架包，包括 `Assets/SurvivorSample/Rendering`。工具从源 `Packages/manifest.json` 读取精确 URP 版本，并单独复制 Unity 版本、构建场景列表、GraphicsSettings 和 QualitySettings，使源 Editor 与消费工程使用相同渲染基线；另行生成最小 PlayerSettings（输入模式 Both）。不会复制整个 ProjectSettings、Library、`Assets/Editor` 中的本机设置辅助代码或 Unity Pipeline/MCP 包；目标必须是源工程外尚不存在的目录。
 
 压力夹具仅在传入 `--survivor-profile-output <完整 JSON 路径>` 时启用；同时传入 `--survivor-test-data <独立数据目录>`。它固定实体数量、稳定生命与升级队列，预热后采样 60 秒并正常退出，不能作为正常难度胜利的证据。正常启动不创建夹具。
 
